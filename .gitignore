@@ -1,4 +1,5 @@
 dev
 lib
-output/*
 ignore_test/*
+input/*
+output/*

@@ -1,3 +1,4 @@
 dev
 lib
 output/*
+ignore_test/*

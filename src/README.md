@@ -78,11 +78,11 @@ The _split_ key in the tiling section allows the script to divide the tiles into
 
 ### Training and Validation
 
-The script is used in the following way :
+The scripts are used in the following way :
 
     $ cd [process_directory]
     $ python3 prepare_data.py --config [yaml_config] --logger [logging_config]
-    $ python3 [object-detector_path]/scripts/generate_training_sets.py [yaml_config]
+    $ python3 [object-detector_path]/scripts/generate_tilesets.py [yaml_config]
     $ cd [output_directory]
     $ tar -cvf images-[image_size].tar COCO_{trn,val,tst}.json && \
       tar -rvf images-[image_size].tar {trn,val,tst}-images-[image_size] && \
@@ -95,3 +95,5 @@ The script is used in the following way :
     $ python3 [object-detector_path]/scripts/assess_predictions.py config.yaml
 
 ### Prediction
+
+From the Training and Validation procedure, copy from the output folder the log and detectron  

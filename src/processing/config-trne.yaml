@@ -1,22 +1,22 @@
 prepare_data.py:
   srs: "EPSG:2056"
   tiling:
-    shapefile: ../input/tiles_500_0_0.shp
+    shapefile: ../../input/input-trne/tiles_500_0_0.shp
   label:
-    shapefile: ../input/tlm-hr-trn-topo.shp
-  output_folder: ../output
+    shapefile: ../../input/input-trne/tlm-hr-trn-topo.shp
+  output_folder: ../../output/output-trne
 
 generate_tilesets.py:
   debug_mode: False
   datasets:
-    aoi_tiles_geojson: ../output/tiles.geojson
-    ground_truth_labels_geojson: ../output/labels.geojson
+    aoi_tiles_geojson: ../../output/output-trne/tiles.geojson
+    ground_truth_labels_geojson: ../../output/output-trne/labels.geojson
     orthophotos_web_service:
       type: WMS # supported values: 1. MIL = Map Image Layer 2. WMS
       url: https://wms.geo.admin.ch/service
       layers: ch.swisstopo.swissimage
       srs: "EPSG:2056"
-  output_folder: ../output
+  output_folder: ../../output/output-trne
   tile_size: 512 # per side, in pixels
   overwrite: False
   n_jobs: 10
@@ -34,38 +34,36 @@ generate_tilesets.py:
         supercategory: "Land usage"
 
 train_model.py:
-    working_folder: ../output
+    working_folder: ../../output/output-trne
     log_subfolder: logs
     sample_tagged_img_subfolder: sample_tagged_images
     COCO_files: # relative paths, w/ respect to the working_folder
         trn: COCO_trn.json
         val: COCO_val.json
         tst: COCO_tst.json
-    # detectron2_config_file: '../config/detectron2_config_GE.yaml' # path relative to the working_folder
-    detectron2_config_file: '../config/detectron2_config_tpnl.yaml' # path relative to the working_folder
+    detectron2_config_file: '../../src/processing/detectron2_config_dqry.yaml' # path relative to the working_folder
     model_weights:
         model_zoo_checkpoint_url: "COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_1x.yaml"
 
 make_predictions.py:
-    working_folder: ../output
+    working_folder: ../../output/output-trne
     log_subfolder: logs
     sample_tagged_img_subfolder: sample_tagged_images
     COCO_files: # relative paths, w/ respect to the working_folder
         trn: COCO_trn.json
         val: COCO_val.json
         tst: COCO_tst.json
-   # detectron2_config_file: '../config/detectron2_config_GE.yaml' # path relative to the working_folder
-    detectron2_config_file: '../config/detectron2_config_tpnl.yaml' # path relative to the working_folder
+    detectron2_config_file: '../../src/processing/detectron2_config_dqry.yaml' # path relative to the working_folder
     model_weights:
         pth_file: './logs/model_0000999.pth'
   
 assess_predictions.py:
   datasets:
-    ground_truth_labels_geojson: ../output/labels.geojson
-    image_metadata_json: ../output/img_metadata.json
-    split_aoi_tiles_geojson: ../output/split_aoi_tiles.geojson # aoi = Area of Interest
+    ground_truth_labels_geojson: ../../output/output-trne/labels.geojson
+    image_metadata_json: ../../output/output-trne/img_metadata.json
+    split_aoi_tiles_geojson: ../../output/output-trne/split_aoi_tiles.geojson # aoi = Area of Interest
     predictions:
-      trn: ../output/trn_predictions_at_0dot05_threshold.pkl
-      val: ../output/val_predictions_at_0dot05_threshold.pkl
-      tst: ../output/tst_predictions_at_0dot05_threshold.pkl
-  output_folder: ../output
+      trn: ../../output/output-trne/trn_predictions_at_0dot05_threshold.pkl
+      val: ../../output/output-trne/val_predictions_at_0dot05_threshold.pkl
+      tst: ../../output/output-trne/tst_predictions_at_0dot05_threshold.pkl
+  output_folder: ../../output/output-trne

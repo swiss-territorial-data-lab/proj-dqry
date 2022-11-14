@@ -199,6 +199,7 @@ rsa==4.9
     # via google-auth
 rtree==1.0.0
     # via -r requirements.in
+scikit-learn==0.24.2
 shapely==1.8.4
     # via geopandas
 six==1.16.0

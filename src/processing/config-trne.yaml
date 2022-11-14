@@ -1,13 +1,13 @@
 prepare_data.py:
   srs: "EPSG:2056"
   tiling:
-    shapefile: ../../input/input-trne/tiles_500_0_0.shp
+    shapefile: ../../input/input-trne/[Tile_Shapefile]
   label:
-    shapefile: ../../input/input-trne/tlm-hr-trn-topo.shp
+    shapefile: ../../input/input-trne/[Label_Shapefile] 
   output_folder: ../../output/output-trne
 
 generate_tilesets.py:
-  debug_mode: False
+  debug_mode: True
   datasets:
     aoi_tiles_geojson: ../../output/output-trne/tiles.geojson
     ground_truth_labels_geojson: ../../output/output-trne/labels.geojson

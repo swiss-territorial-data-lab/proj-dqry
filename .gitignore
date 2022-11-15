@@ -1,6 +1,4 @@
 dev
 lib
-ignore_test/*
-input/*
 output/*
 tools/*

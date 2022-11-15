@@ -88,13 +88,13 @@ For the quarries example:
 -Working directory and paths
 
 By default the working directory is: 
-    $ cd [proj-dqry repository path]/src/processing/
+    $ cd [path to proj-dqry repository]/src/processing/
 
 -Config and input data
 
 Two config files are provided in `proj-dqry`:
 
-    [yaml_config] = config_trne.yaml 
+    [yaml_config] = config-trne.yaml 
     [logging_config] = logging.conf
 
 The logging format file can be used as provided. The configuration _YAML_ has been set for the object detector workflow by reading dedicated section. It has to be adapted in terms of input and output location and files.
@@ -179,7 +179,7 @@ For the quarries example:
 
 Two config files are provided in `proj-dqry`:
 
-    [yaml_config] = config_prd.yaml 
+    [yaml_config] = config-prd.yaml 
     [logging_config] = logging.conf
 
 For the quarries example, copy the following files into the folder /input/input-prd/
@@ -195,7 +195,7 @@ Choose the relevant log.pth file, i.e. the one minimizing the validation loss cu
 
 By default the working directory is:
 
-    $ cd [proj-dqry repository path]/src/processing/
+    $ cd [path to proj-dqry repository]/src/processing/
 
 In the config file verify (and custom) the paths.
 

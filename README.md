@@ -80,6 +80,7 @@ For the quarries example:
 -Working directory and paths
 
 By default the working directory is: 
+
     $ cd proj-dqry/config/
 
 -Config and input data
@@ -98,17 +99,17 @@ In the config file verify (and custom) the paths of input and output. The `prepa
     prepare_data.py:
       srs: "EPSG:2056"
       tiling:
-        shapefile: [Tile_Shapefile]
+        shapefile: ../input/input-trne/[Tile_Shapefile]
       label:
-        shapefile: [Label_Shapefile]
+        shapefile: ../input/input-trne/[Label_Shapefile]
       output_folder: ../output/output-trne
 
 Set the path to the desired tiles shapefile (tiling) and to the AoI shapefile (label).
 
 For the quarries example:
 
-    [Tile_Shapefile] = ../input/input-trne/tiles_500_0_0.shp
-    [Label_Shapefile] = ../input/input-trne/tlm-hr-trn-topo.shp
+    [Tile_Shapefile] = tiles_500_0_0.shp
+    [Label_Shapefile] = tlm-hr-trn-topo.shp
 
 The labels section can be missing, indicating that tiles are prepared for inference only.
 
@@ -124,7 +125,7 @@ The `object-detector` scripts are then called in the following way: :
     $ tar -cvf images-[image_size].tar COCO_{trn,val,tst}.json && \
       tar -rvf images-[image_size].tar {trn,val,tst}-images-[image_size] && \
       gzip < images-[image_size].tar > images-[image_size].tar.gz && \
-      rm images-[image_size].tar
+      rm all-images-[image_size].tar
     $ cd -
     $ cd [process_directory]
     $ python3 [object-detector_path]/scripts/train_model.py config.yaml
@@ -200,10 +201,9 @@ The `object-detector` scripts are then called in the following way: :
     $ tar -cvf images-[image_size].tar COCO_{trn,val,tst}.json && \
       tar -rvf images-[image_size].tar {trn,val,tst}-images-[image_size] && \
       gzip < images-[image_size].tar > images-[image_size].tar.gz && \
-      rm images-[image_size].tar
+      rm all-images-[image_size].tar
     $ cd -
     $ cd [process_directory]
-    $ python3 [object-detector_path]/scripts/train_model.py config.yaml
     $ python3 [object-detector_path]/scripts/make_prediction.py config.yaml
     $ python3 [object-detector_path]/scripts/assess_predictions.py config.yaml
 

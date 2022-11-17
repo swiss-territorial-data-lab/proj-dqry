@@ -6,18 +6,10 @@ The worflow is defined in two disctinct procedures:
 * the Training and Evaluation procedure allowing to train the detection model on a given dataset and evaluated to ground truth dataset examined by domain experts.
 * the Prediction procedure performing detection of quarries in a given dataset thanks to the previously trained model.
 
+The quarry are detected with the tools developped in `object-detector`. 
+
 _(to be improved)_
 
-
-## Required repositories
-
-Two repositories are required to detect quarries in images: the main project `proj-dqry` and the detector of object `object-detector` to perform the automatic quarries detection. 
-
-Clone the following repositories to your personal workspace:
-
-https://github.com/swiss-territorial-data-lab/proj-dqry.git
-
-https://github.com/swiss-territorial-data-lab/object-detector.git
 
 ## Python virtual environment
 
@@ -70,7 +62,7 @@ In this folder you can find different folders:
 
 The pre-processing, performed with the script `tile-generator.py`, generates a shapefile with tiles of a given size for an AoI defined by polygons.
 
-Copy the polygons shapefile defining the AoI to the folder /input/input-trne/ and proceed the command:
+Copy the polygons shapefile defining the AoI to a new folder /proj-dqry/input/input-trne/ and proceed the command:
 
     $ python3 tile-generator.py --labels [polygon_shapefile] 
                                 --size [tile_size]
@@ -79,16 +71,16 @@ Copy the polygons shapefile defining the AoI to the folder /input/input-trne/ an
 
 For the quarries example:
 
-    [polygon_shapefile] = tlm-hr-trn-topo.shp
+    [polygon_shapefile] = /proj-dqry/input/input-trne/tlm-hr-trn-topo.shp
     [tile_size] = 500 (in px)
-    [output_directory]: /input/input-trne/
+    [output_directory]: /proj-dqry/input/input-trne/
 
 - Processing
 
 -Working directory and paths
 
 By default the working directory is: 
-    $ cd [path to proj-dqry repository]/src/processing/
+    $ cd proj-dqry/config/
 
 -Config and input data
 
@@ -109,14 +101,14 @@ In the config file verify (and custom) the paths of input and output. The `prepa
         shapefile: [Tile_Shapefile]
       label:
         shapefile: [Label_Shapefile]
-      output_folder: ../../output/output-trne
+      output_folder: ../output/output-trne
 
 Set the path to the desired tiles shapefile (tiling) and to the AoI shapefile (label).
 
 For the quarries example:
 
-    [Tile_Shapefile] = tiles_500_0_0.shp
-    [Label_Shapefile] = tlm-hr-trn-topo.shp
+    [Tile_Shapefile] = ../input/input-trne/tiles_500_0_0.shp
+    [Label_Shapefile] = ../input/input-trne/tlm-hr-trn-topo.shp
 
 The labels section can be missing, indicating that tiles are prepared for inference only.
 
@@ -148,7 +140,7 @@ And open the following link with a web browser: `http://localhost:6006`
 
 -Output
 
-Finally we obtained the following results in the folder /output/output/trne/:
+Finally we obtained the following results in the folder /proj-dqry/output/output-trne/:
 
 _(to be completed)_
 
@@ -160,7 +152,7 @@ _(skip this part for the moment)_
 
 The pre-processing, performed with the script `tile-generator.py`, generates a shapefile with tiles of a given size for an AoI defined by polygons.
 
-Copy the polygons shapefile defining the AoI to the folder /input/input-prd/ and proceed the command:
+Copy the polygons shapefile defining the AoI to a new folder /proj-dqry/input/input-prd/ and proceed the command:
 
     $ python3 tile-generator.py --labels [polygon_shapefile] 
                                 --size [tile_size]
@@ -169,9 +161,9 @@ Copy the polygons shapefile defining the AoI to the folder /input/input-prd/ and
 
 For the quarries example:
 
-    [polygon_shapefile] = [AoI].shp
+    [polygon_shapefile] = proj-dqry/input/input-prd/[AoI].shp
     [tile_size] = 500 (in px)
-    [output_directory]: /input/input-prd/
+    [output_directory]: proj-dqry/input/input-prd/
 
 - Processing
 
@@ -182,7 +174,7 @@ Two config files are provided in `proj-dqry`:
     [yaml_config] = config-prd.yaml 
     [logging_config] = logging.conf
 
-For the quarries example, copy the following files into the folder /input/input-prd/
+For the quarries example, copy the following files into the folder proj-dqry/input/input-prd/
 
       model_weights:pth_file = logs
       aoi_tiles_geojson = tiles_prediction.geojson
@@ -195,7 +187,7 @@ Choose the relevant log.pth file, i.e. the one minimizing the validation loss cu
 
 By default the working directory is:
 
-    $ cd [path to proj-dqry repository]/src/processing/
+    $ cd /proj-dqry/config/
 
 In the config file verify (and custom) the paths.
 
@@ -219,7 +211,7 @@ The `object-detector` scripts are then called in the following way: :
 
 -Output:
 
-Finally we obtained the following results stored in the folder /output/output-prd/:
+Finally we obtained the following results stored in the folder /proj-dqry/output/output-prd/:
 
 _(to be completed)_
 

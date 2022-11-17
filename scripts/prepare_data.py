@@ -146,6 +146,7 @@ if __name__ == "__main__":
         if not os.path.exists(cfg['output_folder']):
 
             # Create directory
+            print(cfg['output_folder'])
             os.makedirs(cfg['output_folder'])
 
             # Logging info

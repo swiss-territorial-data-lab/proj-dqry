@@ -21,9 +21,9 @@ The results of the filtering/merging are dumped in the provided output _GeoJSON_
 The following images give an illustration of the extraction process showing the original and filtered predictions :
 
 <p align="center">
-<img src="doc/before.png?raw=true" width="35%">
+<img src="../images/before.png?raw=true" width="35%">
 &nbsp;
-<img src="doc/after.png?raw=true" width="35%">
+<img src="../images/after.png?raw=true" width="35%">
 <br />
 <i>Left : Detector predictions - Right : Threshold filtering results</i>
 </p>

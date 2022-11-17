@@ -1,11 +1,11 @@
 #!/bin/python
 # -*- coding: utf-8 -*-
 
-#  prepare_data
+#  Detector interface
 #
 #      Nils Hamel - nils.hamel@alumni.epfl.ch
 #      Huriel Reichel
-#      Copyright (c) 2020-2022 Republic and Canton of Geneva
+#      Copyright (c) 2020 Republic and Canton of Geneva
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ import csv
 
 from shapely.geometry import Polygon
 
-def compose_tiles( x_min, y_min, x_max, y_max, tile_split ):
+def compose_tiles( csv_row, tile_split ):
 
     """
     Overview :
@@ -64,12 +64,12 @@ def compose_tiles( x_min, y_min, x_max, y_max, tile_split ):
     """
 
     # Compose bounding box origin
-    org_x = x_min
-    org_y = y_min
+    org_x = float( csv_row['x_min'] )
+    org_y = float( csv_row['y_min'] )
 
     # Compute tiles edge
-    egde_x = ( x_max - x_min ) / tile_split
-    egde_y = ( y_max - y_min ) / tile_split
+    egde_x = ( float( csv_row['x_max'] ) - float( csv_row['x_min'] ) ) / tile_split
+    egde_y = ( float( csv_row['y_max'] ) - float( csv_row['y_min'] ) ) / tile_split
 
     # Initialise polygon list
     poly_list=[]
@@ -122,16 +122,16 @@ if __name__ == "__main__":
         print('Unable to access logger configuration file')
         sys.stderr.flush()
         sys.exit(1)
-
+   
     try:
-
+        print(args.config)
         # Import configuration file (YAML file)
         with open(args.config) as fp:
             cfg = yaml.load(fp, Loader=yaml.FullLoader)[os.path.basename(__file__)]
-
+            print(os.path.basename(__file__))
         # Logging info
         logger.info(f"Using {args.config} as config file.")
-
+        
     except:
     
         # Logging info & abort
@@ -146,6 +146,7 @@ if __name__ == "__main__":
         if not os.path.exists(cfg['output_folder']):
 
             # Create directory
+            print(cfg['output_folder'])
             os.makedirs(cfg['output_folder'])
 
             # Logging info
@@ -167,20 +168,12 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # Check YAML key
-    if 'label' in cfg:
-
-        # Check YAML key
-        if not 'redfact' in cfg['label']:
-
-            # Logging info & abort
-            logger.error("Missing reduction factor in label")
-            sys.stderr.flush()
-            sys.exit(1)            
-
-    else:
+    if not 'label' in cfg:
 
         # Logging info & abort
-        logger.info("No labels provided")
+        logger.error("Missing label key")
+        sys.stderr.flush()
+        sys.exit(1)
 
     # Check YAML key
     if not 'tiling' in cfg:
@@ -196,30 +189,27 @@ if __name__ == "__main__":
     # geographic file.
 
     # Check YAML key
-    if 'label' in cfg:
+    if 'shapefile' in cfg['label']:
 
-        # Check YAML key
-        if 'shapefile' in cfg['label']:
-
-            # Import label geometries from shapefile
-            geo_label = gpd.read_file( cfg['label']['shapefile'] )
-
-            # Logging info
-            logger.info(f"Read from \"{cfg['label']['shapefile']}\" :")
-            logger.info(f"\t{len(geo_label)} label(s) imported")
-
-        else:
-
-            # Logging info & abort
-            logger.error("Missing source in label")
-            sys.stderr.flush()
-            sys.exit(1)
-
-        # Match label and tiling coordinate frame
-        geo_label = geo_label.to_crs( cfg['srs'] )
+        # Import label geometries from shapefile
+        geo_label = gpd.read_file( cfg['label']['shapefile'] )
 
         # Logging info
-        logger.info(f"SRS {cfg['srs']} forced for label(s)")
+        logger.info(f"Read from \"{cfg['label']['shapefile']}\" :")
+        logger.info(f"\t{len(geo_label)} label(s) imported")
+
+    else:
+
+        # Logging info & abort
+        logger.error("Missing source in label")
+        sys.stderr.flush()
+        sys.exit(1)
+
+    # Match label and tiling coordinate frame
+    geo_label = geo_label.to_crs( cfg['srs'] )
+
+    # Logging info
+    logger.info(f"SRS {cfg['srs']} forced for label(s)")
 
     # Section : Tiles
     #
@@ -253,7 +243,7 @@ if __name__ == "__main__":
             for row in csvdata:
 
                 # Compute polygon list
-                poly_list = compose_tiles( float( row['x_min'] ), float( row['y_min'] ), float( row['x_max'] ), float( row['y_max'] ), cfg['tiling']['split'] )
+                poly_list = compose_tiles( row, cfg['tiling']['split'] )
 
                 # Parsing polygon list
                 for poly in poly_list:
@@ -275,9 +265,6 @@ if __name__ == "__main__":
                     # Update index
                     index = index + 1
 
-        # force crs for csv-defined tiles
-        geo_tiling = geo_tiling.set_crs( crs = cfg['srs'] )
-
         # Logging info
         logger.info(f"Read from \"{cfg['tiling']['csv']}\" :")
         logger.info(f"\t{index} tile(s) imported")
@@ -285,48 +272,24 @@ if __name__ == "__main__":
     elif 'shapefile' in cfg['tiling']:
 
         # Import tiles definition
-        geo_tiles = gpd.read_file( cfg['tiling']['shapefile'] )
+        geo_tiling = gpd.read_file( cfg['tiling']['shapefile'] )
 
         # Remove all columns #
-        #geo_tiles = geo_tiles.loc[:, ['geometry']]
-
-        # Initialise tiling geometry
-        geo_tiling = gpd.GeoDataFrame()
-        
-        # Initialise index
-        index=0
+        geo_tiling = geo_tiling.loc[:, ['geometry']]
 
         # Iterates over geometries
-        for unused, tile in geo_tiles.iterrows(): #range(len(geo_tiling.index)):
+        for index in range(len(geo_tiling.index)):
 
             # Get bounding box
-            poly_bbox = tile['geometry'].bounds
+            poly_bbox = geo_tiling.loc[index,'geometry'].bounds
 
-            # Compute polygon list
-            poly_list = compose_tiles( poly_bbox[0], poly_bbox[1], poly_bbox[2], poly_bbox[3], cfg['tiling']['split'] )
+            # Compose tile synthetic coordinates
+            syn_x = int( poly_bbox[0] )
+            syn_y = int( poly_bbox[1] )
 
-            # Parsing polygon list
-            for poly in poly_list:
-
-                # Retreive polygon bounding box
-                poly_bbox = poly.bounds
-
-                # Compose tile synthetic coordinates
-                syn_x = int( poly_bbox[0] )
-                syn_y = int( poly_bbox[1] )
-
-                # Add tile geometry
-                geo_tiling.loc[index,'geometry'] = poly
-
-                # Add tile required columns
-                geo_tiling.loc[index,'id'   ] = f"({syn_x}, {syn_y}, 0)"
-                geo_tiling.loc[index,'title'] = f"XYZ tile ({syn_x}, {syn_y}, 0)"
-
-                # Update index
-                index = index + 1
-
-        # force crs for csv-defined tiles
-        geo_tiling = geo_tiling.set_crs( crs = cfg['srs'] )
+            # Add tile required columns
+            geo_tiling.loc[index,'id'   ] = f"({syn_x}, {syn_y}, 0)"
+            geo_tiling.loc[index,'title'] = f"XYZ tile ({syn_x}, {syn_y}, 0)"
 
         # Logging info
         logger.info(f"Read from \"{cfg['tiling']['shapefile']}\" :")
@@ -345,53 +308,47 @@ if __name__ == "__main__":
     # Logging info
     logger.info(f"SRS {cfg['srs']} forced for tile(s)")
 
+    # Duplicate geodataframe (be sure to work on a copy, the original being exported at the end)
+    geo_label_shrink = geo_label.copy()
+
     # Section : Filter and export
     #
     # This section is dedicated to tile and label linked process and result
     # exportation in the output directory.
 
-    # Check YAML key
-    if 'label' in cfg:
+    # Note : Shrink label geometries
+    #
+    # As a spatial "inner" join is made considering tiles and labels to only
+    # consider labelled tiles, shrinking the labels a bit allows to avoid
+    # keeping tiles that are only "touched" by a label but without a proper and
+    # relevant intersection.
+    geo_label_shrink['geometry'] = geo_label_shrink['geometry'].scale( xfact=0.9, yfact=0.9, origin='centroid' )
 
-        # Duplicate geodataframe (be sure to work on a copy, the original being exported at the end)
-        geo_label_shrink = geo_label.copy()
+    # Spatial join based on label to eliminate empty tiles (keeping only tiles with at least one clear label)
+    geo_tiling = gpd.sjoin(geo_tiling, geo_label_shrink, how="inner")
 
-        # Note : Shrink label geometries
-        #
-        # As a spatial "inner" join is made considering tiles and labels to only
-        # consider labelled tiles, shrinking the labels a bit allows to avoid
-        # keeping tiles that are only "touched" by a label but without a proper and
-        # relevant intersection.
-        geo_label_shrink['geometry'] = geo_label_shrink['geometry'].scale( xfact=float( cfg['label']['redfact'] ), yfact=float( cfg['label']['redfact'] ), origin='centroid' )
+    # Drop spatial join duplicated geometries based on 'id' column
+    geo_tiling.drop_duplicates(subset=['id'],inplace=True)
 
-        # Spatial join based on label to eliminate empty tiles (keeping only tiles with at least one clear label)
-        geo_tiling = gpd.sjoin(geo_tiling, geo_label_shrink, how="inner")
+    # Logging info
+    logger.info(f"Removed empty and quasi-empty tiles :")
+    logger.info(f"\t{len(geo_tiling)} tile(s) remaining")
 
-        # Drop spatial join duplicated geometries based on 'id' column
-        geo_tiling.drop_duplicates(subset=['id'],inplace=True)
-
-        # Logging info
-        logger.info(f"Removed empty and quasi-empty tiles :")
-        logger.info(f"\t{len(geo_tiling)} tile(s) remaining")
-
-        # Filtering columns on label dataframe
-        geo_label = geo_label.loc[:, ['geometry']]
-
-        # Export labels into geojson, forcing epsg:4326 standard
-        geo_label.to_crs(epsg='4326').to_file(os.path.join(cfg['output_folder'],'labels.geojson'),driver='GeoJSON')
-
-        # logging info    
-        logger.info(f"Written files in output directory :")
-        logger.info(f"\tlabels.geojson")
+    # Filtering columns on label dataframe
+    geo_label = geo_label.loc[:, ['geometry']]
 
     # Filtering columns on tiling dataframe
     geo_tiling = geo_tiling.loc[:, ['geometry', 'id', 'title']]
+
+    # Export labels into geojson, forcing epsg:4326 standard
+    geo_label.to_crs(epsg='4326').to_file(os.path.join(cfg['output_folder'],'labels.geojson'),driver='GeoJSON')
 
     # Export tiles into geojson, forcing epsg:4326 standard
     geo_tiling.to_crs(epsg='4326').to_file(os.path.join(cfg['output_folder'],'tiles.geojson'),driver='GeoJSON')
 
     # logging info    
     logger.info(f"Written files in output directory :")
+    logger.info(f"\tlabels.geojson")
     logger.info(f"\ttiles.geojson")
 
     # Chronometer

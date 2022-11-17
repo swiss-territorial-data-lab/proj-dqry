@@ -21,9 +21,9 @@ The _shift_ value allows to translate the origin of the grid on which tiles are 
 The following illustrations give examples of computed tiles of _50m_ size with two value of shifts using buildings as labels :
 
 <p align="center">
-<img src="doc/tile-example-1.webp?raw=true" width="35%">
+<img src="../images/tile-example-1.webp?raw=true" width="35%">
 &nbsp;
-<img src="doc/tile-example-2.webp?raw=true" width="35%">
+<img src="../images/tile-example-2.webp?raw=true" width="35%">
 <br />
 <i>Obtained tiles of 50m using building as labels</i>
 </p>
@@ -31,9 +31,9 @@ The following illustrations give examples of computed tiles of _50m_ size with t
 This script can also be considered of low amount of large scale labels to obtain covering tiles as shown on the following examples :
 
 <p align="center">
-<img src="doc/tile-example-3.webp?raw=true" width="35%">
+<img src="../images/tile-example-3.webp?raw=true" width="35%">
 &nbsp;
-<img src="doc/tile-example-4.webp?raw=true" width="35%">
+<img src="../images/tile-example-4.webp?raw=true" width="35%">
 <br />
 <i>Tiled cover of a large area with 5000m and 2500m tiles</i>
 </p>

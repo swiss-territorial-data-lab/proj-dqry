@@ -1,2 +1,3 @@
-dev
-lib
+input/*
+output/*
+tools/*

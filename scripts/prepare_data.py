@@ -25,10 +25,19 @@ import logging.config
 import time
 import argparse
 import yaml
-import os, sys
+import os, sys, inspect
+import requests
 import geopandas as gpd
+import pandas as pd
+import morecantile
+import json
+import numpy as np
 import csv
+from tqdm import tqdm
+# import fct_misc
+import re
 
+from shapely.geometry import box
 from shapely.geometry import Polygon
 
 def compose_tiles( csv_row, tile_split ):
@@ -94,21 +103,165 @@ def compose_tiles( csv_row, tile_split ):
     # Return polygon list
     return poly_list
 
+
+# the following allows us to import modules from within this file's parent folder
+sys.path.insert(0, '.')
+
+logging.config.fileConfig('logging.conf')
+logger = logging.getLogger('root')
+
+
 if __name__ == "__main__":
 
+    # Chronometer
+    tic = time.time()
+    logger.info('Starting...')
+
     # Argument and parameter specification
-    parser = argparse.ArgumentParser(description="Front-end for data preparation in the context of thermal panels detection (STDL.PROJ-TPNL)")
-    parser.add_argument('--config', type=str, help='Framework configuration file')
-    parser.add_argument('--logger', type=str, help='Log configuration file', default='logging.conf')
+    parser = argparse.ArgumentParser(description="The script prepares dataset to process the quarries detection project (STDL.proj-dqry)")
+    parser.add_argument('config_file', type=str, help='Framework configuration file')
+   # parser.add_argument('--logger', type=str, help='Log configuration file', default='logging.conf')
     args = parser.parse_args()
 
+    logger.info(f"Using {args.config_file} as config file.")
+
+    with open(args.config_file) as fp:
+       # cfg = yaml.load(fp, Loader=yaml.FullLoader)['prepare_data.py']    #  [os.path.basename(__file__)]
+        cfg = yaml.load(fp, Loader=yaml.FullLoader)[os.path.basename(__file__)]
+
+    # Task to do
+    OUTPUT_DIR = cfg['output_folder']
+    LABELS_SHPFILE = cfg['datasets']['labels_shapefile']
+    ZOOM_LEVEL = cfg['zoom_level'] # this is hard-coded 'cause we only know "OK tile IDs" for this zoom level
+
+    # let's make the output directory in case it doesn't exist
+    if not os.path.exists(OUTPUT_DIR):
+        os.makedirs(OUTPUT_DIR)
+
+
+    written_files = []
+
+    # Convert datasets shapefiles into geojson format
+    logger.info('Convert labels shapefile into GeoJSON format (EPSG:4326)...')
+    labels = gpd.read_file(LABELS_SHPFILE)
+    labels_4326 = labels.to_crs(epsg=4326)
+
+    nb_labels = len(labels)
+    logger.info('There is/are ' + str(nb_labels) + ' polygon(s) in ' + LABELS_SHPFILE)
+
+    feature = 'labels.geojson'
+    feature_path = os.path.join(OUTPUT_DIR, feature)
+    labels_4326.to_file(feature_path, driver='GeoJSON')
+    written_files.append(feature_path)  
+    logger.info(f"...done. A file was written: {feature_path}")
+
+
+    logger.info('Creating tiles for the Area of Interest (AOI)...')   
+    
+    tms = morecantile.tms.get("WebMercatorQuad")    # epsg:3857   
+
+    # New gpd with only labels geometric info (minx, miny, maxx, maxy) 
+    logger.info('- Get geometric boundaries of the label(s)')  
+    boundary = labels_4326.bounds
+
+    # Iterate on geometric coordinates to defined tiles for a given label at a given zoom level
+    # A gpd if created for each label and are then concatenate into a single gpd 
+    logger.info('- Compute tiles for each label(s) geometry') 
+    tiles_3857_all = [] 
+    for row in range(len(boundary)):
+        coords = (boundary.iloc[row,0],boundary.iloc[row,1],boundary.iloc[row,2],boundary.iloc[row,3])      
+        tiles_3857 = gpd.GeoDataFrame.from_features([tms.feature(x, projected=True) for x in tqdm(tms.tiles(*coords, zooms=[ZOOM_LEVEL]))])   
+        tiles_3857.set_crs(epsg=3857, inplace=True)
+        tiles_3857_all.append(tiles_3857)
+    tiles_3857_aoi = gpd.GeoDataFrame(pd.concat(tiles_3857_all, ignore_index=True) )
+
+    # Remove unrelevant tiles and reorganized the data set:
+    logger.info('- Remove duplicated tiles and tiles that are not intersecting labels') 
+
+    # - Keep only tiles that are intersecting the label   
+    labels_3857=labels_4326.to_crs(epsg=3857)
+    labels_3857.rename(columns={'FID': 'id_aoi'},inplace=True)
+   # fct_misc.test_crs(tms.crs,labels_3857.crs)
+    tiles_aoi=gpd.sjoin(tiles_3857_aoi, labels_3857, how='inner')
+
+    # - Remove duplicated tiles
+    if nb_labels > 1:
+        tiles_aoi.drop_duplicates('geometry', inplace=True)
+
+    # - Remove useless columns, reinitilize feature id and redifined it according to xyz format  
+    logger.info('- Format feature id and reorganise data set') 
+    tiles_aoi.drop(tiles_aoi.columns.difference(['geometry','id','title']), 1, inplace=True) 
+    tiles_aoi.reset_index(drop=True, inplace=True)
+
+    xyz=[]
+    for idx in tiles_aoi.index:
+        xyz.append([re.sub('[^0-9]','',coor) for coor in tiles_aoi.loc[idx,'title'].split(',')])
+    tiles_aoi['id'] = [x+', '+y+', '+z for x, y, z in xyz]
+    tiles_aoi = tiles_aoi[['geometry', 'title', 'id']]
+
+    nb_tiles = len(tiles_aoi)
+    logger.info('There was/were ' + str(nb_tiles) + ' tiles(s) created')
+
+    # Convert datasets shapefiles into geojson format
+    logger.info('Convert tiles shapefile into GeoJSON format (EPSG:4326)...')  
+    feature = 'tiles.geojson'
+    feature_path = os.path.join(OUTPUT_DIR, feature)
+    tiles_4326=tiles_aoi.to_crs(epsg=4326)
+    tiles_4326.to_file(feature_path, driver='GeoJSON')
+    written_files.append(feature_path)  
+    logger.info(f"...done. A file was written: {feature_path}")
+
+    print()
+    logger.info("The following files were written. Let's check them out!")
+    for written_file in written_files:
+        logger.info(written_file)
+    print()
+
+    toc = time.time()
+    logger.info(f"Nothing left to be done: exiting. Elapsed time: {(toc-tic):.2f} seconds")
+
+    sys.stderr.flush()
+
+    
+    # ############################################################# 
+    # print('Determination of the information for the tiles to consider...')
+
+    # tms = morecantile.tms.get("WebMercatorQuad")    # epsg:3857
+
+    # boundary = labels_4326.unary_union.bounds
+    # tile_3857 = gpd.GeoDataFrame.from_features([tms.feature(x, projected=True) for x in tqdm(tms.tiles(*boundary, zooms=[ZOOM_LEVEL]))])
+    # tile_3857.set_crs(epsg=3857, inplace=True)
+
+    # labels_3857=labels_4326.to_crs(epsg=3857)
+    # labels_3857.rename(columns={'FID': 'id_aoi'},inplace=True)
+
+    # fct_misc.test_crs(tms.crs,labels_3857.crs)
+
+    # tiles_aoi=gpd.sjoin(tile_3857, labels_3857, how='inner')
+
+    # print('-- Setting a formatted id...')
+    # tiles_aoi.drop_duplicates('geometry', inplace=True)
+    # tiles_aoi.drop(tiles_aoi.columns.difference(['geometry','id','title']), 1, inplace=True) 
+    # tiles_aoi.reset_index(drop=True, inplace=True)
+
+    # xyz=[]
+    # for idx in tiles_aoi.index:
+    #     xyz.append([re.sub('[^0-9]','',coor) for coor in tiles_aoi.loc[idx,'title'].split(',')])
+
+    # tiles_aoi['id'] = [x+', '+y+', '+z for x, y, z in xyz]
+
+    # tiles_4326=tiles_aoi.to_crs(epsg=4326)
+    # tiles_4326.to_file(os.path.join(OUTPUT_DIR, 'tiles.geojson'), driver='GeoJSON')
+    # print(tiles_4326)
+    # print('stop')
+
+    #############################################################
+
+    '''
     # Section : Preliminar
     #
     # This section checks the configuration files and inputs the yaml file
     # containing the configuration.
-
-    # Chronometer
-    tic = time.time()
 
     try:
 
@@ -183,6 +336,8 @@ if __name__ == "__main__":
         sys.stderr.flush()
         sys.exit(1)
 
+    ZOOM_LEVEL=cfg['zoom_level']
+    print(ZOOM_LEVEL)
     # Section : Label
     #
     # This section is dedicated to labels importation from the specified source
@@ -215,7 +370,7 @@ if __name__ == "__main__":
     #
     # This section is dedicated to tile definition importation and process
     # according to the specified source.
-
+    
     # Check YAML key
     if 'csv' in cfg['tiling']:
 
@@ -244,6 +399,7 @@ if __name__ == "__main__":
 
                 # Compute polygon list
                 poly_list = compose_tiles( row, cfg['tiling']['split'] )
+                print('1',poly_list)
 
                 # Parsing polygon list
                 for poly in poly_list:
@@ -273,7 +429,7 @@ if __name__ == "__main__":
 
         # Import tiles definition
         geo_tiling = gpd.read_file( cfg['tiling']['shapefile'] )
-
+        print(geo_tiling)
         # Remove all columns #
         geo_tiling = geo_tiling.loc[:, ['geometry']]
 
@@ -301,7 +457,7 @@ if __name__ == "__main__":
         logger.error("Missing source in tiling")
         sys.stderr.flush()
         sys.exit(1)
-
+    
     # set geographical frame of tiling geometry
     geo_tiling = geo_tiling.to_crs( crs = cfg['srs'] )
 
@@ -359,4 +515,5 @@ if __name__ == "__main__":
 
     # Flush error output
     sys.stderr.flush()
+    '''
 

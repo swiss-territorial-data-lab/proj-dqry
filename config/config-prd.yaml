@@ -1,12 +1,19 @@
+prepare_data.py: 
+  datasets:
+    labels_shapefile: ../input/input-prd/[AOI_Shapefile]
+  output_folder: ../output/output-prd
+  zoom_level: 17  # keep between 17 and 20  
+
 generate_tilesets.py:
   debug_mode: True
   datasets:
-    aoi_tiles_geojson: ../input/input-prd/tiles_prediction.geojson
+    aoi_tiles_geojson: ../output/output-prd/tiles.geojson
     orthophotos_web_service:
-      type: WMS # supported values: 1. MIL = Map Image Layer 2. WMS
-      url: https://wms.geo.admin.ch/service
-      layers: ch.swisstopo.swissimage
-      srs: "EPSG:2056"
+      type: XYZ # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ
+      url: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/2020/3857/{z}/{x}/{y}.jpeg
+    #  layers: ch.swisstopo.swissimage
+    #  year: '2020'
+    #  srs: "EPSG:3857"
   output_folder: ../output/output-prd
   tile_size: 512 # per side, in pixels
   overwrite: True
@@ -32,11 +39,11 @@ make_predictions.py:
         oth: COCO_oth.json
     detectron2_config_file: '../../config/detectron2_config_dqry.yaml' # path relative to the working_folder
     model_weights:
-        pth_file: '../../input/input-prd/logs/model_final.pth'
+       # pth_file: '../../input/input-prd/logs/model_final.pth'
+        pth_file: '../../input/input-prd/logs/model_0000999.pth'
 
 assess_predictions.py:
   datasets:
-    ground_truth_labels_geojson: ../input/input-prd/labels.geojson
     image_metadata_json: ../output/output-prd/img_metadata.json
     split_aoi_tiles_geojson: ../output/output-prd/split_aoi_tiles.geojson # aoi = Area of Interest
     predictions:

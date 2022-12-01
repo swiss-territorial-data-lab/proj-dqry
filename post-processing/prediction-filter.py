@@ -21,76 +21,102 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import logging
+import logging.config
+import time
 import geopandas as gpd
 import pandas as pd
 import rasterio
 import argparse
+import yaml
+import os, sys, inspect
 from sklearn.cluster import KMeans
 
-# argument parser
-pm_argparse = argparse.ArgumentParser()
+# the following allows us to import modules from within this file's parent folder
+sys.path.insert(0, '.')
 
-pm_argparse.add_argument( '-i', '--input',     type=str,                         help='input geojson path' )
-pm_argparse.add_argument( '-d', '--dem',       type=str,                         help='input DEM path' )
-pm_argparse.add_argument( '-o', '--output',    type=str,                         help='output geojson path' )
-pm_argparse.add_argument( '-a', '--area' ,     type=float,     default = 1728.,  help='area threshold. Default to 1728' )
-pm_argparse.add_argument( '-s', '--score',     type=float,     default = 0.96  ,  help='score threshold. Default to 0.96' )
-pm_argparse.add_argument( '-e', '--elevation', type=float,     default = 1155. , help='elevation threshold. Default to 1155' )
-pm_argparse.add_argument( '--distance',        type=float,     default = 8,      help="distance for union. Default to 8")
+logging.config.fileConfig('logging.conf')
+logger = logging.getLogger('root')
 
-pm_args = pm_argparse.parse_args()
+if __name__ == "__main__":
 
-# import predictions GeoJSON
-input = gpd.read_file(pm_args.input)
-input = input.to_crs(2056)
-total = len(input)
+    # Chronometer
+    tic = time.time()
+    logger.info('Starting...')
 
-# Centroid of every prediction polygon
-centroids = gpd.GeoDataFrame()
-centroids.geometry = input.representative_point()
+    # argument parser
+    parser = argparse.ArgumentParser(description="The script filter the prediction results of the quarry project (STDL.proj-dqry)")
+    parser.add_argument('config_file', type=str, help='input geojson path')
+    args = parser.parse_args()
 
-# KMeans Unsupervised Learning
-centroids = pd.DataFrame({'x': centroids.geometry.x, 'y': centroids.geometry.y})
-k = int( ( len(input) / 3 ) + 1 )
-cluster = KMeans(n_clusters=k, algorithm = 'auto', random_state = 1)
-model = cluster.fit(centroids)
-labels = model.predict(centroids)
-print("KMeans algorithm computed with k = " + str(k))
+    logger.info(f"Using {args.config_file} as config file.")
 
-# Dissolve and Aggregate
-input['cluster'] = labels
-input = input.dissolve(by = 'cluster', aggfunc = 'max')
-total = len(input)
+    with open(args.config_file) as fp:
+        cfg = yaml.load(fp, Loader=yaml.FullLoader)[os.path.basename(__file__)]
 
-# filter by score
-input = input[input['score'] > pm_args.score]
-sc = len(input)
-print(str(total - sc) + " predictions removed by score threshold")
+    INPUT = cfg['input']
+    DEM = cfg['dem']
+    SCORE = cfg['score']
+    AREA = cfg['area']
+    ELEVATION = cfg['elevation']
+    DISTANCE = cfg['distance']
+    OUTPUT = cfg['output']
 
-# Create empty data frame
-geo_merge = gpd.GeoDataFrame()
+    # import predictions GeoJSON
+    input = gpd.read_file(INPUT)
+    input = input.to_crs(2056)
+    total = len(input)
 
-# Merge close labels using buffer and unions
-geo_merge = input.buffer( +pm_args.distance, resolution = 2 )
-geo_merge = geo_merge.geometry.unary_union
-geo_merge = gpd.GeoDataFrame(geometry=[geo_merge], crs = input.crs )
-geo_merge = geo_merge.explode(index_parts = True).reset_index(drop=True)
-geo_merge = geo_merge.buffer( -pm_args.distance, resolution = 2 )
-td = len(geo_merge)
-print(str(sc - td) + " difference to clustered predictions after union")
+    # Centroid of every prediction polygon
+    centroids = gpd.GeoDataFrame()
+    centroids.geometry = input.representative_point()
 
-geo_merge = geo_merge[geo_merge.area > pm_args.area]
-ta = len(geo_merge)
-print(str(td - ta) + " predictions removed by area threshold")
+    # KMeans Unsupervised Learning
+    centroids = pd.DataFrame({'x': centroids.geometry.x, 'y': centroids.geometry.y})
+    k = int( ( len(input) / 3 ) + 1 )
+    cluster = KMeans(n_clusters=k, algorithm = 'auto', random_state = 1)
+    model = cluster.fit(centroids)
+    labels = model.predict(centroids)
+    print("KMeans algorithm computed with k = " + str(k))
 
-r = rasterio.open(pm_args.dem)
-row, col = r.index(geo_merge.centroid.x, geo_merge.centroid.y)
-values = r.read(1)[row,col]
-geo_merge.elev = values
-geo_merge = geo_merge[geo_merge.elev < pm_args.elevation]
-te = len(geo_merge)
-print(str(ta - te) + " predictions removed by elevation threshold")
+    # Dissolve and Aggregate
+    input['cluster'] = labels
+    input = input.dissolve(by = 'cluster', aggfunc = 'max')
+    total = len(input)
 
-print(str(te) + " predictions left")
+    # filter by score
+    input = input[input['score'] > SCORE]
+    sc = len(input)
+    print(str(total - sc) + " predictions removed by score threshold")
 
-geo_merge.to_file(pm_args.output, driver='GeoJSON')
+    # Create empty data frame
+    geo_merge = gpd.GeoDataFrame()
+
+    # Merge close labels using buffer and unions
+    geo_merge = input.buffer( +DISTANCE, resolution = 2 )
+    geo_merge = geo_merge.geometry.unary_union
+    geo_merge = gpd.GeoDataFrame(geometry=[geo_merge], crs = input.crs )
+    geo_merge = geo_merge.explode(index_parts = True).reset_index(drop=True)
+    geo_merge = geo_merge.buffer( -DISTANCE, resolution = 2 )
+    td = len(geo_merge)
+    print(str(sc - td) + " difference to clustered predictions after union")
+
+    geo_merge = geo_merge[geo_merge.area > AREA]
+    ta = len(geo_merge)
+    print(str(td - ta) + " predictions removed by area threshold")
+
+    r = rasterio.open(DEM)
+    row, col = r.index(geo_merge.centroid.x, geo_merge.centroid.y)
+    values = r.read(1)[row,col]
+    geo_merge.elev = values
+    geo_merge = geo_merge[geo_merge.elev < ELEVATION]
+    te = len(geo_merge)
+    print(str(ta - te) + " predictions removed by elevation threshold")
+
+    print(str(te) + " predictions left")
+
+    OUTPUT_completed = OUTPUT.replace('{score}', str(SCORE)).replace('0.', '0dot') \
+         .replace('{area}', str(int(AREA)))\
+         .replace('{elevation}', str(int(ELEVATION))) \
+         .replace('{distance}', str(int(DISTANCE)))
+    geo_merge.to_file(OUTPUT_completed, driver='GeoJSON')

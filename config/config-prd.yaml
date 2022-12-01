@@ -1,16 +1,26 @@
+#####################################################################
+###########     configuration file to predict quarry     ############ 
+#####################################################################
+# Follow the workflow to predict quarries in a given area of interest
+# Refer to the README.md provided for more details
+
+
+# 1-Prepare the tiles geometry according to the AOI and zoom level
 prepare_data.py: 
+  srs: "EPSG:3857"
   datasets:
     labels_shapefile: ../input/input-prd/[AOI_Shapefile]
   output_folder: ../output/output-prd
-  zoom_level: 17  # keep between 17 and 20  
+  zoom_level: 17  #z, keep between 17 and 20  
 
+# 2-Request tiles according to the provided AOI and tiles parameters
 generate_tilesets.py:
   debug_mode: True
   datasets:
     aoi_tiles_geojson: ../output/output-prd/tiles.geojson
     orthophotos_web_service:
       type: XYZ # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ
-      url: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/2020/3857/{z}/{x}/{y}.jpeg
+      url: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/2017/3857/{z}/{x}/{y}.jpeg
     #  layers: ch.swisstopo.swissimage
     #  year: '2020'
     #  srs: "EPSG:3857"
@@ -31,6 +41,7 @@ generate_tilesets.py:
         name: "Quarry"
         supercategory: "Land usage"
 
+# 3-Perform the object detection based on the optimized trained model
 make_predictions.py:
     working_folder: ../output/output-prd
     log_subfolder: logs
@@ -40,12 +51,24 @@ make_predictions.py:
     detectron2_config_file: '../../config/detectron2_config_dqry.yaml' # path relative to the working_folder
     model_weights:
        # pth_file: '../../input/input-prd/logs/model_final.pth'
-        pth_file: '../../input/input-prd/logs/model_0000999.pth'
+        pth_file: '../../input/input-prd/logs/model_0004999.pth'    #!!!Chose the optimized trained model, i.e. the one minimizing the validation loss curve 
 
+# 4-Evaluate the quality of the prediction with metrics calculation
 assess_predictions.py:
   datasets:
+ #   ground_truth_labels_geojson: ../input/input-prd/labels.geojson
     image_metadata_json: ../output/output-prd/img_metadata.json
     split_aoi_tiles_geojson: ../output/output-prd/split_aoi_tiles.geojson # aoi = Area of Interest
     predictions:
       oth: ../output/output-prd/oth_predictions_at_0dot05_threshold.pkl
   output_folder: ../output/output-prd
+
+# 5-Filtering and merging prediction polygons to improve results
+prediction-filter.py:
+  input: ../output/output-prd/oth_predictions.geojson 
+  dem: ../input/DEM/swiss-srtm.tif 
+  elevation: 1155.0     #m, altitude threshold. Dectection above the threshold are discarded. Unlikely to observe quarry above and avoid flase detection of rock outcrop and snow . Default: 1155
+  score: 0.96           #prediction score (reliability of the detection) provided by detectron2. The value can be varied from 0 to 1. Default: 0.96 
+  distance: 8           #m, distance use as a buffer to merge close polygons (likely to belong to the same quarry) together. Default: 8 
+  area: 1728.0          #m2, area threshold under which polygons are discarded (unlikely to observe quarry sites under this surface). Default: 1728.0
+  output: ../output/output-prd/oth_prediction_score-{score}_area-{area}_elevation-{elevation}_distance-{distance}.geojson

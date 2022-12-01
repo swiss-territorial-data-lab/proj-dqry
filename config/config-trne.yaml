@@ -1,9 +1,19 @@
+#####################################################################
+#####  configuration file to train the model to detect quarry  ##### 
+#####################################################################
+# Follow the workflow to train the model to detect quarries with a provided ground truth
+# Refer to the README.md provided for more details
+
+
+# 1-Prepare the tiles geometry according to the AOI and zoom level
 prepare_data.py:  
+  srs: "EPSG:2056"
   datasets:
     labels_shapefile: ../input/input-trne/[Label_Shapefile]
   output_folder: ../output/output-trne
-  zoom_level: 18  # keep between 17 and 20  
+  zoom_level: 17  #z, keep between 17 and 20  
 
+# 2-Request tiles according to the provided AOI and tiles parameters and split tiles into 3 datasets: train, test, validation
 generate_tilesets.py:
   debug_mode: False
   datasets:
@@ -32,6 +42,8 @@ generate_tilesets.py:
         name: "Quarry"
         supercategory: "Land usage"
 
+# 3-Train the model with the detectron2 algorithm
+# Monitor the training process via tensorboard (tensorboard --logdir </logs>). Choice of the optimized model: minimisation of the validation loss curve
 train_model.py:
     working_folder: ../output/output-trne
     log_subfolder: logs
@@ -44,6 +56,7 @@ train_model.py:
     model_weights:
         model_zoo_checkpoint_url: "COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_1x.yaml"
 
+# 4-Perform the object detection based on the optimized trained model
 make_predictions.py:
     working_folder: ../output/output-trne
     log_subfolder: logs
@@ -54,8 +67,9 @@ make_predictions.py:
         tst: COCO_tst.json
     detectron2_config_file: '../../config/detectron2_config_dqry.yaml' # path relative to the working_folder
     model_weights:
-        pth_file: './logs/model_0000999.pth'
+        pth_file: './logs/model_0004999.pth'
   
+# 5-Evaluate the quality of the prediction for the different datasets with metrics calculation
 assess_predictions.py:
   datasets:
     ground_truth_labels_geojson: ../output/output-trne/labels.geojson

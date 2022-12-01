@@ -189,13 +189,13 @@ _(to be completed)_
 
 - Post-processing
 
-The quarry prediction output as a polygons shapefile needs a filtering procedure to discard false detections and improve the aesthetic of the polygons (merge polygons belonging to a single quarry). This is performed the script `prediction-filter.py`:
+The quarry prediction output as a polygons shapefile needs a filtering procedure to discard false detections and improve the aesthetic of the polygons (merge polygons belonging to a single quarry). This is performed the script `prediction_filter.py`:
 
     $ python3 [object-detector_path]/post-processing/prediction-filter.py [config_yaml]
 
-The `prediction-filter.py` section of the _yaml_ configuration file is expected as follow:
+The `prediction_filter.py` section of the _yaml_ configuration file is expected as follow:
 
-    prediction-filter.py:
+    prediction_filter.py:
         input: ../output/output-prd/oth_predictions.geojson 
         dem: ../input/DEM/swiss-srtm.tif 
         elevation: 1155.0   

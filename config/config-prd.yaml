@@ -64,7 +64,7 @@ assess_predictions.py:
   output_folder: ../output/output-prd
 
 # 5-Filtering and merging prediction polygons to improve results
-prediction-filter.py:
+prediction_filter.py:
   input: ../output/output-prd/oth_predictions.geojson 
   dem: ../input/DEM/swiss-srtm.tif 
   elevation: 1155.0     #m, altitude threshold. Dectection above the threshold are discarded. Unlikely to observe quarry above and avoid flase detection of rock outcrop and snow . Default: 1155

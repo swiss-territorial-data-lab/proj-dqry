@@ -54,6 +54,8 @@ if __name__ == "__main__":
     with open(args.config_file) as fp:
         cfg = yaml.load(fp, Loader=yaml.FullLoader)[os.path.basename(__file__)]
 
+    # Load input parameters
+    YEAR = cfg['year']
     INPUT = cfg['input']
     DEM = cfg['dem']
     SCORE = cfg['score']
@@ -62,8 +64,11 @@ if __name__ == "__main__":
     DISTANCE = cfg['distance']
     OUTPUT = cfg['output']
 
+    written_files = [] 
+
     # import predictions GeoJSON
-    input = gpd.read_file(INPUT)
+    INPUT_completed = INPUT.replace('{year}', str(YEAR))
+    input = gpd.read_file(INPUT_completed)
     input = input.to_crs(2056)
     total = len(input)
 
@@ -86,25 +91,29 @@ if __name__ == "__main__":
 
     # filter by score
     input = input[input['score'] > SCORE]
+    # print(input)
     sc = len(input)
     print(str(total - sc) + " predictions removed by score threshold")
-
+    geo_input = gpd.GeoDataFrame(input)
     # Create empty data frame
     geo_merge = gpd.GeoDataFrame()
 
     # Merge close labels using buffer and unions
     geo_merge = input.buffer( +DISTANCE, resolution = 2 )
     geo_merge = geo_merge.geometry.unary_union
-    geo_merge = gpd.GeoDataFrame(geometry=[geo_merge], crs = input.crs )
+    geo_merge = gpd.GeoDataFrame(geometry=[geo_merge], crs = input.crs )  
     geo_merge = geo_merge.explode(index_parts = True).reset_index(drop=True)
     geo_merge = geo_merge.buffer( -DISTANCE, resolution = 2 )
+
     td = len(geo_merge)
     print(str(sc - td) + " difference to clustered predictions after union")
 
+    # Discard polygons with area under the threshold 
     geo_merge = geo_merge[geo_merge.area > AREA]
     ta = len(geo_merge)
     print(str(td - ta) + " predictions removed by area threshold")
 
+    # Discard polygons detected above the threshold elevalation 
     r = rasterio.open(DEM)
     row, col = r.index(geo_merge.centroid.x, geo_merge.centroid.y)
     values = r.read(1)[row,col]
@@ -115,8 +124,35 @@ if __name__ == "__main__":
 
     print(str(te) + " predictions left")
 
-    OUTPUT_completed = OUTPUT.replace('{score}', str(SCORE)).replace('0.', '0dot') \
+    # Preparation of a geo df 
+    data = {'id': geo_merge.index,'area': geo_merge.area, 'centroid x': geo_merge.centroid.x, 'centroid y': geo_merge.centroid.y, 'geometry': geo_merge}
+    geo_tmp = gpd.GeoDataFrame(data, crs=input.crs)
+
+    # Get the averaged prediction score of the merge polygons  
+    intersection = gpd.sjoin(geo_tmp, input, how='inner')
+    intersection['id'] = intersection.index
+    score_final=intersection.groupby(['id']).mean()
+
+    # Formatting the final geo df 
+    data = {'id': geo_merge.index,'score': score_final['score'] , 'area': geo_merge.area, 'centroid x': geo_merge.centroid.x, 'centroid y': geo_merge.centroid.y, 'geometry': geo_merge}
+    geo_final = gpd.GeoDataFrame(data, crs=input.crs)
+
+    OUTPUT_completed = OUTPUT.replace('{year}', str(YEAR)) \
+         .replace('{score}', str(SCORE)).replace('0.', '0dot') \
          .replace('{area}', str(int(AREA)))\
          .replace('{elevation}', str(int(ELEVATION))) \
          .replace('{distance}', str(int(DISTANCE)))
-    geo_merge.to_file(OUTPUT_completed, driver='GeoJSON')
+    geo_final.to_file(OUTPUT_completed, driver='GeoJSON')
+    written_files.append(OUTPUT_completed) 
+
+    print()
+    logger.info("The following files were written. Let's check them out!")
+    for written_file in written_files:
+        logger.info(written_file)
+    print()
+
+    # Stop chronometer  
+    toc = time.time()
+    logger.info(f"Nothing left to be done: exiting. Elapsed time: {(toc-tic):.2f} seconds")
+
+    sys.stderr.flush()

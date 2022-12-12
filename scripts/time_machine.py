@@ -93,23 +93,24 @@ if __name__ == "__main__":
     csv_path = os.path.join(OUTPUT_DIR, 'intersection.csv')
     f = open(csv_path, 'w', encoding='UTF8', newline='')
     writer = csv.writer(f)  
-    header = ('id_quarry', 'id_feature', 'year', 'status', 'centroid x', 'centroid y', 'area', 'geometry')
+    header = ('id_quarry', 'id_feature', 'year', 'status', 'score', 'area', 'centroid_x', 'centroid_y', 'geometry')
     writer.writerow(header)
     written_files.append(csv_path) 
 
-    # Match or not quarry detection
-    for row in d1.index:
-        id = d1['id'][row]
+    for row in d1.itertuples():
+        id = row.id
         n = n + 1
         unique_id = n
         year = YEAR1
         status = 'exist'
-        centroidx = d1['centroid x'][row] 
-        centroidy = d1['centroid y'][row] 
-        area = d1['area'][row] 
-        geom = d1['geometry'][row]
+        score = row.score
+        area = row.area
+        centroidx = row.centroidx
+        centroidy = row.centroidy
+
+        geom = row.geometry
       
-        info = (unique_id, id, year, status, centroidx, centroidy, area, geom)
+        info = (unique_id, id, year, status, score, area, centroidx, centroidy, geom)
         exist_ds.append(info) 
         writer.writerow(info)
 
@@ -119,41 +120,42 @@ if __name__ == "__main__":
     df = gpd.GeoDataFrame(exist_ds) 
     intersection_exp = intersection.explode(index_parts=False,ignore_index=True)
 
-    # for row in intersection.index:
-    for row in range(len(intersection)):
-        id = intersection_exp['id_right'][row]
-        id_search =  intersection_exp['id_left'][row]
+    for row in intersection.itertuples():
+        id = row.id_right
+        id_search =  row.id_left
         for i in df.index:
             if df[1][i] == id_search: 
-                unique_id = df[1][i]
+                unique_id = df[0][i]
         year = YEAR2
         status = 'evolution'
-        centroidx = intersection_exp['centroid x_right'][row] 
-        centroidy = intersection_exp['centroid y_right'][row] 
-        area = intersection_exp['area_right'][row] 
-        geom = intersection_exp['geometry'][row]
+        score = row.score_right 
+        area = row.area_right
+        centroidx = row.centroidx_right 
+        centroidy = row.centroidy_right
+        geom = row.geometry
 
-        info = (unique_id, id, year, status, centroidx, centroidy, area, geom)
+        info = (unique_id, id, year, status, score, area, centroidx, centroidy, geom)
         writer.writerow(info)
     
     nb12 = len(intersection)
 
     intersection2 = intersection2.fillna(value=0)
     n = unique_id_list[-1]
-    for row in intersection2.index:
+    for row in intersection2.itertuples():
 
-        if intersection2['index_left'][row] == 0:
-            id = intersection2['id_right'][row]
+        if row.index_left == 0:
+            id = row.id_right
             n =  n + 1
             unique_id =  n
             year = YEAR2
             status = 'new'
-            centroidx = intersection2['centroid x_right'][row] 
-            centroidy = intersection2['centroid y_right'][row] 
-            area = intersection2['area_right'][row] 
-            geom = intersection2['geometry'][row]
+            area = row.area_right 
+            score = row.score_right
+            centroidx = row.centroidx_right
+            centroidy = row.centroidy_right 
+            geom = row.geometry
 
-            info = (unique_id, id, year, status, centroidx, centroidy, area, geom)
+            info = (unique_id, id, year, status, score, area, centroidx, centroidy, geom)
             writer.writerow(info)
 
             unique_id_list.append(unique_id) 

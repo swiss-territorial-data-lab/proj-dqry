@@ -62,13 +62,14 @@ if __name__ == "__main__":
     AREA = cfg['area']
     ELEVATION = cfg['elevation']
     DISTANCE = cfg['distance']
-    OUTPUT = cfg['output']
+    OUTPUT_DIR = cfg['output_folder']
 
     written_files = [] 
 
     # import predictions GeoJSON
-    INPUT_completed = INPUT.replace('{year}', str(YEAR))
-    input = gpd.read_file(INPUT_completed)
+ #   INPUT_completed = INPUT.replace('{year}', str(YEAR))
+  #  input = gpd.read_file(INPUT_completed)
+    input = gpd.read_file(INPUT)
     input = input.to_crs(2056)
     total = len(input)
 
@@ -125,7 +126,7 @@ if __name__ == "__main__":
     print(str(te) + " predictions left")
 
     # Preparation of a geo df 
-    data = {'id': geo_merge.index,'area': geo_merge.area, 'centroid x': geo_merge.centroid.x, 'centroid y': geo_merge.centroid.y, 'geometry': geo_merge}
+    data = {'id': geo_merge.index,'area': geo_merge.area, 'centroidx': geo_merge.centroid.x, 'centroidy': geo_merge.centroid.y, 'geometry': geo_merge}
     geo_tmp = gpd.GeoDataFrame(data, crs=input.crs)
 
     # Get the averaged prediction score of the merge polygons  
@@ -134,16 +135,28 @@ if __name__ == "__main__":
     score_final=intersection.groupby(['id']).mean()
 
     # Formatting the final geo df 
-    data = {'id': geo_merge.index,'score': score_final['score'] , 'area': geo_merge.area, 'centroid x': geo_merge.centroid.x, 'centroid y': geo_merge.centroid.y, 'geometry': geo_merge}
+    data = {'id': geo_merge.index,'score': score_final['score'] , 'area': geo_merge.area, 'centroidx': geo_merge.centroid.x, 'centroidy': geo_merge.centroid.y, 'geometry': geo_merge}
     geo_final = gpd.GeoDataFrame(data, crs=input.crs)
 
-    OUTPUT_completed = OUTPUT.replace('{year}', str(YEAR)) \
-         .replace('{score}', str(SCORE)).replace('0.', '0dot') \
-         .replace('{area}', str(int(AREA)))\
-         .replace('{elevation}', str(int(ELEVATION))) \
-         .replace('{distance}', str(int(DISTANCE)))
-    geo_final.to_file(OUTPUT_completed, driver='GeoJSON')
-    written_files.append(OUTPUT_completed) 
+ #    OUTPUT_completed = OUTPUT.replace('{year}', str(YEAR))
+    feature = 'oth_prediction_filter_year-{year}.geojson'
+    feature = feature.replace('{year}', str(YEAR))
+    OUTPUT = os.path.join(OUTPUT_DIR, feature)
+    geo_final.to_file(OUTPUT, driver='GeoJSON')
+    written_files.append(OUTPUT)  
+
+    s = 'year = ' + str(YEAR) + '\n'
+    s += 'score = ' + str(SCORE) + '\n'
+    s += 'area = ' + str(int(AREA)) + '\n'
+    s += 'elevation = ' + str(int(ELEVATION)) + '\n'
+    s += 'distance = ' + str(int(DISTANCE)) + '\n'
+
+    feature = 'filters.log' 
+    OUTPUT = os.path.join(OUTPUT_DIR, feature) 
+    f = open(OUTPUT, 'w') 
+    f.write(s)
+    f.close()
+    written_files.append(OUTPUT)  
 
     print()
     logger.info("The following files were written. Let's check them out!")

@@ -1,5 +1,0 @@
-time_machine.py:  
-  years: [2017,2020]
-  datasets:
-    detection: ../output/output-prd/oth_prediction_filter_year-{year}.geojson
-  output_folder: ../output/output-tm

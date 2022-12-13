@@ -1,11 +1,12 @@
 #!/bin/python
 # -*- coding: utf-8 -*-
 
-#  prediction-thresholding
+#  prediction_filter
 #
 #      Nils Hamel - nils.hamel@alumni.epfl.ch
 #      Huriel Reichel - huriel.reichel@protonmail.com
 #      Alessandro Cerioni
+#      Clemence Herny
 #      Copyright (c) 2020-2022 Republic and Canton of Geneva
 #
 #  This program is free software: you can redistribute it and/or modify
@@ -66,12 +67,8 @@ if __name__ == "__main__":
 
     written_files = [] 
 
-    # import predictions GeoJSON
- #   INPUT_completed = INPUT.replace('{year}', str(YEAR))
-  #  input = gpd.read_file(INPUT_completed)
     input = gpd.read_file(INPUT)
     input = input.to_crs(2056)
-    total = len(input)
 
     # Centroid of every prediction polygon
     centroids = gpd.GeoDataFrame()
@@ -90,15 +87,14 @@ if __name__ == "__main__":
     input = input.dissolve(by = 'cluster', aggfunc = 'max')
     total = len(input)
 
-    # filter by score
+    # Filter dataframe by score value
     input = input[input['score'] > SCORE]
-    # print(input)
     sc = len(input)
     print(str(total - sc) + " predictions removed by score threshold")
     geo_input = gpd.GeoDataFrame(input)
+
     # Create empty data frame
     geo_merge = gpd.GeoDataFrame()
-
     # Merge close labels using buffer and unions
     geo_merge = input.buffer( +DISTANCE, resolution = 2 )
     geo_merge = geo_merge.geometry.unary_union
@@ -122,11 +118,10 @@ if __name__ == "__main__":
     geo_merge = geo_merge[geo_merge.elev < ELEVATION]
     te = len(geo_merge)
     print(str(ta - te) + " predictions removed by elevation threshold")
-
     print(str(te) + " predictions left")
 
     # Preparation of a geo df 
-    data = {'id': geo_merge.index,'area': geo_merge.area, 'centroidx': geo_merge.centroid.x, 'centroidy': geo_merge.centroid.y, 'geometry': geo_merge}
+    data = {'id': geo_merge.index,'area': geo_merge.area, 'centroid_x': geo_merge.centroid.x, 'centroid_y': geo_merge.centroid.y, 'geometry': geo_merge}
     geo_tmp = gpd.GeoDataFrame(data, crs=input.crs)
 
     # Get the averaged prediction score of the merge polygons  
@@ -135,16 +130,16 @@ if __name__ == "__main__":
     score_final=intersection.groupby(['id']).mean()
 
     # Formatting the final geo df 
-    data = {'id': geo_merge.index,'score': score_final['score'] , 'area': geo_merge.area, 'centroidx': geo_merge.centroid.x, 'centroidy': geo_merge.centroid.y, 'geometry': geo_merge}
+    data = {'id_feature': geo_merge.index,'score': score_final['score'] , 'area': geo_merge.area, 'centroid_x': geo_merge.centroid.x, 'centroid_y': geo_merge.centroid.y, 'geometry': geo_merge}
     geo_final = gpd.GeoDataFrame(data, crs=input.crs)
 
- #    OUTPUT_completed = OUTPUT.replace('{year}', str(YEAR))
     feature = 'oth_prediction_filter_year-{year}.geojson'
     feature = feature.replace('{year}', str(YEAR))
     OUTPUT = os.path.join(OUTPUT_DIR, feature)
     geo_final.to_file(OUTPUT, driver='GeoJSON')
     written_files.append(OUTPUT)  
 
+    # Save filter threshold values to log file 
     s = 'year = ' + str(YEAR) + '\n'
     s += 'score = ' + str(SCORE) + '\n'
     s += 'area = ' + str(int(AREA)) + '\n'

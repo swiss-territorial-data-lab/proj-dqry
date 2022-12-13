@@ -56,7 +56,7 @@ make_predictions.py:
 # 4-Evaluate the quality of the prediction with metrics calculation
 assess_predictions.py:
   datasets:
- #   ground_truth_labels_geojson: ../input/input-prd/labels.geojson
+    # ground_truth_labels_geojson: ../input/input-prd/labels.geojson
     image_metadata_json: ../output/output-prd/img_metadata.json
     split_aoi_tiles_geojson: ../output/output-prd/split_aoi_tiles.geojson # aoi = Area of Interest
     predictions:
@@ -65,11 +65,11 @@ assess_predictions.py:
 
 # 5-Filtering and merging prediction polygons to improve results
 prediction_filter.py:
-  year: 2017
+  year: 2020
   input: ../output/output-prd/oth_predictions.geojson 
   dem: /home/cherny/Documents/Projects/Quarries_TimeMachine/PROJ_DQRY/GIS/DEM/swiss-srtm.tif 
   elevation: 1155.0     #m, altitude threshold. Dectection above the threshold are discarded. Unlikely to observe quarry above and avoid flase detection of rock outcrop and snow . Default: 1155
   score: 0.95           #prediction score (reliability of the detection) provided by detectron2. The value can be varied from 0 to 1. Default: 0.96 
   distance: 8           #m, distance use as a buffer to merge close polygons (likely to belong to the same quarry) together. Default: 8 
   area: 1728.0          #m2, area threshold under which polygons are discarded (unlikely to observe quarry sites under this surface). Default: 1728.0
-  output: ../output/output-prd/oth_prediction_filter_year-{year}.geojson
+  output_folder: ../output/output-prd/

@@ -1,0 +1,10 @@
+######################################################################
+### configuration file to identify and monitor quarry through time ### 
+######################################################################
+# Refer to the README.md provided for more details
+
+detection_monitoring.py:  
+  years: [YEAR1, YEAR2, ...]      # Provide a list of years used for detection
+  datasets:
+    detection: ../output/output-prd/oth_prediction_filter_year-{year}.geojson  # Final detection file, produced by prediction_filter.py 
+  output_folder: ../output/output-dm

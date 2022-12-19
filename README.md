@@ -11,17 +11,21 @@ The quarry are detected with the tools developped in `object-detector`.
 _(to be improved)_
 
 
-## Python virtual environment
+## Hardware and OS requirements
 
-Before starting to run scripts make sure to work with the required Python libraries that have been used during the code development. This can be ensured by working with a virtual environment that will preserve the package dependencies.
+The entire workflow has been run on with Ubuntu 20.04 OS on a GPU machine with 32 Gbits RAM. The main limitation is the number of tiles to proceed. The provided requirements stand for a zoom level equal to or below 16 and for an AoI corresponding to SWISSIMAGE acquisition footprints (about a third of Switzerland surface max). For higher zoom level and/or a larger AoI, the number of tiles to process might lead to memory saturation. In this case either a more powerful machine will be required, or the AoI will need to be subdivided in a smaller area and the final predictions will be merged at the end.
 
-* if not done already, create a dedicated Python virtual environment:
+## Python libraries
+
+The scripts have been developed by importing Python3 libraries that are listed in `requirements.in` and `requirements.txt`. Before starting to run scripts make sure the required Python libraries that have been used during the code development are installed, otherwise incompatibilities and errors could occur. A clean method to install Python libraries is to work with a virtual environment that will preserve the package dependencies.
+
+* if not already done, create a dedicated Python virtual environment:
 	    
-      python3 -m venv <path>/[name of the virtual environment]
+      python3 -m venv <dir_path>/[name of the virtual environment]
 
 * activate the virtual environment:
 
-      source <path>/[name of the virtual environment]/bin/activate
+      source <dir_path>/[name of the virtual environment]/bin/activate
 
 * install the required Python packages into the virtual environment:
 
@@ -38,21 +42,23 @@ The requirements.txt file used for the quarries detection can be found in the `p
 
 The input data for the ‘Training and Evaluation’ and ‘Prediction’ workflow for the quarry detection project are stored on the STDL kDrive (https://kdrive.infomaniak.com/app/drive/548133/files) with the following access path: /STDL/Common Documents/Projets/En_cours/Quarries_TimeMachine/02_Data/
 
-In this folder you can find different folders:
+In this main folder you can find subfolders:
 *	DEM
-    -	swiss-srtm.tif: DEM of Switzerland produced from SRTM instrument (_add reference and source_). The raster is used to filter the detection according to an elevation threshold.
-* Learning models
-    - logs: folder containing trained detection model at several learning iteration. They have been obtained during the model training phase. The optimum model minimizing the validation loss curve. The learning characteristics of the algorithm can be visualized using tensorboard (see below in Processing/Run scripts). The optimum model obtained during the ‘Training and Evaluation’ phase is used to perform the ‘Prediction’ phase. The algorithm has been trained on SWISSIMAGE data with a 1 m/px resolution.
+    -	`swiss-srtm.tif`: DEM (spatial resolution about 25 m/px) of Switzerland produced from SRTM instrument (https://doi.org/10.5066/F7PR7TFT). The raster is used to filter the quarry detection * Learning models
+    - `logs`: folder containing trained detection models obtained during the model training phase using Ground Truth data. The learning characteristics of the algorithm can be visualized using tensorboard (see below in Processing/Run scripts). Models at several epochs have been saved. The optimum model minimize the validation loss curve across epochs. This model is used to perform the ‘Prediction’ phase. The algorithm has been trained on SWISSIMAGE data with zoom levels from 15 (3.2 m/px) to 18 (0.4 m/px). For each zoom level subfolder a file `metrics.txt` is provided summing-up the metrics values (precision, recall and f1-score) obtained for the optimized model epoch. The user can either used the already trained model or performed is own model training by running the ‘Training and Evaluation’ workflow and use the produced model to detect quarries.
+
 * Shapefiles
-    -	quarry_label_tlm_revised: polygons shapefile of the quarries labels (TLM data) reviewed by the domain experts. This file has been used to train and assess the automatic detection algorithms = Ground Truth.
-    - swissimage_footprints_shape_year_per_year: original SWISSIMAGE footprints and processed polygons border shapefiles for every SWISSIMAGE acquisition year.
-    - switzerland_border: polygon shapefile of the Switzerland border. 
+    -	`quarry_label_tlm_revised`: polygons shapefile of the quarries labels (TLM data) reviewed by the domain experts. This file has been used to train and assess the automatic detection algorithms = Ground Truth.
+    - `swissimage_footprints_shape_year_per_year`: original SWISSIMAGE footprints and processed polygons border shapefiles for every SWISSIMAGE acquisition year.
+    - `switzerland_border`: polygon shapefile of the Switzerland border. 
 
 *	SWISSIMAGE
-    -	Explanation.txt: file explaining the main characteristics of SWISSIMAGE and the references links (written by R. Pott).
+    - `Explanation.txt`: file explaining the main characteristics of SWISSIMAGE and the references links (written by R. Pott).
 
 
 ## Workflow
+
+This section detail the procedure and the command lines to execute in order to run the workflows.
 
 ### Training and Evaluation
 
@@ -64,12 +70,13 @@ By default the working directory is:
 
 - Config and input data
 
-Two config files are provided in `proj-dqry`:
+Configuration files are required:
 
-    [config_yaml] = config-trne.yaml 
     [logging_config] = logging.conf
 
 The logging format file can be used as provided. The configuration _YAML_ has been set for the object detector workflow by reading dedicated section. It has to be adapted in terms of input and output location and files.
+
+    [config_yaml] = config-trne.yaml 
 
 In the config file verify (and custom) the paths and set the paths to the input data to the tiles shapefile (tiling) and to the AoI shapefile (label).
 
@@ -82,7 +89,7 @@ In the config file verify (and custom) the paths of input and output. The `prepa
       output_folder: ../output/output-trne
       zoom_level: [z]
 
-Set the path to the desired label shapefile (AOI) (create a new folder /proj-dqry/input/input-trne/). For the training, the labels correspond to polygons of quarries defined manually by experts. It constitute the ground truth. 
+Set the path to the desired label shapefile (AoI) (create a new folder /proj-dqry/input/input-trne/). For the training, the labels correspond to polygons of quarries defined manually by experts. It constitute the ground truth. 
 
 For the quarries example:
 
@@ -96,8 +103,8 @@ The _srs_ key provides the working geographical frame to ensure all the input da
 
 The training and detection of objects requires the use of `object-detector` scripts. The workflow is processed in following way:
 
-    $ python3 prepare_data.py --config [config_yaml] --logger [logging_config]
-    $ python3 [object-detector_path]/scripts/generate_tilesets.py [yaml_config]
+    $ python3 ../scripts/prepare_data.py [config_yaml]
+    $ python3 [object-detector_path]/scripts/generate_tilesets.py [config_yaml]
     $ cd [output_directory]
     $ tar -cvf images-[image_size].tar COCO_{trn,val,tst}.json && \
       tar -rvf images-[image_size].tar {trn,val,tst}-images-[image_size] && \

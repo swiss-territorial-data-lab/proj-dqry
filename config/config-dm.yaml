@@ -8,3 +8,10 @@ detection_monitoring.py:
   datasets:
     detection: ../output/output-prd/oth_prediction_filter_year-{year}.geojson  # Final detection file, produced by prediction_filter.py 
   output_folder: ../output/output-dm
+
+plots.py:  
+  quarries_id: [Q1, Q2, ...]      # Provide a list of years used for detection
+  plots: ['area-year'] 
+  datasets:
+    detection: ../output/output-dm/quarry_times  # Final detection file, produced by prediction_filter.py 
+  output_folder: ../output/output-dm/plots

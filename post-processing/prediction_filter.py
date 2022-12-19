@@ -1,13 +1,14 @@
 #!/bin/python
 # -*- coding: utf-8 -*-
 
-#  prediction_filter
+#  Proj quarry detection and time machine
 #
 #      Nils Hamel - nils.hamel@alumni.epfl.ch
-#      Huriel Reichel - huriel.reichel@protonmail.com
-#      Alessandro Cerioni
-#      Clemence Herny
-#      Copyright (c) 2020-2022 Republic and Canton of Geneva
+#      Huriel Reichel
+#      Clemence Herny 
+#      Shanci Li
+#      Alessandro Cerioni 
+#      Copyright (c) 2020 Republic and Canton of Geneva
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -21,6 +22,12 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# 
+# 
+################################################################
+#  Script used to filter the prediction obtained with the object-detector 
+#  Inputs are defined in config-prd.yaml
+
 
 import logging
 import logging.config
@@ -32,6 +39,7 @@ import argparse
 import yaml
 import os, sys, inspect
 from sklearn.cluster import KMeans
+
 
 # the following allows us to import modules from within this file's parent folder
 sys.path.insert(0, '.')
@@ -67,6 +75,7 @@ if __name__ == "__main__":
 
     written_files = [] 
 
+    # Convert input detection to a geo dataframe 
     input = gpd.read_file(INPUT)
     input = input.to_crs(2056)
 

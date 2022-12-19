@@ -1,10 +1,14 @@
 #!/bin/python
 # -*- coding: utf-8 -*-
 
-#  detection_monitoring.py
+#  Proj quarry detection and time machine
 #
-#      Clemence Herny
-#      Copyright (c) 2020-2022 Republic and Canton of Geneva
+#      Nils Hamel - nils.hamel@alumni.epfl.ch
+#      Huriel Reichel
+#      Clemence Herny 
+#      Shanci Li
+#      Alessandro Cerioni 
+#      Copyright (c) 2020 Republic and Canton of Geneva
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -18,6 +22,12 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# 
+# 
+################################################################
+#  Script used to plot and visualize quarry data trough times 
+#  Inputs are defined in config-dm.yaml
+
 
 import logging
 import logging.config
@@ -27,9 +37,6 @@ import yaml
 import os, sys, inspect
 import geopandas as gpd
 import pandas as pd
-import json
-import numpy as np
-import csv
 
 # the following allows us to import modules from within this file's parent folder
 sys.path.insert(0, '.')
@@ -100,7 +107,7 @@ if __name__ == "__main__":
     logger.info(f"Save files")
     intersection.rename(columns={'index_right': 'id_quarry'}, inplace=True)
     gdf_final = intersection[['id_quarry', 'id_feature', 'year','score', 'area', 'centroidx', 'centroidy', 'geometry']]
-    feature_path = os.path.join(OUTPUT_DIR, 'quarry_times')
+    feature_path = os.path.join(OUTPUT_DIR, 'quarry_times.geojson')
     gdf_final.to_file(feature_path, driver='GeoJSON') 
     written_files.append(feature_path) 
     feature_path = os.path.join(OUTPUT_DIR, 'quarry_times.csv')

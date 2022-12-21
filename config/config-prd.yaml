@@ -9,9 +9,11 @@
 prepare_data.py: 
   srs: "EPSG:3857"
   datasets:
-    labels_shapefile: ../input/input-prd/[AOI_Shapefile]
+    labels_shapefile: ../input/input-prd/[AOI_Shapefile] 
+  random_tiles:
+    add_tiles: False
   output_folder: ../output/output-prd
-  zoom_level: 17  #z, keep between 17 and 20  
+  zoom_level: 16  #z, keep between 17 and 20  
 
 # 2-Request tiles according to the provided AOI and tiles parameters
 generate_tilesets.py:
@@ -20,7 +22,7 @@ generate_tilesets.py:
     aoi_tiles_geojson: ../output/output-prd/tiles.geojson
     orthophotos_web_service:
       type: XYZ # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ
-      url: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/2017/3857/{z}/{x}/{y}.jpeg
+      url: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/2020/3857/{z}/{x}/{y}.jpeg
     #  layers: ch.swisstopo.swissimage
     #  year: '2020'
     #  srs: "EPSG:3857"
@@ -43,15 +45,16 @@ generate_tilesets.py:
 
 # 3-Perform the object detection based on the optimized trained model
 make_predictions.py:
-    working_folder: ../output/output-prd
-    log_subfolder: logs
-    sample_tagged_img_subfolder: sample_tagged_images
-    COCO_files: # relative paths, w/ respect to the working_folder
-        oth: COCO_oth.json
-    detectron2_config_file: '../../config/detectron2_config_dqry.yaml' # path relative to the working_folder
-    model_weights:
-       # pth_file: '../../input/input-prd/logs/model_final.pth'
-        pth_file: '../../input/input-prd/logs/model_0004999.pth'    #!!!Chose the optimized trained model, i.e. the one minimizing the validation loss curve 
+  working_folder: ../output/output-prd
+  log_subfolder: logs
+  sample_tagged_img_subfolder: sample_tagged_images
+  COCO_files: # relative paths, w/ respect to the working_folder
+    oth: COCO_oth.json
+  detectron2_config_file: '../../config/detectron2_config_dqry.yaml' # path relative to the working_folder
+  model_weights:
+    # pth_file: '../../input/input-prd/logs/model_final.pth'
+    pth_file: '../../input/input-prd/z16/logs/model_0001999.pth'    #!!!Chose the optimized trained model, i.e. the one minimizing the validation loss curve 
+  score_thd: 0.05
 
 # 4-Evaluate the quality of the prediction with metrics calculation
 assess_predictions.py:

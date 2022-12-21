@@ -66,6 +66,12 @@ if __name__ == "__main__":
     OUTPUT_DIR = cfg['output_folder']
     LABELS_SHPFILE = cfg['datasets']['labels_shapefile']
     ZOOM_LEVEL = cfg['zoom_level']
+    ADD_TILES = cfg['random_tiles']['add_tiles']
+
+    if ADD_TILES == True:
+        NB_TILES = cfg['random_tiles']['tiles_number']
+        BORDER_SHPFILE = cfg['datasets']['border_shapefile']
+
 
     # Create an output directory in case it doesn't exist
     if not os.path.exists(OUTPUT_DIR):
@@ -109,14 +115,44 @@ if __name__ == "__main__":
         tiles_3857_all.append(tiles_3857)
     tiles_3857_aoi = gpd.GeoDataFrame(pd.concat(tiles_3857_all, ignore_index=True) )
 
-    # Remove unrelevant tiles and reorganized the data set:
-    logger.info('- Remove duplicated tiles and tiles that are not intersecting labels') 
-
-    # - Keep only tiles that are intersecting the label   
     labels_3857=labels_4326.to_crs(epsg=3857)
     labels_3857.rename(columns={'FID': 'id_aoi'},inplace=True)
-    # fct_misc.test_crs(tms.crs,labels_3857.crs)
+    # # fct_misc.test_crs(tms.crs,labels_3857.crs)
     tiles_aoi=gpd.sjoin(tiles_3857_aoi, labels_3857, how='inner')
+
+    # Add (or not) tiles not intersecting labels to improve training  
+    if ADD_TILES == True:
+        ## Convert datasets shapefiles into geojson format
+        labels = gpd.read_file(BORDER_SHPFILE)
+        border_4326 = labels.to_crs(epsg=4326)
+        # New gpd with only labels geometric info (minx, miny, maxx, maxy) 
+        logger.info('- Get geometric boundaries of the label(s)')  
+        boundary = border_4326.bounds
+
+        # Iterate on geometric coordinates to defined tiles for a given label at a given zoom level
+        # A gpd if created for each label and are then concatenate into a single gpd 
+        logger.info('- Compute extra tiles') 
+        tiles_3857_random_all = [] 
+        for row in range(len(boundary)):
+            coords = (boundary.iloc[row,0],boundary.iloc[row,1],boundary.iloc[row,2],boundary.iloc[row,3])      
+            tiles_3857_random = gpd.GeoDataFrame.from_features([tms.feature(x, projected=True) for x in tqdm(tms.tiles(*coords, zooms=[ZOOM_LEVEL]))]).sample(n=NB_TILES)  
+            tiles_3857_random.set_crs(epsg=3857, inplace=True)
+            tiles_3857_random_all.append(tiles_3857_random)
+        tiles_3857_random_aoi = gpd.GeoDataFrame(pd.concat(tiles_3857_random_all, ignore_index=True) )
+
+        # Remove unrelevant tiles and reorganized the data set:
+        logger.info('- Remove duplicated tiles and tiles that are not intersecting labels') 
+
+        # - Keep only tiles that are intersecting the label   
+        border_3857=border_4326.to_crs(epsg=3857)
+        border_3857.rename(columns={'FID': 'id_aoi'},inplace=True)
+        # fct_misc.test_crs(tms.crs,labels_3857.crs)
+        border_aoi=gpd.sjoin(tiles_3857_random_aoi, border_3857, how='inner')
+
+        # print(len(border_3857),len(tiles_3857_random_aoi)) 
+        tiles_aoi = pd.concat([tiles_aoi, border_aoi])
+        print(len(tiles_aoi)) 
+
 
     # - Remove duplicated tiles
     if nb_labels > 1:

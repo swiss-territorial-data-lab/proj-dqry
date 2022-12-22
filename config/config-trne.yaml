@@ -9,12 +9,12 @@
 prepare_data.py:  
   srs: "EPSG:2056"
   datasets:
-    labels_shapefile: ../input/input-trne/[Label_Shapefile] 
-    border_shapefile: ../input/input-trne/[Boder_Shapefile] 
+    labels_shapefile: ../input/input-trne/[Tile_Shapefile]
+    border_shapefile: ../input/input-trne/[Border_Shapefile]
   random_tiles:
     add_tiles: True
     tiles_number: 500
-  output_folder: ../output/output-trne/test_extra-tiles
+  output_folder: ../output/output-trne
   zoom_level: 16  #z, keep between 17 and 20  
 
 # 2-Request tiles according to the provided AOI and tiles parameters and split tiles into 3 datasets: train, test, validation
@@ -23,6 +23,7 @@ generate_tilesets.py:
   datasets:
     aoi_tiles_geojson: ../output/output-trne/tiles.geojson
     ground_truth_labels_geojson: ../output/output-trne/labels.geojson
+    add_tiles: True
     orthophotos_web_service:
       type: XYZ # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ
       url: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/2020/3857/{z}/{x}/{y}.jpeg

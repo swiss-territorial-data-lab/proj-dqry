@@ -68,7 +68,8 @@ make_predictions.py:
     detectron2_config_file: '../../config/detectron2_config_dqry.yaml' # path relative to the working_folder
     model_weights:
         pth_file: './logs/model_0004999.pth'
-  
+    score_thd: 0.05
+    
 # 5-Evaluate the quality of the prediction for the different datasets with metrics calculation
 assess_predictions.py:
   datasets:

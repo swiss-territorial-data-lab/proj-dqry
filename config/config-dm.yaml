@@ -13,5 +13,5 @@ plots.py:
   quarries_id: [Q1, Q2, ...]      # Provide a list of years used for detection
   plots: ['area-year'] 
   datasets:
-    detection: ../output/output-dm/quarry_times  # Final detection file, produced by prediction_filter.py 
+    detection: ../output/output-dm/quarry_times.geojson  # Final detection file, produced by prediction_filter.py 
   output_folder: ../output/output-dm/plots

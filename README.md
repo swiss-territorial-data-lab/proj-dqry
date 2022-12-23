@@ -13,11 +13,11 @@ _(to be improved)_
 
 ## Hardware and OS requirements
 
-The entire workflow has been run on with Ubuntu 20.04 OS on a GPU machine with 32 Gbits RAM. The main limitation is the number of tiles to proceed. The provided requirements stand for a zoom level equal to or below 16 and for an AoI corresponding to SWISSIMAGE acquisition footprints (about a third of Switzerland surface max). For higher zoom level and/or a larger AoI, the number of tiles to process might lead to memory saturation. In this case either a more powerful machine will be required, or the AoI will need to be subdivided in a smaller area and the final predictions will be merged at the end.
+The entire workflow has been run with Ubuntu 20.04 OS on a GPU machine with 32 Gbits RAM. The main limitation is the number of tiles to proceed. The provided requirements stand for a zoom level equal to or below 16 and for an AoI corresponding to SWISSIMAGE acquisition footprints (about a third of Switzerland surface max). For higher zoom level and/or a larger AoI, the number of tiles to process might lead to memory saturation. In this case either a more powerful machine will be required, or the AoI will need to be subdivided in a smaller area and the final predictions will be merged at the end.
 
 ## Python libraries
 
-The scripts have been developed by importing Python3 libraries that are listed in `requirements.in` and `requirements.txt`. Before starting to run scripts make sure the required Python libraries that have been used during the code development are installed, otherwise incompatibilities and errors could occur. A clean method to install Python libraries is to work with a virtual environment that will preserve the package dependencies.
+The scripts have been developed by importing Python3 libraries that are listed in `requirements.in` and `requirements.txt`. Before starting to run scripts make sure the required Python libraries that have been used during the code development are installed, otherwise incompatibilities and errors could occur. A clean method to install Python libraries is to work with a virtual environment preserving the package dependencies.
 
 * if not already done, create a dedicated Python virtual environment:
 	    
@@ -105,13 +105,6 @@ The training and detection of objects requires the use of `object-detector` scri
 
     $ python3 ../scripts/prepare_data.py [config_yaml]
     $ python3 [object-detector_path]/scripts/generate_tilesets.py [config_yaml]
-    $ cd [output_directory]
-    $ tar -cvf images-[image_size].tar COCO_{trn,val,tst}.json && \
-      tar -rvf images-[image_size].tar {trn,val,tst}-images-[image_size] && \
-      gzip < images-[image_size].tar > images-[image_size].tar.gz && \
-      rm all-images-[image_size].tar
-    $ cd -
-    $ cd [process_directory]
     $ python3 [object-detector_path]/scripts/train_model.py [config_yaml]
     $ python3 [object-detector_path]/scripts/make_prediction.py [config_yaml]
     $ python3 [object-detector_path]/scripts/assess_predictions.py [config_yaml]
@@ -175,15 +168,8 @@ In the config file verify (and custom) the paths.
 
 The prediction of objects requires the use of `object-detector` scripts. The workflow is processed in following way:
 
-    $ python3 prepare_data.py --config [yaml_config] --logger [logging_config]
+    $ python3 ../scripts/prepare_data.py [yaml_config]
     $ python3 [object-detector_path]/scripts/generate_tilesets.py [config_yaml]
-    $ cd [output_directory]
-    $ tar -cvf images-[image_size].tar COCO_{trn,val,tst}.json && \
-      tar -rvf images-[image_size].tar {trn,val,tst}-images-[image_size] && \
-      gzip < images-[image_size].tar > images-[image_size].tar.gz && \
-      rm all-images-[image_size].tar
-    $ cd -
-    $ cd [process_directory]
     $ python3 [object-detector_path]/scripts/make_prediction.py [config_yaml]
     $ python3 [object-detector_path]/scripts/assess_predictions.py [config_yaml]
 
@@ -198,7 +184,7 @@ _(to be completed)_
 
 The quarry prediction output as a polygons shapefile needs a filtering procedure to discard false detections and improve the aesthetic of the polygons (merge polygons belonging to a single quarry). This is performed the script `prediction_filter.py`:
 
-    $ python3 [object-detector_path]/post-processing/prediction-filter.py [config_yaml]
+    $ python3 ../post-processing/prediction-filter.py [config_yaml]
 
 The `prediction_filter.py` section of the _yaml_ configuration file is expected as follow:
 
@@ -224,6 +210,42 @@ The `prediction_filter.py` section of the _yaml_ configuration file is expected 
 -area: small area polygons can be discarded assuming a quarry has a minimal area. The default value is set to 1728 m2.
 
 -output: provide the path and name of the filtered polygons shapefile
+
+### Prediction monitoring
+
+- Config and input data
+
+    [config_yaml] = config-dm.yaml 
+
+- Working directory and paths
+
+By default the working directory is:
+
+    $ cd /proj-dqry/config/
+
+In the config file verify (and custom) the paths.
+
+-Run scripts
+
+    $ python3 ../scripts/plots.py [config_yaml]
+
+### Plots
+
+- Config and input data
+
+    [config_yaml] = config-dm.yaml 
+
+- Working directory and paths
+
+By default the working directory is:
+
+    $ cd /proj-dqry/config/
+
+In the config file verify (and custom) the paths.
+
+-Run scripts
+
+    $ python3 ../scripts/prediction-filter.py [config_yaml]
 
 ## Copyright and License
 

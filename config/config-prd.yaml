@@ -52,6 +52,7 @@ make_predictions.py:
     model_weights:
        # pth_file: '../../input/input-prd/logs/model_final.pth'
         pth_file: '../../input/input-prd/logs/model_0004999.pth'    #!!!Chose the optimized trained model, i.e. the one minimizing the validation loss curve 
+    score_thd: 0.05
 
 # 4-Evaluate the quality of the prediction with metrics calculation
 assess_predictions.py:
@@ -67,7 +68,7 @@ assess_predictions.py:
 prediction_filter.py:
   year: 2020
   input: ../output/output-prd/oth_predictions.geojson 
-  dem: /home/cherny/Documents/Projects/Quarries_TimeMachine/PROJ_DQRY/GIS/DEM/swiss-srtm.tif 
+  dem: ../input/input-prd/swiss-srtm.tif 
   elevation: 1155.0     #m, altitude threshold. Dectection above the threshold are discarded. Unlikely to observe quarry above and avoid flase detection of rock outcrop and snow . Default: 1155
   score: 0.95           #prediction score (reliability of the detection) provided by detectron2. The value can be varied from 0 to 1. Default: 0.96 
   distance: 8           #m, distance use as a buffer to merge close polygons (likely to belong to the same quarry) together. Default: 8 

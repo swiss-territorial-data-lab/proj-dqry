@@ -93,7 +93,7 @@ if __name__ == "__main__":
     logger.info(f"Merging overlapping polygons")
     gdf_all = gdf.geometry.unary_union
     gdf_all = gpd.GeoDataFrame(geometry=[gdf_all], crs='EPSG:2056')  
-    logger.info(f"Attribute unique id to quarry")
+    logger.info(f"Attribute unique object id")
     gdf_all = gdf_all.explode(index_parts = True).reset_index(drop=True)
     labels = gdf_all.index
 
@@ -105,8 +105,8 @@ if __name__ == "__main__":
     # Reorganized dataframe columns and save files 
     print()
     logger.info(f"Save files")
-    intersection.rename(columns={'index_right': 'id_quarry'}, inplace=True)
-    gdf_final = intersection[['id_quarry', 'id_feature', 'year','score', 'area', 'centroidx', 'centroidy', 'geometry']]
+    intersection.rename(columns={'index_right': 'id_object'}, inplace=True)
+    gdf_final = intersection[['id_object', 'id_feature', 'year','score', 'area', 'centroidx', 'centroidy', 'geometry']]
     feature_path = os.path.join(OUTPUT_DIR, 'quarry_times.geojson')
     gdf_final.to_file(feature_path, driver='GeoJSON') 
     written_files.append(feature_path) 

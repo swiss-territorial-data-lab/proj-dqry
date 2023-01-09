@@ -11,7 +11,7 @@ prepare_data.py:
   datasets:
     labels_shapefile: ../input/input-trne/[Label_Shapefile]
   output_folder: ../output/output-trne
-  zoom_level: 17  #z, keep between 17 and 20  
+  zoom_level: 17  #z, keep between 15 and 18  
 
 # 2-Request tiles according to the provided AOI and tiles parameters and split tiles into 3 datasets: train, test, validation
 generate_tilesets.py:
@@ -26,7 +26,7 @@ generate_tilesets.py:
     #  year: '2020'
     #  srs: "EPSG:3857"
   output_folder: ../output/output-trne
-  tile_size: 512 # per side, in pixels
+  tile_size: 256 # per side, in pixels
   overwrite: False
   n_jobs: 10
   COCO_metadata:

@@ -3,7 +3,7 @@
 Following the scripts and configuration files properties in `proj-dqry` are presented in detailed.
 
 
-# 1. `prepare_data.py`
+## 1. `prepare_data.py`
 
 The script `prepare_data.py` allows to prepare the input dataset to be processed by the `object-detector` workflow. The caracteristics of the tiles are defined by the script to set the tiles parameters for the tiling service request. _XYZ_ connector is used to fetch images with a Web Map Tiling Service _wmts_. _wmts_ allows to request images for a given year and provides base tile of 256 px that can be combined according to the given zoom level _z_. The zoom level will act on the tiles size (and tiles number) and on the pixel resolution (z15: 3.2 m/px, z16: 1.6 m/px, z17: 0.8 m/px and z18: 0.4 m/px). _x_ and _y_ coordinates of tiles on a grid are defined for the given AOI and the zoom level. This script can be used to prepare the tiles of the 'Training and evaluation' workflow and the 'Prediction' workflow. Therefore it works along the config files `config-trne.yaml` and `config-prd.yaml`.
 
@@ -47,7 +47,7 @@ The outputs are `tiles.geojson` files corresponding to tiles polygons obtained f
 
 
 
-# 2. `prediction_filter.py`
+## 2. `prediction_filter.py`
 
 The object detection output (**oth_predictions.geojson**) obtained via the `object-detector` scripts needs to be filtered to discard false detections and improve the aesthetic of the polygons (merge polygons belonging to a single quarry). The script `prediction_filter.py` allows to extract the prediction out of the detector _geojson_ based on a series of provided threshold values. It works along with the config file `config-prd.yaml` 
 
@@ -95,7 +95,7 @@ The script can be run by exectuting the following command:
    $ python3 <dir_path>/scripts/prediction-filter.py <dir_path>/config/config-prd.yaml
 
 
-# 3. `detection_monitoring.py`
+## 3. `detection_monitoring.py`
 
 The script `detection_monitoring.py` has been developped in order to identified and track an object between different year datasets. It has been developped in the scope of quarries monitoring and works along with the config file `config-dm.yaml`. 
 
@@ -122,7 +122,7 @@ The script can be run by exectuting the following command:
 
 The outputs are a _geojson_ and _csv_ (**quarry_time**) files saving predictions over years with their caracteristics (ID_object, ID_feature, year, score, area, geometry). 
 
-# 4. `plots.py`
+## 4. `plots.py`
 
 Script to draw basic plots is provided with `plots.py` and works along with the config file `config-dm.yaml` 
 

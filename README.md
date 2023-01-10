@@ -20,10 +20,10 @@ The scripts have been developed with Python 3.8 by importing libraries that are 
 
 The `proj-dqry` repository contains **scripts** to prepare and post-process the datasets: 
 
-    1. `prepare_data.py`  
-    2. `prediction_filter.py` 
-    3. `detection_monitoring.py`
-    4. `plots.py` 
+    1. prepare_data.py 
+    2. prediction_filter.py 
+    3. detection_monitoring.py
+    4. plots.py 
 
 The description of each script can be found [here](/scripts/README.md).  
 
@@ -31,10 +31,10 @@ In addition, the object detection itself is performed by tools developped in `ob
 
 Configurations files used to set the input parameters of the scripts and model are located in the **config** folder:
 
-    1. `config-trne.yaml` 
-    2. `config-prd.yaml` 
-    3. `config-dm.yaml` 
-    3. `detectron2_config_dqry.yaml`
+    1. config-trne.yaml
+    2. config-prd.yaml
+    3. config-dm.yaml
+    4. detectron2_config_dqry.yaml
 
  The detailed instruction to run the workflows can be find [here](/config/README.md).
 

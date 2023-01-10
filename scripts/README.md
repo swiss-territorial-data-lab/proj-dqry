@@ -39,6 +39,13 @@ for 'Training and evaluation' workflow and 'Prediction' respectively.
 
 The outputs are `tiles.geojson` files corresponding to tiles polygons obtained for the given AOI and `labels.geojson` corresponding the input labels polygons. 
 
+<p align="center">
+<img src="../images/z16_tiles_example.png?raw=true" width="100%">
+<br />
+<i>Example of tiles obtained during the 'Training and evaluation' at zoom level 16 and</i>
+</p>
+
+
 
 # 2. `prediction_filter.py`
 
@@ -49,9 +56,9 @@ The first step going on is a clustering of the centroids of every prediction pol
 The following images give an illustration of the extraction process showing the original and filtered predictions :
 
 <p align="center">
-<img src="../images/before.png?raw=true" width="40%">
+<img src="../images/prediction_filter_before.png?raw=true" width="40%">
 &nbsp;
-<img src="../images/after.png?raw=true" width="40%">
+<img src="../images/prediction_filter_after.png?raw=true" width="40%">
 <br />
 <i>Left : Detector predictions - Right : Threshold filtering results</i>
 </p>
@@ -134,3 +141,9 @@ The script can be run by exectuting the following command:
     $ python3  <dir_path>/scripts/prediction-filter.py <dir_path>/config/config-dm.yaml
 
 Plot(s) will be produced in _png_ format
+
+<p align="center">
+<img src="../images/quarry_area-year.png?raw=true" width="100%">
+<br />
+<i>Quarries area vs time.</i>
+</p>

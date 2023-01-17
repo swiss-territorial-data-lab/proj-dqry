@@ -36,6 +36,8 @@ import csv
 from tqdm import tqdm
 # import fct_misc
 import re
+import random
+random.seed(1)
 
 from shapely.geometry import box
 from shapely.geometry import Polygon

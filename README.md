@@ -1,11 +1,11 @@
 ## Overview
 
-This project provides a suite of scripts and configuration files to perform quarries automatic detections in georeferenced raster images with Deep Learning method. For the object detection, tools developped in `object-detector` git repository are used. 
+This project provides a suite of scripts and configuration files to perform quarries automatic detections in georeferenced raster images with Deep Learning method. For object detection, tools developed in `object-detector` git repository are used.
 
-The procedure is defined in tree disctinct worflows:
-* the 'Training and Evaluation' workflow allowing to train the detection model on a given image dataset (year) and evaluated to ground truth dataset reveiwed by domain experts. The detector is initially trained on _swissimage_ mosaic of 2020 (_swisstopo_) from using the _TLM_ data of _swisstopo_ as Ground Truth.
-* the 'Prediction' workflow performing inference detection of quarries in a given image dataset (year) thanks to the previously trained model.
-* the 'Detection monitoring' workflow tracking quarry evolution over years.
+The procedure is defined in three distinct workflows:
+*  'Training and Evaluation' workflow allows training the detection model on a given image dataset (year) and evaluated to ground truth dataset reviewed by domain experts. The detector is initially trained on _swissimage_ mosaic of 2020 (_swisstopo_) from using the _TLM_ data of _swisstopo_ as Ground Truth.
+*  'Prediction' workflow performing inference detection of quarries in a given image dataset (year) thanks to the previously trained model.
+*  'Detection monitoring' workflow tracking quarry evolution over years.
 
 
 ## Hardware and OS requirements
@@ -18,25 +18,25 @@ The scripts have been developed with Python 3.8 by importing libraries that are 
 
 ## Scripts and configuration files
 
-The `proj-dqry` repository contains **scripts** to prepare and post-process the datasets: 
+The `proj-dqry` repository contains **scripts** to prepare and post-process the datasets:
 
-    1. prepare_data.py 
-    2. prediction_filter.py 
-    3. detection_monitoring.py
-    4. plots.py 
+	1. prepare_data.py
+	2. prediction_filter.py
+	3. detection_monitoring.py
+	4. plots.py
 
 The description of each script can be found [here](/scripts/README.md).  
 
-In addition, the object detection itself is performed by tools developped in `object-detector` git repository. The description of the scripts used are presented here: https://github.com/swiss-territorial-data-lab/object-detector
+In addition, the object detection itself is performed by tools developed in `object-detector` git repository. The description of the scripts used are presented here: https://github.com/swiss-territorial-data-lab/object-detector
 
 Configurations files used to set the input parameters of the scripts and model are located in the **config** folder:
 
-    1. config-trne.yaml
-    2. config-prd.yaml
-    3. config-dm.yaml
-    4. detectron2_config_dqry.yaml
+	1. config-trne.yaml
+	2. config-prd.yaml
+	3. config-dm.yaml
+	4. detectron2_config_dqry.yaml
 
- The detailed instruction to run the workflows can be find [here](/config/README.md).
+ The detailed instructions to run the workflows can be found [here](/config/README.md).
 
 ## Copyright and License
  

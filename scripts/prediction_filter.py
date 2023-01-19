@@ -72,12 +72,14 @@ if __name__ == "__main__":
     ELEVATION = cfg['elevation']
     DISTANCE = cfg['distance']
     OUTPUT_DIR = cfg['output_folder']
+    TEST = cfg['test_mode'] 
 
     written_files = [] 
 
     # Convert input detection to a geo dataframe 
     input = gpd.read_file(INPUT)
     input = input.to_crs(2056)
+    print('Total input = ', len(input))
 
     # Centroid of every prediction polygon
     centroids = gpd.GeoDataFrame()
@@ -99,7 +101,7 @@ if __name__ == "__main__":
     # Filter dataframe by score value
     input = input[input['score'] > SCORE]
     sc = len(input)
-    print(str(total - sc) + " predictions removed by score threshold")
+    print(str(total - sc) + " predictions removed by score threshold: " + str(SCORE))
     geo_input = gpd.GeoDataFrame(input)
 
     # Create empty data frame
@@ -112,22 +114,26 @@ if __name__ == "__main__":
     geo_merge = geo_merge.buffer( -DISTANCE, resolution = 2 )
 
     td = len(geo_merge)
-    print(str(sc - td) + " difference to clustered predictions after union")
+    print(str(sc - td) + " difference to clustered predictions after union (distance " + str(DISTANCE) + ')')
 
     # Discard polygons with area under the threshold 
     geo_merge = geo_merge[geo_merge.area > AREA]
     ta = len(geo_merge)
-    print(str(td - ta) + " predictions removed by area threshold")
+    print(str(td - ta) + " predictions removed by area threshold: " + str(AREA))
 
-    # Discard polygons detected above the threshold elevalation 
+    # Discard polygons detected above the threshold elevalation and 0 m 
     r = rasterio.open(DEM)
     row, col = r.index(geo_merge.centroid.x, geo_merge.centroid.y)
     values = r.read(1)[row,col]
     geo_merge.elev = values
     geo_merge = geo_merge[geo_merge.elev < ELEVATION]
+    row, col = r.index(geo_merge.centroid.x, geo_merge.centroid.y)
+    values = r.read(1)[row,col]
+    geo_merge.elev = values
+    geo_merge = geo_merge[geo_merge.elev != 0]
     te = len(geo_merge)
-    print(str(ta - te) + " predictions removed by elevation threshold")
-    print(str(te) + " predictions left")
+    print(str(ta - te) + " predictions removed by elevation threshold: " + str(ELEVATION))
+    print("Predictions left = " + str(te))
 
     # Preparation of a geo df 
     data = {'id': geo_merge.index,'area': geo_merge.area, 'centroid_x': geo_merge.centroid.x, 'centroid_y': geo_merge.centroid.y, 'geometry': geo_merge}
@@ -137,30 +143,20 @@ if __name__ == "__main__":
     intersection = gpd.sjoin(geo_tmp, input, how='inner')
     intersection['id'] = intersection.index
     score_final=intersection.groupby(['id']).mean()
-
     # Formatting the final geo df 
     data = {'id_feature': geo_merge.index,'score': score_final['score'] , 'area': geo_merge.area, 'centroid_x': geo_merge.centroid.x, 'centroid_y': geo_merge.centroid.y, 'geometry': geo_merge}
     geo_final = gpd.GeoDataFrame(data, crs=input.crs)
+    print(geo_final)
 
-    feature = 'oth_prediction_filter_year-{year}.geojson'
-    feature = feature.replace('{year}', str(YEAR))
+    # Format the ooutput name of the filtered prediction  
+    feature = 'oth_prediction_filter_year-{year}_score-{score}_elevation-{elevation}_distance-{distance}_area-{area}.geojson'
+    feature = feature.replace('{score}', str(SCORE)).replace('0.', '0dot') \
+        .replace('{year}', str(int(YEAR)))\
+        .replace('{area}', str(int(AREA)))\
+        .replace('{elevation}', str(int(ELEVATION))) \
+        .replace('{distance}', str(int(DISTANCE)))
     OUTPUT = os.path.join(OUTPUT_DIR, feature)
     geo_final.to_file(OUTPUT, driver='GeoJSON')
-    written_files.append(OUTPUT)  
-
-    # Save filter threshold values to log file 
-    s = 'year = ' + str(YEAR) + '\n'
-    s += 'score = ' + str(SCORE) + '\n'
-    s += 'area = ' + str(int(AREA)) + '\n'
-    s += 'elevation = ' + str(int(ELEVATION)) + '\n'
-    s += 'distance = ' + str(int(DISTANCE)) + '\n'
-
-    feature = 'filters.log' 
-    OUTPUT = os.path.join(OUTPUT_DIR, feature) 
-    f = open(OUTPUT, 'w') 
-    f.write(s)
-    f.close()
-    written_files.append(OUTPUT)  
 
     print()
     logger.info("The following files were written. Let's check them out!")

@@ -72,7 +72,7 @@ if __name__ == "__main__":
 
     # Concatenate all the dataframe obtained for a given year to a single dataframe
     print()
-    logger.info(f"Concaneting years dataframes")
+    logger.info(f"Concaneting different years dataframes:")
     for YEAR in YEARS:      
         if YEAR == YEARS[0]: 
             DETECTION = cfg['datasets']['detection']
@@ -106,7 +106,7 @@ if __name__ == "__main__":
     print()
     logger.info(f"Save files")
     intersection.rename(columns={'index_right': 'id_object'}, inplace=True)
-    gdf_final = intersection[['id_object', 'id_feature', 'year','score', 'area', 'centroidx', 'centroidy', 'geometry']]
+    gdf_final = intersection[['id_object', 'id_feature', 'year', 'score', 'area', 'centroid_x', 'centroid_y', 'geometry']]
     feature_path = os.path.join(OUTPUT_DIR, 'quarry_times.geojson')
     gdf_final.to_file(feature_path, driver='GeoJSON') 
     written_files.append(feature_path) 

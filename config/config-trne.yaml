@@ -11,7 +11,7 @@ prepare_data.py:
   datasets:
     labels_shapefile: ../input/input-trne/[Label_Shapefile]
   output_folder: ../output/output-trne
-  zoom_level: 17  #z, keep between 15 and 18  
+  zoom_level: 16  #z, keep between 15 and 18  
 
 # 2-Request tiles according to the provided AOI and tiles parameters and split tiles into 3 datasets: train, test, validation
 generate_tilesets.py:

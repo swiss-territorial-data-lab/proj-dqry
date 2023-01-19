@@ -3,15 +3,17 @@
 ######################################################################
 # Refer to the README.md provided for more details
 
+# Track object in different datasets over years
 detection_monitoring.py:  
-  years: [YEAR1, YEAR2, ...]      # Provide a list of years used for detection
+  years: [YEAR1, YEAR2, YEAR3,...]        # Provide a list of years used for detection
   datasets:
-    detection: ../output/output-prd/oth_prediction_filter_year-{year}.geojson  # Final detection file, produced by prediction_filter.py 
+    detection: ../output/output-prd/'oth_prediction_filter_year-{year}_score-[SCORE]_elevation-[elevation]_distance-[distance]_area-[area].geojson'  # Final detection file, produced by prediction_filter.py !!! Change value in squared bracket 
   output_folder: ../output/output-dm
 
+# Plots
 plots.py:  
-  quarries_id: [Q1, Q2, ...]      # Provide a list of years used for detection
+  object_id: [ID_OBJECT1, ID_OBJECT2, ID_OBJECT3,...]      # Provide a list of id_object defined by detection_monitoring.py
   plots: ['area-year'] 
   datasets:
-    detection: ../output/output-dm/quarry_times.geojson  # Final detection file, produced by prediction_filter.py 
+    detection: ../output/output-dm/quarry_times.geojson  # Object tracking file, produced by detection_monitoring.py
   output_folder: ../output/output-dm/plots

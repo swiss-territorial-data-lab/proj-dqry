@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
     logger.info('Creating tiles for the Area of Interest (AOI)...')   
     
-    # Grid 
+    # Grid definition
     tms = morecantile.tms.get("WebMercatorQuad")    # epsg:3857   
 
     # New gpd with only labels geometric info (minx, miny, maxx, maxy) 
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     boundary = labels_4326.bounds
 
     # Iterate on geometric coordinates to defined tiles for a given label at a given zoom level
-    # A gpd if created for each label and are then concatenate into a single gpd 
+    # A gpd is created for each label and are then concatenate into a single gpd 
     logger.info('- Compute tiles for each label(s) geometry') 
     tiles_3857_all = [] 
     for row in range(len(boundary)):

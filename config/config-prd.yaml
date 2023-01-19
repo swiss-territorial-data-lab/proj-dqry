@@ -7,23 +7,20 @@
 
 # 1-Prepare the tiles geometry according to the AOI and zoom level
 prepare_data.py: 
-  srs: "EPSG:3857"
+  srs: "EPSG:2056"                       # Projection of the input file
   datasets:
     labels_shapefile: ../input/input-prd/[AOI_Shapefile]
   output_folder: ../output/output-prd
-  zoom_level: 17  #z, keep between 15 and 18  
+  zoom_level: 16    #z, keep between 15 and 18  
 
 # 2-Request tiles according to the provided AOI and tiles parameters
 generate_tilesets.py:
-  debug_mode: True
+  debug_mode: True             #reduced amount of tiles
   datasets:
     aoi_tiles_geojson: ../output/output-prd/tiles.geojson
     orthophotos_web_service:
       type: XYZ # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ
       url: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/2020/3857/{z}/{x}/{y}.jpeg
-    #  layers: ch.swisstopo.swissimage
-    #  year: '2020'
-    #  srs: "EPSG:3857"
   output_folder: ../output/output-prd
   tile_size: 256 # per side, in pixels
   overwrite: True
@@ -51,7 +48,7 @@ make_predictions.py:
     detectron2_config_file: '../../config/detectron2_config_dqry.yaml' # path relative to the working_folder
     model_weights:
         pth_file: '../../input/input-prd/logs/model_0004999.pth'    #!!!Chose the optimized trained model, i.e. the one minimizing the validation loss curve 
-    score_thd: 0.05
+    score_thd: 0.05            #discard prediction scores below threshold 
 
 # 4-Evaluate the quality of the prediction with metrics calculation
 assess_predictions.py:
@@ -68,8 +65,8 @@ prediction_filter.py:
   year: 2020
   input: ../output/output-prd/oth_predictions.geojson 
   dem: ../input/input-prd/swiss-srtm.tif 
-  elevation: 1155.0     #m, altitude threshold. Dectection above the threshold are discarded. Unlikely to observe quarry above and avoid flase detection of rock outcrop and snow . Default: 1155
-  score: 0.95           #prediction score (reliability of the detection) provided by detectron2. The value can be varied from 0 to 1. Default: 0.96 
-  distance: 8           #m, distance use as a buffer to merge close polygons (likely to belong to the same quarry) together. Default: 8 
-  area: 1728.0          #m2, area threshold under which polygons are discarded (unlikely to observe quarry sites under this surface). Default: 1728.0
-  output_folder: ../output/output-prd/
+  elevation: 1200.0     #m, altitude threshold. Dectection above the threshold are discarded. Unlikely to observe quarry above and avoid flase detection of rock outcrop and snow . Default: 1200
+  score: 0.95           #prediction score (reliability of the detection) provided by detectron2. The value can be varied from 0 to 1. Default: 0.95 
+  distance: 10          #m, distance use as a buffer to merge close polygons (likely to belong to the same quarry) together. Default: 10 
+  area: 2000.0          #m2, area threshold under which polygons are discarded (unlikely to observe quarry sites under this surface). Default: 2000.0
+  output_folder: ../output/output-prd

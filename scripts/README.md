@@ -51,7 +51,7 @@ The outputs are `tiles.geojson` files corresponding to tiles polygons obtained f
 
 The object detection output (**oth_predictions.geojson**) obtained via the `object-detector` scripts needs to be filtered to discard false detections and improve the aesthetic of the polygons (merge polygons belonging to a single quarry). The script `prediction_filter.py` allows to extract the prediction out of the detector _geojson_ based on a series of provided threshold values. It works along with the config file `config-prd.yaml` 
 
-The first step going on is a clustering of the centroids of every prediction polygon. This is used as a way to maintain the scores for a further unary union of the polygons, that then uses the cluster value assigned as an aggregation method. This allows the removal of lower scores in a smart way, _i.e._, by maintaining the integrity of the final polygon. Be careful to keep the threshold score value low while running `make_prediction.py` to obtain better results. Then, predictions are filtered based on the score. Polygons that are not overlapping but are close in position are merged together. Based on the polygons' area value, the smaller to the threshold value is discarded. Following, with the input of a Digital Elevation Model, an elevation thresholding is processed (predictions at level 0 are also discarded). Finally, an averaged predicted score is computed again taking into account the merged polygons scores. The results of the filtering/merging process are saved in a _geojson_ file.
+First, with the input of a Digital Elevation Model, an elevation threshold is applied above what prediction are discarded (predictions at altitude 0 are also discarded because they are located outside of DEM limits). Following, an alogrithm (KMeans Unsupervised Learning) is applied to cluster polygons according to their centroids. This is used as a way to maintain the scores for a further unary union of the polygons, that then uses the cluster value assigned as an aggregation method. This allows the removal of lower scores in a smart way, _i.e._, by maintaining the integrity of the final polygon. Be careful to keep the threshold score value low while running `make_prediction.py` to obtain better results. Then, predictions are filtered based on the score. Polygons that are not overlapping but are close in position are merged together. Based on the polygons' area value, the smaller to the threshold value is discarded. Finally, an averaged predicted score is computed again taking into account the merged polygons scores. The results of the filtering/merging process are saved in a _geojson_ file.
 
 The following images give an illustration of the extraction process showing the original and filtered predictions :
 
@@ -87,7 +87,7 @@ Input and output paths of the config file must be adapted if necessary. The scri
 
 -**score**: each polygon comes with a confidence score given by the prediction algorithm. Polygons with low scores can be discarded. By default the value is set to 0.95.
 
--**distance**: two polygons that are close to each other can be considered to belong to the same quarry. Those polygons can be merged into a single one. By default the buffer value is set to 10 m.
+-**distance**: two polygons that are close to each other can be considered to belong to the same quarry. Those polygons can be merged into a single one. By default the buffer value is set to 8 m.
 
 -**area**: small area polygons can be discarded assuming a quarry has a minimal area. The default value is set to 2000 m2.
 
@@ -119,7 +119,7 @@ The `detection_monitoring.py` section of the _yaml_ configuration file is expect
         detection: ../output/output-prd/'oth_prediction_filter_year-{year}_score-[SCORE]_elevation-[elevation]_distance-[distance]_area-[area].geojson'  
     output_folder: ../output/output-dm
   
-Input and output paths of the config file must be adapted if necessary. The script takes as input a _geojson_ file. In the quarry monitoring case, **oth_prediction_filter_year-{year}_[filters_list] .geojson** files produced with the script `prediction_filter.py` of the `object-detector` for different years are used. The list of years _YEARx_ required for the object monitoring must be specified.
+Input and output paths of the config file must be adapted if necessary. The script takes as input a _geojson_ file. In the quarry monitoring case, **oth_prediction_filter_year-{year}_[filters_list].geojson** files produced with the script `prediction_filter.py` of the `object-detector` for different years are used. The list of years _YEARx_ required for the object monitoring must be specified.
 
 The script can be run by executing the following command:
 

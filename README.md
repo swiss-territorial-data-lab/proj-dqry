@@ -3,9 +3,9 @@
 This project provides a suite of scripts and configuration files to perform quarries automatic detections in georeferenced raster images with Deep Learning method. For object detection, tools developed in `object-detector` git repository are used.
 
 The procedure is defined in three distinct workflows:
-*  'Training and Evaluation' workflow allows training the detection model on a given image dataset (year) and evaluated to ground truth dataset reviewed by domain experts. The detector is initially trained on _swissimage_ mosaic of 2020 (_swisstopo_) from using the _TLM_ data of _swisstopo_ as Ground Truth.
-*  'Prediction' workflow performing inference detection of quarries in a given image dataset (year) thanks to the previously trained model.
-*  'Detection monitoring' workflow tracking quarry evolution over years.
+* **Training and Evaluation** workflow allows training the detection model on a given image dataset (year) and evaluated to ground truth dataset reviewed by domain experts. The detector is initially trained on _swissimage_ mosaic of 2020 (_swisstopo_) from using the _TLM_ data of _swisstopo_ as Ground Truth.
+* **Prediction** workflow performing inference detection of quarries in a given image dataset (year) thanks to the previously trained model.
+* **Detection monitoring** workflow tracking quarry evolution over years.
 
 
 ## Hardware and OS requirements

@@ -3,9 +3,9 @@
 This document provides a detailed description of the procedure to run `proj-dqry` and perform quarries automatic detections. For object detection, tools developed in `object-detector` git repository are used. The description of the scripts are presented here: https://github.com/swiss-territorial-data-lab/object-detector
 
 The procedure is defined in three distinct workflows:
-*  'Training and Evaluation' workflow allows to train the detection model on a given image dataset (year) and evaluate to ground truth dataset reviewed by domain experts. The detector is initially trained on _swissimage_ mosaic of 2020 (_swisstopo_) from using the _TLM_ data of _swisstopo_ as Ground Truth.
-*  'Prediction' workflow performing inference detection of quarries in a given image dataset (year) thanks to the previously trained model.
-*  'Detection monitoring' workflow tracking quarry evolution over years.
+1. **Training and Evaluation** workflow allows to train the detection model on a given image dataset (year) and evaluate to ground truth dataset reviewed by domain experts. The detector is initially trained on _swissimage_ mosaic of 2020 (_swisstopo_) from using the _TLM_ data of _swisstopo_ as Ground Truth.
+2. **Prediction** workflow performing inference detection of quarries in a given image dataset (year) thanks to the previously trained model.
+3. **Detection monitoring** workflow tracking quarry evolution over years.
 
 Configuration files are used to set the variables parameters. They must be adapted if required. In **config** folder config files relative to `proj-dqry` and `object-detector` are present, one for each workflow type:
 

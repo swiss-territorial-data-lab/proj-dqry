@@ -149,7 +149,7 @@ The script can be run by executing the following command:
 Plot(s) will be produced in _png_ format
 
 <p align="center">
-<img src="../images/quarry_area-year.png?raw=true" width="100%">
+<img src="../images/quarries_area-year.png?raw=true" width="100%">
 <br />
 <i>Quarries area vs time.</i>
 </p>

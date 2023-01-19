@@ -350,6 +350,7 @@ Following the end-to-end workflow can be run by issuing the following list of co
     $ cd proj-dqry/config/
 
 **Training and evaluation**: copy the required input files (labels shapefile) to **input-trne**
+
     $ python3 ../scripts/prepare_data.py config-trne.yaml
     $ python3 ../../scripts/generate_tilesets.py config-trne.yaml
     $ python3 ../../scripts/train_model.py config-trne.yaml
@@ -357,6 +358,7 @@ Following the end-to-end workflow can be run by issuing the following list of co
     $ python3 ../../scripts/assess_predictions.py config-trne.yaml
 
 **Predictions**: copy the required input files (AOI shapefile and trained model) to **input-prd**
+
     $ python3 ../scripts/prepare_data.py config-prd.yaml
     $ python3 ../../scripts/generate_tilesets.py config-prd.yaml
     $ python3 ../../scripts/make_prediction.py config-prd.yaml
@@ -364,5 +366,6 @@ Following the end-to-end workflow can be run by issuing the following list of co
     $ python3 ../scripts/prediction-filter.py config-prd.yaml 
 
 **Object Monitoring**: copy the required input files (labels shapefile) to **input-dm**
+
     $ python3 ../scripts/detection_monitoring.py config-dm.yaml
     $ python3 ../scripts/plots.py config-dm.yaml

@@ -72,14 +72,27 @@ if __name__ == "__main__":
     ELEVATION = cfg['elevation']
     DISTANCE = cfg['distance']
     OUTPUT_DIR = cfg['output_folder']
-    TEST = cfg['test_mode'] 
 
     written_files = [] 
 
     # Convert input detection to a geo dataframe 
     input = gpd.read_file(INPUT)
     input = input.to_crs(2056)
-    print('Total input = ', len(input))
+    total = len(input)
+    print('Total input = ', total)
+
+    # Discard polygons detected above the threshold elevalation and 0 m 
+    r = rasterio.open(DEM)
+    row, col = r.index(input.centroid.x, input.centroid.y)
+    values = r.read(1)[row,col]
+    input.elev = values
+    input = input[input.elev < ELEVATION]
+    row, col = r.index(input.centroid.x, input.centroid.y)
+    values = r.read(1)[row,col]
+    input.elev = values
+    geo_merge = input[input.elev != 0]
+    te = len(geo_merge)
+    print(str(total - te) + " predictions removed by elevation threshold: " + str(ELEVATION))
 
     # Centroid of every prediction polygon
     centroids = gpd.GeoDataFrame()
@@ -121,20 +134,6 @@ if __name__ == "__main__":
     ta = len(geo_merge)
     print(str(td - ta) + " predictions removed by area threshold: " + str(AREA))
 
-    # Discard polygons detected above the threshold elevalation and 0 m 
-    r = rasterio.open(DEM)
-    row, col = r.index(geo_merge.centroid.x, geo_merge.centroid.y)
-    values = r.read(1)[row,col]
-    geo_merge.elev = values
-    geo_merge = geo_merge[geo_merge.elev < ELEVATION]
-    row, col = r.index(geo_merge.centroid.x, geo_merge.centroid.y)
-    values = r.read(1)[row,col]
-    geo_merge.elev = values
-    geo_merge = geo_merge[geo_merge.elev != 0]
-    te = len(geo_merge)
-    print(str(ta - te) + " predictions removed by elevation threshold: " + str(ELEVATION))
-    print("Predictions left = " + str(te))
-
     # Preparation of a geo df 
     data = {'id': geo_merge.index,'area': geo_merge.area, 'centroid_x': geo_merge.centroid.x, 'centroid_y': geo_merge.centroid.y, 'geometry': geo_merge}
     geo_tmp = gpd.GeoDataFrame(data, crs=input.crs)
@@ -146,7 +145,7 @@ if __name__ == "__main__":
     # Formatting the final geo df 
     data = {'id_feature': geo_merge.index,'score': score_final['score'] , 'area': geo_merge.area, 'centroid_x': geo_merge.centroid.x, 'centroid_y': geo_merge.centroid.y, 'geometry': geo_merge}
     geo_final = gpd.GeoDataFrame(data, crs=input.crs)
-    print(geo_final)
+    print(str(len(geo_final)) + " prediction remaining")
 
     # Format the ooutput name of the filtered prediction  
     feature = 'oth_prediction_filter_year-{year}_score-{score}_elevation-{elevation}_distance-{distance}_area-{area}.geojson'

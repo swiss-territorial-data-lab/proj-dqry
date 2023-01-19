@@ -7,7 +7,7 @@
 detection_monitoring.py:  
   years: [YEAR1, YEAR2, YEAR3,...]        # Provide a list of years used for detection
   datasets:
-    detection: ../output/output-prd/'oth_prediction_filter_year-{year}_score-[SCORE]_elevation-[elevation]_distance-[distance]_area-[area].geojson'  # Final detection file, produced by prediction_filter.py !!! Change value in squared bracket 
+    detection: ../input/input-dm/oth_prediction_filter_year-{year}_score-[SCORE]_elevation-[elevation]_distance-[distance]_area-[area].geojson  # Final detection file, produced by prediction_filter.py !!! Change value in squared bracket 
   output_folder: ../output/output-dm
 
 # Plots

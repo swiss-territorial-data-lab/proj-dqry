@@ -11,7 +11,7 @@ prepare_data.py:
   datasets:
     labels_shapefile: ../input/input-prd/[AOI_Shapefile]
   random_tiles:
-    add_tiles: False                                         # keep false 
+    add_tiles: False                                         # keep false for prediction workflow
   output_folder: ../output/output-prd
   zoom_level: 16  #z, keep between 17 and 20  
 
@@ -54,7 +54,7 @@ make_predictions.py:
   detectron2_config_file: '../../config/detectron2_config_dqry.yaml' # path relative to the working_folder
   model_weights:
     # pth_file: '../../input/input-prd/logs/model_final.pth'
-    pth_file: '../../input/input-prd/z16/logs/model_0001999.pth'    #!!!Chose the optimized trained model, i.e. the one minimizing the validation loss curve 
+    pth_file: '../../input/input-prd/logs/model_0001999.pth'    #!!!Chose the optimized trained model, i.e. the one minimizing the validation loss curve 
   score_thd: 0.05
 
 # 4-Evaluate the quality of the prediction with metrics calculation

@@ -66,15 +66,15 @@ if __name__ == "__main__":
     input = gpd.read_file(INPUT)
     input = input.to_crs(2056)
     total = len(input)
-
+    
     # Centroid of every prediction polygon
     centroids = gpd.GeoDataFrame()
     centroids.geometry = input.representative_point()
-
+    
     # KMeans Unsupervised Learning
     centroids = pd.DataFrame({'x': centroids.geometry.x, 'y': centroids.geometry.y})
     k = int( ( len(input) / 3 ) + 1 )
-    cluster = KMeans(n_clusters=k, algorithm = 'auto', random_state = 1)
+    cluster = KMeans(n_clusters=k, algorithm = 'elkan', random_state = 1)
     model = cluster.fit(centroids)
     labels = model.predict(centroids)
     print("KMeans algorithm computed with k = " + str(k))
@@ -83,11 +83,13 @@ if __name__ == "__main__":
     input['cluster'] = labels
     input = input.dissolve(by = 'cluster', aggfunc = 'max')
     total = len(input)
-
+    
     # filter by score
     input = input[input['score'] > SCORE]
     sc = len(input)
     print(str(total - sc) + " predictions removed by score threshold")
+
+    geo_input = gpd.GeoDataFrame(input)
 
     # Create empty data frame
     geo_merge = gpd.GeoDataFrame()
@@ -115,8 +117,23 @@ if __name__ == "__main__":
 
     print(str(te) + " predictions left")
 
+    # Preparation of a geo df 
+    data = {'id': geo_merge.index,'area': geo_merge.area, 'centroid_x': geo_merge.centroid.x, 'centroid_y': geo_merge.centroid.y, 'geometry': geo_merge}
+    geo_tmp = gpd.GeoDataFrame(data, crs=input.crs)
+
+    # Get the averaged prediction score of the merge polygons  
+    intersection = gpd.sjoin(geo_tmp, input, how='inner')
+    intersection['id'] = intersection.index
+    score_final=intersection.groupby(['id']).mean()
+
+    # Formatting the final geo df 
+    data = {'id_feature': geo_merge.index,'score': score_final['score'] , 'area': geo_merge.area, 'centroid_x': geo_merge.centroid.x, 'centroid_y': geo_merge.centroid.y, 'geometry': geo_merge}
+    geo_final = gpd.GeoDataFrame(data, crs=input.crs)
+
     OUTPUT_completed = OUTPUT.replace('{score}', str(SCORE)).replace('0.', '0dot') \
          .replace('{area}', str(int(AREA)))\
          .replace('{elevation}', str(int(ELEVATION))) \
          .replace('{distance}', str(int(DISTANCE)))
-    geo_merge.to_file(OUTPUT_completed, driver='GeoJSON')
+    geo_final.to_file(OUTPUT_completed, driver='GeoJSON')
+
+    print('done')

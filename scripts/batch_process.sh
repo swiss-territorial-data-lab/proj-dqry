@@ -1,6 +1,6 @@
 echo 'Run batch processes to make quarries prediction over several years'
 
-for year in 2009 2020
+for year in YEAR1 YEAR2 YEAR3 ...       #add the years to be processed 
 do
     echo ' '
     echo '-----------'
@@ -21,5 +21,5 @@ do
     python3 ../../object-detector/scripts/assess_predictions.py config-prd_$year.yaml
     echo ' '
     echo 'prediction_filter.py'
-    python3 ../post-processing/prediction_filter.py config-prd_$year.yaml
+    python3 ../scripts/prediction_filter.py config-prd_$year.yaml
 done

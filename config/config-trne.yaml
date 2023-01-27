@@ -9,13 +9,13 @@
 prepare_data.py:  
   srs: "EPSG:2056"
   datasets:
-    labels_shapefile: ../input/input-trne/[Tile_Shapefile]
-    border_shapefile: ../input/input-trne/[Border_Shapefile] #AoI for which additional tiles can be picked 
-  random_tiles:
+    labels_shapefile: ../input/input-trne/tlm-hr-trn-topo.shp
+    border_shapefile: ../input/input-trne/switzerland_border.shp #AoI for which additional tiles can be picked 
+  empty_tiles:
     add_tiles: True                                        # True or False. Possibility to add random empty tiles to the training dataset
-    tiles_number: 500                                      # The number of tiles indicated can differ from the actual number of tiles added (can be less)  
-  output_folder: ../output/output-trne
-  zoom_level: 16  #z, keep between 17 and 20  
+    tiles_number: 30                                      # The number of tiles indicated can differ from the actual number of tiles added (can be less)  
+  output_folder: ../output/output-trne/tiles-test
+  zoom_level: 14  #z, keep between 17 and 20  
 
 # 2-Request tiles according to the provided AOI and tiles parameters and split tiles into 3 datasets: train, test, validation
 generate_tilesets.py:

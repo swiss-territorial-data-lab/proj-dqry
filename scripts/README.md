@@ -49,7 +49,7 @@ The outputs are `tiles.geojson` files corresponding to tiles polygons obtained f
 
 ## 2. `prediction_filter.py`
 
-The object detection output (**oth_predictions.geojson**) obtained via the `object-detector` scripts needs to be filtered to discard false detections and improve the aesthetic of the polygons (merge polygons belonging to a single quarry). The script `prediction_filter.py` allows to extract the prediction out of the detector _geojson_ based on a series of provided threshold values. It works along with the config file `config-prd.yaml` 
+The object detection output (`oth_predictions_at_0dot*_threshold.gpkg`) obtained via the `object-detector` scripts needs to be filtered to discard false detections and improve the aesthetic of the polygons (merge polygons belonging to a single quarry). The script `prediction_filter.py` allows to extract the prediction out of the detection file _gpkg_ based on a series of provided threshold values. It works along with the config file `config-prd.yaml` 
 
 First, with the input of a Digital Elevation Model, an elevation threshold is applied above what prediction are discarded (predictions at altitude 0 are also discarded because they are located outside of DEM limits). Following, an alogrithm (KMeans Unsupervised Learning) is applied to cluster polygons according to their centroids. This is used as a way to maintain the scores for a further unary union of the polygons, that then uses the cluster value assigned as an aggregation method. This allows the removal of lower scores in a smart way, _i.e._, by maintaining the integrity of the final polygon. Be careful to keep the threshold score value low while running `make_prediction.py` to obtain better results. Then, predictions are filtered based on the score. Polygons that are not overlapping but are close in position are merged together. Based on the polygons' area value, the smaller to the threshold value is discarded. Finally, an averaged predicted score is computed again taking into account the merged polygons scores. The results of the filtering/merging process are saved in a _geojson_ file.
 
@@ -65,12 +65,12 @@ The following images give an illustration of the extraction process showing the 
 
 The values of the filtering thresholds are usually obtained by analysing the predictions output.
 
-Input and output paths of the config file must be adapted if necessary. The script expects as input a prediction _geojson_ (`oth_prediction.geojson` obtained with `assess_prediction.py` of `object-detector`) file with all geometries containing a _score_ value normalised in _[0,1]_. The `prediction_filter.py` section of the _yaml_ configuration file is expected as follow:
+Input and output paths of the config file must be adapted if necessary. The script expects as input a detection file (`oth_predictions_at_0dot*_threshold.gpkg` obtained with `make_prediction.py` of `object-detector`) file with all geometries containing a _score_ value normalised in _[0,1]_. The `prediction_filter.py` section of the _yaml_ configuration file is expected as follow:
 
     prediction_filter.py:
         year:[YEAR] 
-        input: ../output/output-prd/oth_predictions.geojson 
-        dem: ../input/DEM/swiss-srtm.tif 
+        input: ../output/output-prd/oth_predictions_at_0dot*_threshold.gpkg
+        dem: ../input/input-prd/[DEM.tif]  
         elevation: [THRESHOLD VALUE]   
         score: [THRESHOLD VALUE]
         distance: [THRESHOLD VALUE] 
@@ -79,9 +79,9 @@ Input and output paths of the config file must be adapted if necessary. The scri
 
 -**year**: year of the dataset used as input for filtering
 
--**input**: indicate path to the input geojson file that needs to be filtered, _i.e._ `oth_predictions.geojson`
+-**input**: indicate path to the input file that needs to be filtered, _i.e._ `oth_predictions_at_0dot*_threshold.gpkg`
 
--**dem**: indicate the path to the DEM of Switzerland. A SRTM derived product is used and can be found in the STDL kDrive. A threshold elevation is used to discard detection above the given value.
+-**dem**: indicate the path to a DEM of Switzerland. SRTM derived product is used and can be found in the STDL kDrive (`switzerland_dem_EPSG:2056.tif`). A threshold elevation is used to discard detection above the given value.
 
 -**elevation**: altitude above which predictions are discarded. Indeed 1st tests have shown numerous false detection due to snow cover area (reflectance value close to bedrock reflectance) or mountain bedrock exposure that are mainly observed in altitude.. By default the threshold elevation has been set to 1200.0 m.
 
@@ -119,7 +119,7 @@ The `detection_monitoring.py` section of the _yaml_ configuration file is expect
         detection: ../output/output-prd/'oth_prediction_filter_year-{year}_score-[SCORE]_elevation-[elevation]_distance-[distance]_area-[area].geojson'  
     output_folder: ../output/output-dm
   
-Input and output paths of the config file must be adapted if necessary. The script takes as input a _geojson_ file. In the quarry monitoring case, **oth_prediction_filter_year-{year}_[filters_list].geojson** files produced with the script `prediction_filter.py` of the `object-detector` for different years are used. The list of years _YEARx_ required for the object monitoring must be specified.
+Input and output paths of the config file must be adapted if necessary. The script takes as input a _geojson_ file. In the quarry monitoring case, `oth_prediction_filter_year-{year}_[filters_list].geojson` files produced with the script `prediction_filter.py` of the `object-detector` for different years are used. The list of years _YEARx_ required for the object monitoring must be specified.
 
 The script can be run by executing the following command:
 
@@ -153,3 +153,24 @@ Plot(s) will be produced in _png_ format
 <br />
 <i>Quarries area vs time.</i>
 </p>
+
+
+## 5. `batch_process.sh`
+
+`batch_process.sh` allows to execute a list of command to perform the **Prediction** workflow for several years. It works along with `config.prd.template.yaml`.
+
+The list of years to process must be specified as input of the shell script 
+
+    for year in YEAR1 YEAR2 YEAR3 ... 
+
+By executing the command:
+
+    $ ../scripts/batch_process.sh
+
+`config-prd_[YEAR].yaml` will be generated for a given year and the command list in `batch_process.sh` will be executed for the provided list of years:
+ 1. `prepare_data.py`
+ 2. `generate_tilesets.py` 
+ 3. `make_prediction.py` 
+ 4. `prediction_filter.py` 
+
+The paths and value of _yaml_ configuration file template must be adapted, if necessary.

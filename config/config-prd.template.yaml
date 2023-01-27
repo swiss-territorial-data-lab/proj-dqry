@@ -1,5 +1,5 @@
 #####################################################################
-###########     configuration file to predict quarry     ############ 
+#######     configuration file template to predict quarry     ####### 
 #####################################################################
 # Follow the workflow to predict quarries in a given surface of interest
 # Refer to the README.md provided for more details
@@ -7,11 +7,11 @@
 
 # 1-Prepare the tiles geometry according to the AOI and zoom level
 prepare_data.py: 
-  srs: "EPSG:3857"
+  srs: "EPSG:2056"
   datasets:
     labels_shapefile: ../input/input-prd/swissimage_footprint_SWISSIMAGE_YEAR.shp
   output_folder: ../output/output-prd/SWISSIMAGE_YEAR
-  zoom_level: 15  #z, keep between 17 and 20  
+  zoom_level: 16  #z, keep between 15 and 18  
 
 # 2-Request tiles according to the provided AOI and tiles parameters
 generate_tilesets.py:
@@ -21,9 +21,6 @@ generate_tilesets.py:
     orthophotos_web_service:
       type: XYZ # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ
       url: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/SWISSIMAGE_YEAR/3857/{z}/{x}/{y}.jpeg
-    #  layers: ch.swisstopo.swissimage
-    #  year: '2020'
-    #  srs: "EPSG:3857"
   output_folder: ../output/output-prd/SWISSIMAGE_YEAR
   tile_size: 512 # per side, in pixels
   overwrite: True
@@ -43,32 +40,26 @@ generate_tilesets.py:
 
 # 3-Perform the object detection based on the optimized trained model
 make_predictions.py:
-    working_folder: ../output/output-prd/SWISSIMAGE_YEAR
-    log_subfolder: logs
-    sample_tagged_img_subfolder: sample_tagged_images
-    COCO_files: # relative paths, w/ respect to the working_folder
-        oth: COCO_oth.json
-    detectron2_config_file: '../../../config/detectron2_config_dqry.yaml' # path relative to the working_folder
-    model_weights:
-       # pth_file: '../../input/input-prd/logs/model_final.pth'
-        pth_file: '../../../input/input-prd/logs/model_0003999.pth'    #!!!Chose the optimized trained model, i.e. the one minimizing the validation loss curve 
-    score_thd: 0.05
+  working_folder: ../output/output-prd/SWISSIMAGE_YEAR
+  log_subfolder: logs
+  sample_tagged_img_subfolder: sample_tagged_images
+  COCO_files: # relative paths, w/ respect to the working_folder
+      oth: COCO_oth.json
+  detectron2_config_file: '../../../config/detectron2_config_dqry.yaml' # path relative to the working_folder
+  model_weights:
+      pth_file: '../../../input/input-prd/logs/model_0002999.pth'    #!!!Chose the optimized trained model, i.e. the one minimizing the validation loss curve 
+  score_thd: 0.05            #discard prediction scores below threshold 
+  image_metadata_json: '../output/output-prd/SWISSIMAGE_YEAR/img_metadata.json'
+  rdp_simplification: # rdp = Ramer-Douglas-Peucker
+    enabled: true
+    epsilon: 0.5 # cf. https://rdp.readthedocs.io/en/latest/
+  score_lower_threshold: 0.05
 
-# 4-Evaluate the quality of the prediction with metrics calculation
-assess_predictions.py:
-  datasets:
-    # ground_truth_labels_geojson: ../input/input-prd/labels.geojson
-    image_metadata_json: ../output/output-prd/SWISSIMAGE_YEAR/img_metadata.json
-    split_aoi_tiles_geojson: ../output/output-prd/SWISSIMAGE_YEAR/split_aoi_tiles.geojson # aoi = Area of Interest
-    predictions:
-      oth: ../output/output-prd/SWISSIMAGE_YEAR/oth_predictions_at_0dot05_threshold.pkl
-  output_folder: ../output/output-prd/SWISSIMAGE_YEAR
-
-# 5-Filtering and merging prediction polygons to improve results
+# 4-Filtering and merging prediction polygons to improve results
 prediction_filter.py:
   year: SWISSIMAGE_YEAR
-  input: ../output/output-prd/SWISSIMAGE_YEAR/oth_predictions.geojson 
-  dem: ../input/input-prd/swiss-srtm.tif 
+  input: ../output/output-prd/SWISSIMAGE_YEAR/oth_at_0dot05_threshold.gpkg
+  dem: ../input/input-prd/switzerland_dem_EPSG2056.tif
   elevation: 1155.0     #m, altitude threshold. Dectection above the threshold are discarded. Unlikely to observe quarry above and avoid flase detection of rock outcrop and snow . Default: 1155
   score: 0.95           #prediction score (reliability of the detection) provided by detectron2. The value can be varied from 0 to 1. Default: 0.96 
   distance: 8           #m, distance use as a buffer to merge close polygons (likely to belong to the same quarry) together. Default: 8 

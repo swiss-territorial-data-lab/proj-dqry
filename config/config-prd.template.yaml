@@ -15,14 +15,14 @@ prepare_data.py:
 
 # 2-Request tiles according to the provided AOI and tiles parameters
 generate_tilesets.py:
-  debug_mode: True
+  debug_mode: False
   datasets:
     aoi_tiles_geojson: ../output/output-prd/SWISSIMAGE_YEAR/tiles.geojson
     orthophotos_web_service:
       type: XYZ # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ
       url: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/SWISSIMAGE_YEAR/3857/{z}/{x}/{y}.jpeg
   output_folder: ../output/output-prd/SWISSIMAGE_YEAR
-  tile_size: 512 # per side, in pixels
+  tile_size: 256 # per side, in pixels
   overwrite: True
   n_jobs: 10
   COCO_metadata:
@@ -48,20 +48,19 @@ make_predictions.py:
   detectron2_config_file: '../../../config/detectron2_config_dqry.yaml' # path relative to the working_folder
   model_weights:
       pth_file: '../../../input/input-prd/logs/model_0002999.pth'    #!!!Chose the optimized trained model, i.e. the one minimizing the validation loss curve 
-  score_thd: 0.05            #discard prediction scores below threshold 
   image_metadata_json: '../output/output-prd/SWISSIMAGE_YEAR/img_metadata.json'
   rdp_simplification: # rdp = Ramer-Douglas-Peucker
-    enabled: true
-    epsilon: 0.5 # cf. https://rdp.readthedocs.io/en/latest/
-  score_lower_threshold: 0.05
+    enabled: True
+    epsilon: 2.0 # cf. https://rdp.readthedocs.io/en/latest/
+  score_lower_threshold: 0.3
 
 # 4-Filtering and merging prediction polygons to improve results
 prediction_filter.py:
   year: SWISSIMAGE_YEAR
-  input: ../output/output-prd/SWISSIMAGE_YEAR/oth_at_0dot05_threshold.gpkg
+  input: ../output/output-prd/SWISSIMAGE_YEAR/oth_at_0dot3_threshold.gpkg
   dem: ../input/input-prd/switzerland_dem_EPSG2056.tif
-  elevation: 1155.0     #m, altitude threshold. Dectection above the threshold are discarded. Unlikely to observe quarry above and avoid flase detection of rock outcrop and snow . Default: 1155
-  score: 0.95           #prediction score (reliability of the detection) provided by detectron2. The value can be varied from 0 to 1. Default: 0.96 
-  distance: 8           #m, distance use as a buffer to merge close polygons (likely to belong to the same quarry) together. Default: 8 
-  area: 1728.0          #m2, surface threshold under which polygons are discarded (unlikely to observe quarry sites under this surface). Default: 1728.0
+  elevation: 1200.0     #m, altitude threshold. Dectection above the threshold are discarded. Unlikely to observe quarry above and avoid flase detection of rock outcrop and snow . Default: 1200
+  score: 0.96           #prediction score (reliability of the detection) provided by detectron2. The value can be varied from 0 to 1. Default: 0.96 
+  distance: 10           #m, distance use as a buffer to merge close polygons (likely to belong to the same quarry) together. Default: 10 
+  area: 5000.0          #m2, surface threshold under which polygons are discarded (unlikely to observe quarry sites under this surface). Default: 5000.0
   output_folder: ../output/output-prd/SWISSIMAGE_YEAR

@@ -90,8 +90,8 @@ if __name__ == "__main__":
     row, col = r.index(input.centroid.x, input.centroid.y)
     values = r.read(1)[row,col]
     input.elev = values
-    geo_merge = input[input.elev != 0]
-    te = len(geo_merge)
+    input = input[input.elev != 0]
+    te = len(input)
     print(str(total - te) + " predictions removed by elevation threshold: " + str(ELEVATION))
 
     # Centroid of every prediction polygon
@@ -148,7 +148,7 @@ if __name__ == "__main__":
     print(str(len(geo_final)) + " prediction remaining")
 
     # Format the ooutput name of the filtered prediction  
-    feature = 'oth_prediction_filter_year-{year}_score-{score}_elevation-{elevation}_distance-{distance}_area-{area}.geojson'
+    feature = 'oth_prediction_filter_year-{year}_score-{score}_area-{area}_elevation-{elevation}_distance-{distance}.geojson'
     feature = feature.replace('{score}', str(SCORE)).replace('0.', '0dot') \
         .replace('{year}', str(int(YEAR)))\
         .replace('{area}', str(int(AREA)))\

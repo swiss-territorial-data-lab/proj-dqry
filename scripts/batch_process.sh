@@ -1,6 +1,3 @@
-#!/bin/python
-# -*- coding: utf-8 -*-
-
 #  Proj quarry detection and time machine
 ################################################################
 #  Script used to run automatically Prediction workflow for quarries detection

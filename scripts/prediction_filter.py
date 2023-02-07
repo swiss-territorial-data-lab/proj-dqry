@@ -71,7 +71,7 @@ if __name__ == "__main__":
     AREA = cfg['area']
     ELEVATION = cfg['elevation']
     DISTANCE = cfg['distance']
-    OUTPUT_DIR = cfg['output_folder']
+    OUTPUT = cfg['output']
 
     written_files = [] 
 
@@ -84,11 +84,11 @@ if __name__ == "__main__":
     # Discard polygons detected above the threshold elevalation and 0 m 
     r = rasterio.open(DEM)
     row, col = r.index(input.centroid.x, input.centroid.y)
-    values = r.read(1)[row,col]
+    values = r.read(1)[row, col]
     input.elev = values
     input = input[input.elev < ELEVATION]
     row, col = r.index(input.centroid.x, input.centroid.y)
-    values = r.read(1)[row,col]
+    values = r.read(1)[row, col]
     input.elev = values
     input = input[input.elev != 0]
     te = len(input)
@@ -142,20 +142,19 @@ if __name__ == "__main__":
     intersection = gpd.sjoin(geo_tmp, input, how='inner')
     intersection['id'] = intersection.index
     score_final=intersection.groupby(['id']).mean()
+
     # Formatting the final geo df 
     data = {'id_feature': geo_merge.index,'score': score_final['score'] , 'area': geo_merge.area, 'centroid_x': geo_merge.centroid.x, 'centroid_y': geo_merge.centroid.y, 'geometry': geo_merge}
     geo_final = gpd.GeoDataFrame(data, crs=input.crs)
-    print(str(len(geo_final)) + " prediction remaining")
+    print(str(len(geo_final)) + " predictions remaining")
 
     # Format the ooutput name of the filtered prediction  
-    feature = 'oth_prediction_filter_year-{year}_score-{score}_area-{area}_elevation-{elevation}_distance-{distance}.geojson'
-    feature = feature.replace('{score}', str(SCORE)).replace('0.', '0dot') \
+    feature = OUTPUT.replace('{score}', str(SCORE)).replace('0.', '0dot') \
         .replace('{year}', str(int(YEAR)))\
         .replace('{area}', str(int(AREA)))\
         .replace('{elevation}', str(int(ELEVATION))) \
         .replace('{distance}', str(int(DISTANCE)))
-    OUTPUT = os.path.join(OUTPUT_DIR, feature)
-    geo_final.to_file(OUTPUT, driver='GeoJSON')
+    geo_final.to_file(feature, driver='GeoJSON')
 
     print()
     logger.info("The following files were written. Let's check them out!")

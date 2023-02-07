@@ -9,9 +9,9 @@ The procedure is defined in three distinct workflows:
 
 Configuration files are used to set the variables parameters. They must be adapted (_i.e._ path to file) if required. In **config** folder, config files relative to `proj-dqry` and `object-detector` are present, one for each defined workflow:
 
-1. Training and evaluation: `config-trne.yaml`
-2. Predictions: `config-prd.yaml`, `config-prd.template.yaml` is used to run prediction batch process for different year datasets
-3. Detection monitoring: `config-dm.yaml`
+1. **Training and evaluation**: `config-trne.yaml`
+2. **Predictions**: `config-prd.yaml`, `config-prd.template.yaml` is used to run prediction batch process for different year datasets
+3. **Detection monitoring**: `config-dm.yaml`
 
 A config file dedicated to set the parameters of the detectron2 algorithm is also provided: `detectron2_config_dqry.yaml`
 
@@ -48,13 +48,13 @@ The input data for the **Training and Evaluation** and **Prediction** workflows 
 In this main folder you can find subfolders:
 
 * DEM
-	-  DEMs (spatial resolution about 25 m/px) of Switzerland produced from _SRTM_ instrument ([USGS - SRTM](https://doi.org/10.5066/F7PR7TFT)). The processed product `switzerland_dem.tif` has been downloaded [here](https://github.com/lukasmartinelli/swissdem) with coordinate reference system EPSG:4326 - WGS 84 and then reprojected with QGIS to EPSG:2056 - CH1903+ / LV95 to the used raster `switzerland_dem_EPSG:2056.tif`. The raster is used to filter the quarry detection according to elevation values. Another raster can be found `swiss_srtm.tif` (crs: EPSG:2056 - CH1903+ / LV95) which can be used alternatively (slight differences with `switzerland_dem_EPSG:2056.tif`). `swiss_srtm.tif` raster was used in the parent quarry detection project but the file source is untracked.
+	-  DEMs (spatial resolution about 25 m/px) of Switzerland produced from _SRTM_ instrument ([USGS - SRTM](https://doi.org/10.5066/F7PR7TFT)). The processed product `switzerland_dem.tif` has been downloaded [here](https://github.com/lukasmartinelli/swissdem) with coordinate reference system EPSG:4326 - WGS 84 and then reprojected with QGIS to EPSG:2056 - CH1903+ / LV95 to the used raster `switzerland_dem_EPSG:2056.tif`. The raster is used to filter the quarry detection according to elevation values. Another raster can be found `swiss_srtm.tif` (crs: EPSG:2056 - CH1903+ / LV95) which can be used alternatively (slight differences with `switzerland_dem_EPSG:2056.tif`). `swiss_srtm.tif` raster was used in the parent quarry detection project but the file source is untracked. This raster has been used as elevation input to obtained the final **Prediction** in **debug_mode** (usually 2000 tiles for z16) during test phase.
 
 * Learning models
-	- `logs_z*`: folders containing trained detection models obtained during the **Training and Evaluation** workflow using the Ground Truth data. The learning characteristics of the algorithm can be visualized using tensorboard (see below in Processing/Run scripts). Models at several iterations have been saved. The optimum model minimizes the validation loss curve as function of iteration. This model is selected to perform object detection. The algorithm has been trained on _SWISSIMAGE 10 cm_ 2020 mosaic for zoom levels 15 (3.2 m/px) to 18 (0.4 m/px). For each zoom level subfolders, a file `metrics_ite-*.txt` is provided summing-up the metrics values (_precision_, _recall_ and _f1-score_) obtained for the optimized model for which the iteration value corresponds to the value in the file name. The user can either use the already trained model or train his own model by running the **Training and Evaluation** workflow and use the produced model to detect quarries. It is important to note that the training procedure display some random components and therefore the training metrics and results of a new trained model might differ from the ones provided.
+	- `z*/logs`: folders containing trained detection models obtained during the **Training and Evaluation** workflow using the Ground Truth data. The learning characteristics of the algorithm can be visualized using tensorboard (see below in Processing/Run scripts). Models at several iterations have been saved. The optimum model minimizes the validation loss curve as function of iteration. This model is selected to perform object detection. The algorithm has been trained on _SWISSIMAGE 10 cm_ 2020 mosaic for zoom levels 15 (3.2 m/px) to 18 (0.4 m/px). For each zoom level subfolders, a file `metrics_ite-*.txt` is provided summing-up the metrics values (_precision_, _recall_ and _f1-score_) obtained for the optimized model for which the iteration value corresponds to the value in the file name. The user can either use the already trained model or train his own model by running the **Training and Evaluation** workflow and use the produced model to detect quarries. It is important to note that the training procedure display some random components and therefore the training metrics and results of a new trained model might differ from the ones provided.
 
 * Shapefiles
-	-    `quarry_label_tlm_revised`: polygons shapefile of the quarries labels (_TLM_ data) reviewed by the domain experts. The data of this file have been used as Ground Truth data to train and assess the automatic detection algorithm.
+	- `quarry_label_tlm_revised`: polygons shapefile of the quarries labels (_TLM_ data) reviewed by the domain experts. The data of this file have been used as Ground Truth data to train and assess the automatic detection algorithm.
 	- `swissimage_footprints_shape_year_per_year`: original _SWISSIMAGE 10 cm_ footprints and processed polygons border shapefiles for every acquisition year.
 	- `switzerland_border`: polygon shapefile of the Switzerland border.
 
@@ -93,7 +93,7 @@ The training and detection of objects requires the use of `object-detector` scri
     $ python3 ../scripts/prepare_data.py [config_yaml]
     $ python3 <path to object-detector>/scripts/generate_tilesets.py [config_yaml]
     $ python3 <path to object-detector>/scripts/train_model.py [config_yaml]
-    $ python3 <path to object-detector>/scripts/make_prediction.py [config_yaml]
+    $ python3 <path to object-detector>/scripts/make_predictions.py [config_yaml]
     $ python3 <path to object-detector>/scripts/assess_predictions.py [config_yaml]
 
 The fisrt script to run is [`prepare_data.py`](/../scripts/README.md) in order to create tiles and labels files that will be then used by the object detector scripts. The `prepare_data.py` section of the _yaml_ configuration file is expected as follow:
@@ -143,7 +143,7 @@ Finally we obtained the following results in the folder /proj-dqry/output/output
 - `logs`: folder containing the files relative to the model training
 - `tiles.geojson`: tiles polygons obtained for the given AOI
 - `labels.geojson`: labels polygons obtained for the given GT
-- `*_predictions_at_0dot*_threshold.gpkg`: detection polygons obtained for the different datasets (train, test, validation) at a given **score_lower_threshold**.
+- `*_predictions_at_0dot*_threshold.gpkg`: detection polygons obtained for the different datasets (train, test, validation) at a given **score_lower_threshold** (in previous version of `object_detector`: `*_predictions_at_0dot*_threshold.pkl` and `*_predictions.geojson`).
 - `img_metadata.json`: images metadata file
 - `clipped_labels.geojson`: labels polygons clipped according to tiles
 - `split_aoi_tiles.geojson`: tiles polygons sorted according to the dataset where it belongs  
@@ -176,7 +176,7 @@ The prediction of objects requires the use of `object-detector` scripts. The wor
 
     $ python3 ../scripts/prepare_data.py [config_yaml]
     $ python3 <path to object-detector>/scripts/generate_tilesets.py [config_yaml]
-    $ python3 <path to object-detector>/scripts/make_prediction.py [config_yaml]
+    $ python3 <path to object-detector>/scripts/make_predictions.py [config_yaml]
 
 The first script to run is [`prepare_data.py`](/../scripts/README.md) in order to create tiles and labels files that will be then used by the object detector scripts. The `prepare_data.py` section of the _yaml_ configuration file is expected as follow:
 
@@ -208,9 +208,9 @@ The object predictions are computed with a previously trained model. Copy the de
 
 Choose the relevant `model_*.pth` file, _i.e._ the one minimizing the validation loss curve (see above Training and Evaluation/Run scripts).
 
-Prediction polygons are produced with high resolution (one point by vertices) causing for some configuration RAM saturation and heavy prediction files. A Ramer algorithm can be activated (**enabled**: true otherwise false) in order to simplify the polygon geomtry by deleting non essential points to respect the polygon geometry according to an **epsilon** factor. By default the value is set to 0.5. Increasing **epsilon** filter more points.
+Prediction polygons are produced with high resolution (one point by vertices) causing for some configuration RAM saturation and heavy prediction files. A Ramer algorithm can be activated (**enabled**: true otherwise false) in order to simplify the polygon geomtry by deleting non essential points to respect the polygon geometry according to an **epsilon** factor. By default the value is set to 2.0. Increasing **epsilon** filter more points.
 
-Predictions come with a confidence score [0 to 1]. Predictions with low score can be discarded by setting a threshold value for `make_predictions.py` script **score_lower_threshold** (by default set to 0.05). 
+Predictions come with a confidence score [0 to 1]. Predictions with low score can be discarded by setting a threshold value for `make_predictions.py` script **score_lower_threshold** (by default set to 0.3). 
 
 
 - Batch process
@@ -236,7 +236,7 @@ Finally we obtained the following results stored in the folder /proj-dqry/output
 - `*_images`: folders containing downloaded images of an AOI to perform prediction inference
 - `sample_tagged_images`: folder containing sample of tagged images and bounding boxes
 - `tiles.geojson`: tiles polygons obtained for the given AOI
-- `oth_predictions_at_0dot*_threshold.gpkg`: detection polygons obtained for the AOI at a given **score_lower_threshold**.
+- `oth_predictions_at_0dot*_threshold.gpkg`: detection polygons obtained for the AOI at a given **score_lower_threshold** (in previous version of `object_detector`: `oth_predictions_at_0dot*_threshold.pkl` and `oth_predictions.geojson`).
 - `img_metadata.json`: images metadata file
 - `clipped_labels.geojson`: labels polygons clipped according to tiles
 - `split_aoi_tiles.geojson`: tiles polygons sorted according to the dataset where it belongs  
@@ -244,7 +244,7 @@ Finally we obtained the following results stored in the folder /proj-dqry/output
 
 - Post-processing
 
-The object detection output (`oth_predictions_at_0dot*_threshold.gpkg`) obtained via the `object-detector` scripts needs to be filtered to discard false detections and improve the aesthetic of the polygons (merge polygons belonging to a single quarry). The script [`prediction_filter.py`](/../script/README.md) allows to extract the prediction out of the detector based on a series of provided threshold values.
+The object detection output (`oth_predictions_at_0dot*_threshold.gpkg`or `oth_predictions_at_0dot*_threshold.geojson` (previous version of `make_predictions.py`)) obtained via the `object-detector` scripts needs to be filtered to discard false detections and improve the aesthetic of the polygons (merge polygons belonging to a single quarry). The script [`prediction_filter.py`](/../script/README.md) allows to extract the prediction out of the detector based on a series of provided threshold values.
 
 The `prediction_filter.py` is run as follow:
 
@@ -268,7 +268,7 @@ The script expects a prediction file (`oth_predictions_at_0dot*_threshold.gpkg`)
         score: [THRESHOLD VALUE]
         distance: [THRESHOLD VALUE] 
         area: [THRESHOLD VALUE] 
-        output: ../output/output-prd/
+        output: ../output/output-prd/oth_prediction_at_0dot*_threshold_year-[YEAR]_score-{score}_area-{area}_elevation-{elevation}_distance-{distance}.geojson
 
 
 -**year**: year of the dataset used as input for filtering
@@ -279,11 +279,11 @@ The script expects a prediction file (`oth_predictions_at_0dot*_threshold.gpkg`)
 
 -**elevation**: altitude above which predictions are discarded. Indeed 1st tests have shown numerous false detection due to snow cover area (reflectance value close to bedrock reflectance) or mountain bedrock exposure that are mainly observed in altitude.. By default the threshold elevation has been set to 1200.0 m.
 
--**score**: each polygon comes with a confidence score given by the prediction algorithm. Polygons with low scores can be discarded. By default the value is set to 0.95.
+-**score**: each polygon comes with a confidence score given by the prediction algorithm. Polygons with low scores can be discarded. By default the value is set to 0.96.
 
 -**distance**: two polygons that are close to each other can be considered to belong to the same quarry. Those polygons can be merged into a single one. By default the buffer value is set to 10 m.
 
--**area**: small area polygons can be discarded assuming a quarry has a minimal area. The default value is set to 2000 m2.
+-**area**: small area polygons can be discarded assuming a quarry has a minimal area. The default value is set to 5000 m2.
 
 -**output**: provide the path of the filtered polygons shapefile with prediction score preserved. The output file name will be formated as: `oth_prediction_filter_year-{year}_score-{score}_elevation-{elevation}_distance-{distance}_area-{area}.geojson`.
 
@@ -292,6 +292,8 @@ The script `prediction_filter.py` is run as follow:
 
     $ python3 ../scripts/prediction-filter.py [config_yaml]
 
+
+It has to be noted that different versions of the `prediction_filter.py` have been used to produce the results. The predictions obtained during the test phase (**debug_mode**) and provided were produced by taking `oth_predictions_at_0dot*_threshold.geojson` as input. The elevation filtering was processed at the end with DEM `swiss_srtm.tif`.
 
 ### Detection monitoring
 
@@ -376,23 +378,23 @@ Copy `proj-dqry` and `object-detector` repository in a same folder.
 
 Adapt the paths and input value of the configuration files accordingly.
 
-**Training and evaluation**: copy the required input files (labels shapefile (tlm-hr-trn-topo.shp) and trained model is necessary (`log_z*`)) to **input-trne** folder.
+**Training and evaluation**: copy the required input files (labels shapefile (tlm-hr-trn-topo.shp) and trained model is necessary (`z*/logs`)) to **input-trne** folder.
 
     $ python3 ../scripts/prepare_data.py config-trne.yaml
-    $ python3 ../../scripts/generate_tilesets.py config-trne.yaml
-    $ python3 ../../scripts/train_model.py config-trne.yaml
+    $ python3 ../../object-detector/scripts/generate_tilesets.py config-trne.yaml
+    $ python3 ../../object-detector/scripts/train_model.py config-trne.yaml
     $ tensorboard --logdir ../output/output-trne/logs
 
-Open the following link with a web browser: `http://localhost:6006` and identified the iteration minimizing the validation loss curve and the selected model name (**pth_file**) in `config-trne` to run `make_prediction.py`. 
+Open the following link with a web browser: `http://localhost:6006` and identified the iteration minimizing the validation loss curve and the selected model name (**pth_file**) in `config-trne` to run `make_predictions.py`. 
 
-    $ python3 ../../scripts/make_prediction.py config-trne.yaml
-    $ python3 ../../scripts/assess_predictions.py config-trne.yaml
+    $ python3 ../../object-detector/scripts/make_predictions.py config-trne.yaml
+    $ python3 ../../object-detector/scripts/assess_predictions.py config-trne.yaml
 
-**Predictions**: copy the required input files (AOI shapefile (`swissimage_footprint_[YEAR].shp`), trained model (`log_z*`) and DEM (`switzerland_dem_EPSG:2056.tif`)) to **input-prd** folder.
+**Predictions**: copy the required input files (AOI shapefile (`swissimage_footprint_[YEAR].shp`), trained model (`/z*/logs`) and DEM (`switzerland_dem_EPSG:2056.tif`)) to **input-prd** folder.
 
     $ python3 ../scripts/prepare_data.py config-prd.yaml
-    $ python3 ../../scripts/generate_tilesets.py config-prd.yaml
-    $ python3 ../../scripts/make_prediction.py config-prd.yaml
+    $ python3 ../../object-detector/scripts/generate_tilesets.py config-prd.yaml
+    $ python3 ../../object-detector/scripts/make_predictions.py config-prd.yaml
     $ python3 ../scripts/prediction-filter.py config-prd.yaml 
 
 The workflow has been automatized and can be run for batch of years by running this command:

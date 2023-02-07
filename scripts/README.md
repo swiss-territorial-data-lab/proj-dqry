@@ -5,7 +5,7 @@ Following the scripts and configuration files properties contained in `proj-dqry
 
 ## 1. `prepare_data.py`
 
-The script `prepare_data.py` allows the user to prepare the input dataset to be processed by the `object-detector` workflow. The characteristics of the tiles are defined by the script to set the tiles parameters for the tiling service request. _XYZ_ connector is used to fetch images with a Web Map Tiling Service _wmts_. _wmts_ allows to request images for a given year and provides a base tile of 256 px that can be combined according to the given zoom level _z_. The zoom level will act on the tiles size (and tiles number) and on the pixel resolution (z15: 3.2 m/px, z16: 1.6 m/px, z17: 0.8 m/px and z18: 0.4 m/px for SWISSMAGE 10 cm). _x_ and _y_ coordinates of tiles on a grid are defined for the given AOI and the zoom level. This script can be used to prepare the tiles of the 'Training and evaluation' workflow and the 'Prediction' workflow. It works along the config files `config-trne.yaml` and `config-prd.yaml`.
+The script `prepare_data.py` allows the user to prepare the input dataset to be processed by the `object-detector` workflow. The characteristics of the tiles are defined by the script to set the tiles parameters for the tiling service request. _XYZ_ connector is used to fetch images with a Web Map Tiling Service _wmts_. _wmts_ allows to request images for a given year and provides a base tile of 256 px that can be combined according to the given zoom level _z_. The zoom level will act on the tiles size (and tiles number) and on the pixel resolution (z15: 3.2 m/px, z16: 1.6 m/px, z17: 0.8 m/px and z18: 0.4 m/px for _SWISSMAGE 10 cm_). _x_ and _y_ coordinates of tiles on a grid are defined for the given AOI and the zoom level. This script can be used to prepare the tiles of the **Training and evaluation** workflow and the **Prediction** workflow. It works along the config files `config-trne.yaml` and `config-prd.yaml`.
 
 Input and output paths of the config files must be adapted if necessary. The `prepare_data.py` section of the _yaml_ configuration file is expected as follow:
 
@@ -18,7 +18,7 @@ Input and output paths of the config files must be adapted if necessary. The `pr
  
 The **srs** key provides the working geographical frame to ensure all the input data are compatible together. Specify the **zoom_level**. Set the path to the desired label shapefile (AOI) (create a new folder /proj-dqry/input/input-prd/ to the project). 
 
-For the quarry case, the **labels_shapefile** corresponds to the tiles intersecting labels (Ground Truth) for the 'Training and evaluation' workflow: 
+For the quarry case, the **labels_shapefile** corresponds to the tiles intersecting labels (Ground Truth) for the **Training and evaluation** workflow: 
 
     [Label_Shapefile] = tlm-hr-trn-topo.shp
     
@@ -42,7 +42,7 @@ The outputs are `tiles.geojson` files corresponding to tiles polygons obtained f
 <p align="center">
 <img src="../images/tiles_example.png?raw=true" width="100%">
 <br />
-<i>Example of tiles obtained during the 'Training and evaluation' at zoom level 16 and zoom level 17.</i>
+<i>Example of tiles obtained during the **Training and evaluation** at zoom level 16 and zoom level 17.</i>
 </p>
 
 
@@ -51,7 +51,7 @@ The outputs are `tiles.geojson` files corresponding to tiles polygons obtained f
 
 The object detection output (`oth_predictions_at_0dot*_threshold.gpkg`) obtained via the `object-detector` scripts needs to be filtered to discard false detections and improve the aesthetic of the polygons (merge polygons belonging to a single quarry). The script `prediction_filter.py` allows to extract the prediction out of the detection file _gpkg_ based on a series of provided threshold values. It works along with the config file `config-prd.yaml` 
 
-First, with the input of a Digital Elevation Model, an elevation threshold is applied above what prediction are discarded (predictions at altitude 0 are also discarded because they are located outside of DEM limits). Following, an alogrithm (KMeans Unsupervised Learning) is applied to cluster polygons according to their centroids. This is used as a way to maintain the scores for a further unary union of the polygons, that then uses the cluster value assigned as an aggregation method. This allows the removal of lower scores in a smart way, _i.e._, by maintaining the integrity of the final polygon. Be careful to keep the threshold score value low while running `make_prediction.py` to obtain better results. Then, predictions are filtered based on the score. Polygons that are not overlapping but are close in position are merged together. Based on the polygons' area value, the smaller to the threshold value is discarded. Finally, an averaged predicted score is computed again taking into account the merged polygons scores. The results of the filtering/merging process are saved in a _geojson_ file.
+First, with the input of a Digital Elevation Model, an elevation threshold is applied above what prediction are discarded (predictions at altitude 0 are also discarded because they are located outside of DEM limits). Following, an alogrithm (KMeans Unsupervised Learning) is applied to cluster polygons according to their centroids. This is used as a way to maintain the scores for a further unary union of the polygons, that then uses the cluster value assigned as an aggregation method. This allows the removal of lower scores in a smart way, _i.e._, by maintaining the integrity of the final polygon. Be careful to keep the threshold score value relatively low while running `make_prediction.py` to prevent removing too many polygons. Then, predictions are filtered based on the score. Polygons that are not overlapping but are close in position are merged together. Based on the polygons' area value, the smaller to the threshold value is discarded. Finally, an averaged predicted score is computed again taking into account the merged polygons scores. The results of the filtering/merging process are saved in a _geojson_ file.
 
 The following images give an illustration of the extraction process showing the original and filtered predictions :
 
@@ -65,7 +65,7 @@ The following images give an illustration of the extraction process showing the 
 
 The values of the filtering thresholds are usually obtained by analysing the predictions output.
 
-Input and output paths of the config file must be adapted if necessary. The script expects as input a detection file (`oth_predictions_at_0dot*_threshold.gpkg` obtained with `make_prediction.py` of `object-detector`) file with all geometries containing a _score_ value normalised in _[0,1]_. The `prediction_filter.py` section of the _yaml_ configuration file is expected as follow:
+Input and output paths of the config file must be adapted if necessary. The script expects as input a detection file (`oth_predictions_at_0dot*_threshold.gpkg` obtained with `make_predictions.py` of `object-detector`) file with all geometries containing a _score_ value normalised in _[0,1]_. The `prediction_filter.py` section of the _yaml_ configuration file is expected as follow:
 
     prediction_filter.py:
         year:[YEAR] 
@@ -75,7 +75,7 @@ Input and output paths of the config file must be adapted if necessary. The scri
         score: [THRESHOLD VALUE]
         distance: [THRESHOLD VALUE] 
         area: [THRESHOLD VALUE] 
-        output: ../output/output-prd/
+        output: ../output/output-prd/oth_prediction_at_0dot*_threshold_year-[YEAR]_score-{score}_area-{area}_elevation-{elevation}_distance-{distance}.geojson
 
 -**year**: year of the dataset used as input for filtering
 
@@ -85,13 +85,13 @@ Input and output paths of the config file must be adapted if necessary. The scri
 
 -**elevation**: altitude above which predictions are discarded. Indeed 1st tests have shown numerous false detection due to snow cover area (reflectance value close to bedrock reflectance) or mountain bedrock exposure that are mainly observed in altitude.. By default the threshold elevation has been set to 1200.0 m.
 
--**score**: each polygon comes with a confidence score given by the prediction algorithm. Polygons with low scores can be discarded. By default the value is set to 0.95.
+-**score**: each polygon comes with a confidence score given by the prediction algorithm. Polygons with low scores can be discarded. By default the value is set to 0.96.
 
--**distance**: two polygons that are close to each other can be considered to belong to the same quarry. Those polygons can be merged into a single one. By default the buffer value is set to 8 m.
+-**distance**: two polygons that are close to each other can be considered to belong to the same quarry. Those polygons can be merged into a single one. By default the buffer value is set to 10 m.
 
--**area**: small area polygons can be discarded assuming a quarry has a minimal area. The default value is set to 2000 m2.
+-**area**: small area polygons can be discarded assuming a quarry has a minimal area. The default value is set to 5000 m2.
 
--**output**: provide the path of the filtered polygons shapefile with prediction score preserved. The output file name will be formated as: `oth_prediction_filter_year-{year}_score-{score}_elevation-{elevation}_distance-{distance}_area-{area}.geojson`.
+-**output**: provide the path of the filtered polygons shapefile with prediction score preserved. The output file name will be formated as: `oth_prediction_filter_year-[YEAR]_score-{score}_elevation-{elevation}_distance-{distance}_area-{area}.geojson`.
 
 
 The script can be run by executing the following command:
@@ -170,7 +170,7 @@ By executing the command:
 `config-prd_[YEAR].yaml` will be generated for a given year and the command list in `batch_process.sh` will be executed for the provided list of years:
  1. `prepare_data.py`
  2. `generate_tilesets.py` 
- 3. `make_prediction.py` 
+ 3. `make_predictions.py` 
  4. `prediction_filter.py` 
 
 The paths and value of _yaml_ configuration file template must be adapted, if necessary.

@@ -12,24 +12,28 @@ prepare_data.py:
     labels_shapefile: ../input/input-trne/tlm-hr-trn-topo.shp
     border_shapefile: ../input/input-trne/switzerland_border.shp #AoI for which additional tiles can be picked 
   empty_tiles:
-    add_tiles: True                                        # True or False. Possibility to add random empty tiles to the training dataset
-    tiles_number: 30                                      # The number of tiles indicated can differ from the actual number of tiles added (can be less)  
+    enable: True                                        # True or False. Possibility to add random empty tiles to the training dataset
+    tiles_frac: 0.3                                      # The number of tiles indicated can differ from the actual number of tiles added (can be less)  
   output_folder: ../output/output-trne/tiles-test
   zoom_level: 14  #z, keep between 17 and 20  
 
 # 2-Request tiles according to the provided AOI and tiles parameters and split tiles into 3 datasets: train, test, validation
 generate_tilesets.py:
-  debug_mode: False
+  debug_mode: 
+    enable: True
+    nb_tiles: 2000
+  empty_tiles:
+    add_tiles: True   
+    add_trn_frac: 0.5    
   datasets:
-    aoi_tiles_geojson: ../output/output-trne/tiles.geojson
-    ground_truth_labels_geojson: ../output/output-trne/labels.geojson
-    add_tiles: True                                         # Keep it as for prepare_data.py 
+    aoi_tiles_geojson: ../output/output-trne/tiles-test/tiles.geojson
+    ground_truth_labels_geojson: ../output/output-trne/tiles-test/labels.geojson                                # Keep it as for prepare_data.py 
     orthophotos_web_service:
       type: XYZ # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ
       url: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/2020/3857/{z}/{x}/{y}.jpeg
-  output_folder: ../output/output-trne
-  tile_size: 512 # per side, in pixels
-  overwrite: False
+  output_folder: ../output/output-trne/tiles-test
+  tile_size: 256 # per side, in pixels
+  overwrite: True
   n_jobs: 10
   COCO_metadata:
     year: 2021

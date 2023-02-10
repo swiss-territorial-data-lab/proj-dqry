@@ -37,7 +37,7 @@ from tqdm import tqdm
 # import fct_misc
 import re
 import random
-random.seed(1)
+random.seed(42)
 
 from shapely.geometry import box
 from shapely.geometry import Polygon
@@ -68,10 +68,10 @@ if __name__ == "__main__":
     OUTPUT_DIR = cfg['output_folder']
     LABELS_SHPFILE = cfg['datasets']['labels_shapefile']
     ZOOM_LEVEL = cfg['zoom_level']
-    ADD_TILES = cfg['empty_tiles']['add_tiles']
+    ADD_TILES = cfg['empty_tiles']['enable']
 
     if ADD_TILES == True:
-        NB_TILES = cfg['empty_tiles']['tiles_number']
+        NB_TILES_FRAC = cfg['empty_tiles']['tiles_frac']
         BORDER_SHPFILE = cfg['datasets']['border_shapefile']
 
 
@@ -122,22 +122,17 @@ if __name__ == "__main__":
     # # fct_misc.test_crs(tms.crs,labels_3857.crs)
     tiles_aoi=gpd.sjoin(tiles_3857_aoi, labels_3857, how='inner')
 
-    nb_tiles = len(tiles_aoi)
-    print('Number of tiles' ,nb_tiles)
-
     # - Remove duplicated tiles
     if nb_labels > 1:
         tiles_aoi.drop_duplicates('geometry', inplace=True)
 
     nb_tiles = len(tiles_aoi)
-    print('Number of tiles' ,nb_tiles)
+    logger.info('Number of tiles = ' + str(nb_tiles))
     
-    print(NB_TILES)
-    nb_add = int(NB_TILES/100 * nb_tiles)
-    print(nb_add)
-
     # Add (or not) tiles not intersecting labels to improve training  
     if ADD_TILES == True:
+        nb_add = int(NB_TILES_FRAC * nb_tiles)
+        logger.info(str(int(NB_TILES_FRAC * 100)) + ' perc of empty tiles = ' + str(nb_add) + ' empty tiles to add')
         ## Convert datasets shapefiles into geojson format
         labels = gpd.read_file(BORDER_SHPFILE)
         border_4326 = labels.to_crs(epsg=4326)
@@ -155,9 +150,7 @@ if __name__ == "__main__":
             tiles_3857.set_crs(epsg=3857, inplace=True)
             tiles_3857_all.append(tiles_3857)
         tiles_3857_aoi = gpd.GeoDataFrame(pd.concat(tiles_3857_all, ignore_index=True) )
-        print('1', len(tiles_3857_aoi))
         tiles_3857_random_aoi = tiles_3857_aoi[~tiles_3857_aoi.index.isin(tiles_aoi.index)] 
-        print('2', len(tiles_3857_random_aoi))
 
         # Remove unrelevant tiles and reorganized the data set:
         logger.info('- Remove duplicated tiles and tiles that are not intersecting labels') 
@@ -166,40 +159,13 @@ if __name__ == "__main__":
         border_3857=border_4326.to_crs(epsg=3857)
         border_3857.rename(columns={'FID': 'id_aoi'},inplace=True)
         # fct_misc.test_crs(tms.crs,labels_3857.crs)
-        border_aoi=gpd.sjoin(tiles_3857_random_aoi, border_3857, how='inner').sample(n=nb_add)
-        #print(border_aoi)
-        #print(len(border_aoi))
-        '''
-        # Iterate on geometric coordinates to defined tiles for a given label at a given zoom level
-        # A gpd if created for each label and are then concatenate into a single gpd 
-        logger.info('- Compute extra tiles') 
-        tiles_3857_random_all = [] 
-        for row in range(len(boundary)):
-            coords = (boundary.iloc[row,0],boundary.iloc[row,1],boundary.iloc[row,2],boundary.iloc[row,3])      
-            tiles_3857_random = gpd.GeoDataFrame.from_features([tms.feature(x, projected=True) for x in tqdm(tms.tiles(*coords, zooms=[ZOOM_LEVEL]))]).sample(n=NB_TILES)  
-            tiles_3857_random.set_crs(epsg=3857, inplace=True)
-            tiles_3857_random_all.append(tiles_3857_random)
-        tiles_3857_random_aoi = gpd.GeoDataFrame(pd.concat(tiles_3857_random_all, ignore_index=True) )
+        border_aoi=gpd.sjoin(tiles_3857_random_aoi, border_3857, how='inner').sample(n=nb_add, random_state=None)
 
-        # Remove unrelevant tiles and reorganized the data set:
-        logger.info('- Remove duplicated tiles and tiles that are not intersecting labels') 
-
-        # - Keep only tiles that are intersecting the label   
-        border_3857=border_4326.to_crs(epsg=3857)
-        border_3857.rename(columns={'FID': 'id_aoi'},inplace=True)
-        # fct_misc.test_crs(tms.crs,labels_3857.crs)
-        border_aoi=gpd.sjoin(tiles_3857_random_aoi, border_3857, how='inner')
-        '''
-        # print(len(border_3857),len(tiles_3857_random_aoi)) 
         tiles_aoi = pd.concat([tiles_aoi, border_aoi])
-        print('concat',len(tiles_aoi)) 
-
 
     # - Remove duplicated tiles
     if nb_labels > 1:
         tiles_aoi.drop_duplicates('geometry', inplace=True)
-
-    print('final', len(tiles_aoi))
 
     # - Remove useless columns, reinitilize feature id and redifined it according to xyz format  
     logger.info('- Format feature id and reorganise data set') 

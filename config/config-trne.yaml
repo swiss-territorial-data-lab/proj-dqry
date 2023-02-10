@@ -9,29 +9,29 @@
 prepare_data.py:  
   srs: "EPSG:2056"
   datasets:
-    labels_shapefile: ../input/input-trne/tlm-hr-trn-topo.shp
-    border_shapefile: ../input/input-trne/switzerland_border.shp #AoI for which additional tiles can be picked 
+    labels_shapefile: ../input/input-trne/[Label_Shapefile]
+    border_shapefile: ../input/input-trne/[AOI_Shapefile]  #AoI for which additional tiles can be picked 
   empty_tiles:
-    enable: True                                        # True or False. Possibility to add random empty tiles to the training dataset
-    tiles_frac: 0.3                                      # The number of tiles indicated can differ from the actual number of tiles added (can be less)  
-  output_folder: ../output/output-trne/tiles-test
-  zoom_level: 14  #z, keep between 17 and 20  
+    enable: False                                       # True or False. Possibility to add random empty tiles to the training dataset
+    tiles_frac: 0.5                                      # The number of tiles indicated can differ from the actual number of tiles added (can be less)  
+  output_folder: ../output/output-trne
+  zoom_level: 16  #z, keep between 17 and 20  
 
 # 2-Request tiles according to the provided AOI and tiles parameters and split tiles into 3 datasets: train, test, validation
 generate_tilesets.py:
   debug_mode: 
-    enable: True
+    enable: False               # Enable to work on a subset of tiles 
     nb_tiles: 2000
   empty_tiles:
-    add_tiles: True   
+    add_tiles: False   
     add_trn_frac: 0.5    
   datasets:
-    aoi_tiles_geojson: ../output/output-trne/tiles-test/tiles.geojson
-    ground_truth_labels_geojson: ../output/output-trne/tiles-test/labels.geojson                                # Keep it as for prepare_data.py 
+    aoi_tiles_geojson: ../output/output-trnetiles.geojson
+    ground_truth_labels_geojson: ../output/output-trne/labels.geojson                                # Keep it as for prepare_data.py 
     orthophotos_web_service:
       type: XYZ # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ
       url: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/2020/3857/{z}/{x}/{y}.jpeg
-  output_folder: ../output/output-trne/tiles-test
+  output_folder: ../output/output-trne
   tile_size: 256 # per side, in pixels
   overwrite: True
   n_jobs: 10
@@ -73,17 +73,21 @@ make_predictions.py:
       tst: COCO_tst.json
   detectron2_config_file: '../../config/detectron2_config_dqry.yaml' # path relative to the working_folder
   model_weights:
-    pth_file: './logs/model_0001999.pth'
-  score_thd: 0.05
-  
+      pth_file: './logs/model_0002999.pth'
+  image_metadata_json: '../output/output-prd/img_metadata.json'
+  rdp_simplification: # rdp = Ramer-Douglas-Peucker
+    enabled: true
+    epsilon: 0.5 # cf. https://rdp.readthedocs.io/en/latest/
+  score_lower_threshold: 0.05
+    
 # 5-Evaluate the quality of the prediction for the different datasets with metrics calculation
 assess_predictions.py:
   datasets:
-    ground_truth_labels_geojson: ../output/output-trne/labels.geojson
-    image_metadata_json: ../output/output-trne/img_metadata.json
-    split_aoi_tiles_geojson: ../output/output-trne/split_aoi_tiles.geojson # aoi = Area of Interest
+    ground_truth_labels_geojson: ../output/output-trne/tiles-test/labels.geojson
+    image_metadata_json: ../output/output-trne/tiles-test/img_metadata.json
+    split_aoi_tiles_geojson: ../output/output-trne/tiles-test/split_aoi_tiles.geojson # aoi = Area of Interest
     predictions:
-      trn: ../output/output-trne/trn_predictions_at_0dot05_threshold.pkl
-      val: ../output/output-trne/val_predictions_at_0dot05_threshold.pkl
-      tst: ../output/output-trne/tst_predictions_at_0dot05_threshold.pkl
-  output_folder: ../output/output-trne
+      trn: ../output/output-trne/tiles-test/trn_predictions_at_0dot05_threshold.gpkg
+      val: ../output/output-trne/tiles-test/val_predictions_at_0dot05_threshold.gpkg
+      tst: ../output/output-trne/tiles-test/tst_predictions_at_0dot05_threshold.gpkg
+  output_folder: ../output/output-trne/tiles-test

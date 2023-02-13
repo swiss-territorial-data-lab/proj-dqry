@@ -43,7 +43,7 @@ The `requirements.txt` file used for the quarries detection can be found in the 
 
 ## Input data
 
-The input data for the **Training and Evaluation** and **Prediction** workflows for the quarry detection project are stored on the STDL kDrive ([kDrive quarry project](https://kdrive.infomaniak.com/app/drive/548133/files)) with the following access path: /STDL/Common Documents/Projets/En_cours/Quarries_TimeMachine/02_Data/
+The input data for the **Training and Evaluation** and **Prediction** workflows for the quarry detection project are stored on the STDL S3 server (with the following access path: /s3/proj-quarries/02_Data/)
 
 In this main folder you can find subfolders:
 
@@ -263,6 +263,7 @@ The script expects a prediction file (`oth_predictions_at_0dot*_threshold.gpkg`)
     prediction_filter.py:
         year:[YEAR] 
         input: ../output/output-prd/oth_predictions_at_0dot*_threshold.gpkg
+        labels_shapefile: ../input/input-prd/[AOI_Shapefile] 
         dem: ../input/input-prd/[DEM.tif] 
         elevation: [THRESHOLD VALUE]   
         score: [THRESHOLD VALUE]
@@ -275,17 +276,19 @@ The script expects a prediction file (`oth_predictions_at_0dot*_threshold.gpkg`)
 
 -**input**: indicate path to the input file that needs to be filtered, _i.e._ `oth_predictions_at_0dot*_threshold.gpkg`
 
--**dem**: indicate the path to a DEM of Switzerland. SRTM derived product is used and can be found in the STDL kDrive (`switzerland_dem_EPSG:2056.tif`). A threshold elevation is used to discard detection above the given value.
+-**labels_shapefile**: AOI of interest is used to remove polygons that are located partially outside the AOI. For the quarry project we used the _SWISSIMAGE_ acquisition footprint for a given year. The shapefiles can be found in the STDL S3 storage (s3/proj-quarries/02_Data/Shapefiles/swissimage_footprints_shape_per_year/swissimage_footprints_border/).
+
+-**dem**: indicate the path to a DEM of Switzerland. SRTM derived product is used and can be found in the STDL S3 storage(s3/proj-quarries/02_Data/DEM/`switzerland_dem_EPSG:2056.tif`). A threshold elevation is used to discard detection above the given value.
 
 -**elevation**: altitude above which predictions are discarded. Indeed 1st tests have shown numerous false detection due to snow cover area (reflectance value close to bedrock reflectance) or mountain bedrock exposure that are mainly observed in altitude.. By default the threshold elevation has been set to 1200.0 m.
 
--**score**: each polygon comes with a confidence score given by the prediction algorithm. Polygons with low scores can be discarded. By default the value is set to 0.96.
+-**score**: each polygon comes with a confidence score given by the prediction algorithm. Polygons with low scores can be discarded. By default the value is set to 0.95.
 
 -**distance**: two polygons that are close to each other can be considered to belong to the same quarry. Those polygons can be merged into a single one. By default the buffer value is set to 10 m.
 
 -**area**: small area polygons can be discarded assuming a quarry has a minimal area. The default value is set to 5000 m2.
 
--**output**: provide the path of the filtered polygons shapefile with prediction score preserved. The output file name will be formated as: `oth_prediction_filter_year-{year}_score-{score}_elevation-{elevation}_distance-{distance}_area-{area}.geojson`.
+-**output**: provide the path of the filtered polygons shapefile with prediction score preserved. The output file name will be formated as: `oth_prediction_at_0dot*_threshold_year-{year}_score-{score}_elevation-{elevation}_distance-{distance}_area-{area}.geojson`.
 
 
 The script `prediction_filter.py` is run as follow:
@@ -293,7 +296,9 @@ The script `prediction_filter.py` is run as follow:
     $ python3 ../scripts/prediction-filter.py [config_yaml]
 
 
-It has to be noted that different versions of the `prediction_filter.py` have been used to produce the results. The predictions obtained during the test phase (**debug_mode**) and provided were produced by taking `oth_predictions_at_0dot*_threshold.geojson` as input. The elevation filtering was processed at the end with DEM `swiss_srtm.tif`.
+It has to be noted that different versions of the `prediction_filter.py` have been used to produce the results. The predictions obtained during the test phase (**debug_mode**) and provided were produced by taking `oth_predictions_at_0dot*_threshold.geojson` as input. In this case, the elevation filtering was processed at the end with DEM `swiss_srtm.tif`.
+
+The final predictions for years from 1999 to 2000 are stored in the STDL S3 server with the following access path: /s3/proj-quarries/03_Results/Prediction/. 
 
 ### Detection monitoring
 
@@ -316,10 +321,10 @@ The `detection_monitoring.py` section of the _yaml_ configuration file is expect
     detection_monitoring.py:  
     years: [YEAR1, YEAR2, YEAR3,...]       
     datasets:
-        detection: ../input/input-dm/oth_prediction_filter_year-{year}_score-[SCORE]_elevation-[elevation]_distance-[distance]_area-[area].geojson 
+        detection: ../input/input-dm/oth_prediction_at_0dot*_threshold_year-{year}_score-[SCORE]_elevation-[elevation]_distance-[distance]_area-[area].geojson 
     output_folder: ../output/output-dm
   
-Paths must be adapted if necessary (create a new folder: /proj-dqry/input/input-dm/ to the project to copy the input files of different years in it). The script takes as input a _geojson_ file (`oth_prediction_filter_year-{year}_[filters_list].geojson`) obtained previously with the script `prediction_filter.py` for different years. The list of years required for the object monitoring must be specified in **years**.
+Paths must be adapted if necessary (create a new folder: /proj-dqry/input/input-dm/ to the project to copy the input files of different years in it). The script takes as input a _geojson_ file (`oth_prediction_at_0dot*_threshold_year-{year}_[filters_list].geojson`) obtained previously with the script `prediction_filter.py` for different years. The list of years required for the object monitoring must be specified in **years**.
 
 -Run scripts
 
@@ -328,7 +333,7 @@ The prediction of objects requires the use of `object-detector` scripts. The wor
     $ python3 ../scripts/detection_monitoring.py [config_yaml]
 
 
-The outputs are a _geojson_ and _csv_ (`quarry_time`) files saving predictions over years with their caracteristics (_ID_object_, _ID_feature_, _year_, _score_, _area_, _geometry_). The prediction files computed for previous years and `quarry_times` files can be found on the STDL kDrive (https://kdrive.infomaniak.com/app/drive/548133/files) with the following access path: /STDL/Common Documents/Projets/En_cours/Quarries_TimeMachine/03_Results/Detection_monitoring/
+The outputs are a _geojson_ and _csv_ (`quarry_time`) files saving predictions over years with their caracteristics (_ID_object_, _ID_feature_, _year_, _score_, _area_, _geometry_). The prediction files computed for previous years and `quarry_times` files can be found on the STDL S3 storage with the following access path: /s3/proj-quarries/03_Results/Detection_monitoring/.
 
 ### Plots
 

@@ -9,9 +9,9 @@
 prepare_data.py:  
   srs: "EPSG:2056"
   datasets:
-    labels_shapefile: ../input/input-trne/tlm-hr-trn-topo.shp
+    labels_shapefile: ../input/input-trne/[Label_Shapefile] 
   output_folder: ../output/output-trne
-  zoom_level: 15  #z, keep between 15 and 18  
+  zoom_level: 16  #z, keep between 15 and 18  
 
 # 2-Request tiles according to the provided AOI and tiles parameters and split tiles into 3 datasets: train, test, validation
 generate_tilesets.py:
@@ -22,9 +22,6 @@ generate_tilesets.py:
     orthophotos_web_service:
       type: XYZ # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ
       url: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/2020/3857/{z}/{x}/{y}.jpeg
-    #  layers: ch.swisstopo.swissimage
-    #  year: '2020'
-    #  srs: "EPSG:3857"
   output_folder: ../output/output-trne
   tile_size: 256 # per side, in pixels
   overwrite: False

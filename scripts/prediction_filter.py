@@ -66,6 +66,7 @@ if __name__ == "__main__":
     # Load input parameters
     YEAR = cfg['year']
     INPUT = cfg['input']
+    LABELS_SHPFILE = cfg['labels_shapefile']
     DEM = cfg['dem']
     SCORE = cfg['score']
     AREA = cfg['area']
@@ -115,6 +116,10 @@ if __name__ == "__main__":
     input = input[input['score'] > SCORE]
     sc = len(input)
     print(str(total - sc) + " predictions removed by score threshold: " + str(SCORE))
+
+    # Clip prediction to AOI
+    input=gpd.clip(input, aoi)
+
     geo_input = gpd.GeoDataFrame(input)
 
     # Create empty data frame

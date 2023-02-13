@@ -77,6 +77,9 @@ if __name__ == "__main__":
     written_files = [] 
 
     # Convert input detection to a geo dataframe 
+    aoi = gpd.read_file(LABELS_SHPFILE)
+    aoi = aoi.to_crs(epsg=2056)
+    
     input = gpd.read_file(INPUT)
     input = input.to_crs(2056)
     total = len(input)

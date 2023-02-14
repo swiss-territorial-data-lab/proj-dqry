@@ -70,6 +70,7 @@ Input and output paths of the config file must be adapted if necessary. The scri
     prediction_filter.py:
         year:[YEAR] 
         input: ../output/output-prd/oth_predictions_at_0dot*_threshold.gpkg
+        labels_shapefile: ../input/input-prd/[AOI_Shapefile] 
         dem: ../input/input-prd/[DEM.tif]  
         elevation: [THRESHOLD VALUE]   
         score: [THRESHOLD VALUE]
@@ -81,17 +82,19 @@ Input and output paths of the config file must be adapted if necessary. The scri
 
 -**input**: indicate path to the input file that needs to be filtered, _i.e._ `oth_predictions_at_0dot*_threshold.gpkg`
 
--**dem**: indicate the path to a DEM of Switzerland. SRTM derived product is used and can be found in the STDL kDrive (`switzerland_dem_EPSG:2056.tif`). A threshold elevation is used to discard detection above the given value.
+-**labels_shapefile**: AOI of interest is used to remove polygons that are located partially outside the AOI. For the quarry project we used the _SWISSIMAGE_ acquisition footprint for a given year. The shapefiles can be found in the STDL S3 storage (s3/proj-quarries/02_Data/Shapefiles/swissimage_footprints_shape_per_year/swissimage_footprints_border/).
+
+-**dem**: indicate the path to a DEM of Switzerland. SRTM derived product is used and can be found in the STDL S3 storage(s3/proj-quarries/02_Data/DEM/`switzerland_dem_EPSG:2056.tif`). A threshold elevation is used to discard detection above the given value.
 
 -**elevation**: altitude above which predictions are discarded. Indeed 1st tests have shown numerous false detection due to snow cover area (reflectance value close to bedrock reflectance) or mountain bedrock exposure that are mainly observed in altitude.. By default the threshold elevation has been set to 1200.0 m.
 
--**score**: each polygon comes with a confidence score given by the prediction algorithm. Polygons with low scores can be discarded. By default the value is set to 0.96.
+-**score**: each polygon comes with a confidence score given by the prediction algorithm. Polygons with low scores can be discarded. By default the value is set to 0.95.
 
 -**distance**: two polygons that are close to each other can be considered to belong to the same quarry. Those polygons can be merged into a single one. By default the buffer value is set to 10 m.
 
 -**area**: small area polygons can be discarded assuming a quarry has a minimal area. The default value is set to 5000 m2.
 
--**output**: provide the path of the filtered polygons shapefile with prediction score preserved. The output file name will be formated as: `oth_prediction_filter_year-[YEAR]_score-{score}_elevation-{elevation}_distance-{distance}_area-{area}.geojson`.
+-**output**: provide the path of the filtered polygons shapefile with prediction score preserved. The output file name will be formated as: `oth_prediction_at_0dot*_threshold_year-{year}_score-{score}_elevation-{elevation}_distance-{distance}_area-{area}.geojson`.
 
 
 The script can be run by executing the following command:
@@ -116,10 +119,10 @@ The `detection_monitoring.py` section of the _yaml_ configuration file is expect
     detection_monitoring.py:  
     years: [YEAR1, YEAR2, YEAR3,...]       
     datasets:
-        detection: ../output/output-prd/'oth_prediction_filter_year-{year}_score-[SCORE]_elevation-[elevation]_distance-[distance]_area-[area].geojson'  
+        detection: ../input/input-dm/oth_prediction_at_0dot*_threshold_year-{year}_score-[SCORE]_elevation-[elevation]_distance-[distance]_area-[area].geojson  
     output_folder: ../output/output-dm
   
-Input and output paths of the config file must be adapted if necessary. The script takes as input a _geojson_ file. In the quarry monitoring case, `oth_prediction_filter_year-{year}_[filters_list].geojson` files produced with the script `prediction_filter.py` of the `object-detector` for different years are used. The list of years _YEARx_ required for the object monitoring must be specified.
+Input and output paths of the config file must be adapted if necessary. The script takes as input a _geojson_ file. In the quarry monitoring case, ``oth_prediction_at_0dot*_threshold_year-{year}_[filters_list].geojson` files produced with the script `prediction_filter.py` of the `object-detector` for different years are used. The list of years _YEARx_ required for the object monitoring must be specified.
 
 The script can be run by executing the following command:
 

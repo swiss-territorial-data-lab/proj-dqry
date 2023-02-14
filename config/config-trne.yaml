@@ -26,7 +26,7 @@ generate_tilesets.py:
     add_tiles: False   
     add_trn_frac: 0.5    
   datasets:
-    aoi_tiles_geojson: ../output/output-trnetiles.geojson
+    aoi_tiles_geojson: ../output/output-trne/tiles.geojson
     ground_truth_labels_geojson: ../output/output-trne/labels.geojson                                # Keep it as for prepare_data.py 
     orthophotos_web_service:
       type: XYZ # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ

@@ -102,8 +102,13 @@ The fisrt script to run is [`prepare_data.py`](/../scripts/README.md) in order t
         srs: "EPSG:2056"
         datasets:
             labels_shapefile: ../input/input-trne/[Label_Shapefile]
+        empty_tiles:
+            enable: False                                                 
+            tiles_frac: [value]                                                
+            bound_shapefile: ../input/input-trne/[Bound_shapefile] 
       output_folder: ../output/output-trne
       zoom_level: [z]
+
 
 Set the path to the desired label shapefile (AOI) (create a new folder: /proj-dqry/input/input-trne/ to the `proj-dqry` project). The **labels_shapefile** corresponds to polygons of quarries defined in the _TLM_ and manually reviewed by experts. It constitutes the ground truth.
 
@@ -114,11 +119,20 @@ For the quarries example:
 Specify the **zoom level** _z_. The zoom level will act on the tiles size (and so tiles number) and on the pixel resolution. We advise to use zoom level between 16 (1.6 m/px) and 17 (0.8 m/px) to perform quarries detection.
 The **srs** key provides the working geographical frame to ensure all the input data are compatible together.
 
+Tiles not intersecting labels (_i.e._ empty tiles) can be randomly defined and added to the dataset for model training by enabling **empty_tiles**. The fraction (relative to initial tiles dataset) of empty tiles to add can be specified (_i.e._ tiles_frac: 0.5) and the bound area for the selection as well:
+
+For the quarries example:
+
+    [Bound_Shapefile] = switzerland_border.shp
+
+
 Then, by running `generate_tilesets.py` the images will be downloaded from _WMTS_ server according to the tiles characteristics defined previously. A _XYZ_ connector is used to access _SWISSIMAGE_ for a given year. Be careful to set the desired year **[YEAR]** in the **url** present in the config file:
 
       https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/[YEAR]/3857/{z}/{x}/{y}.jpeg
 
 A **debug mode** can be activated in order to run the script on a sub set of images to perform some test. The number of images sampled is hard coded in the script `generate_tileset.py` of `object-detector`. The images will be split in three datasets: _trn_ (70%), _tst_ (15%) and _val_ (15%) to perform the training. The ground truth with reviewed labels is provided as input.
+
+The addition of empty tiles (`prepare_data.py`) to the datasets can be specified with **add_trn_frac** setting the proportion of empty tiles to add to the training dataset. The remaing tiles will be split in half to the test and validation datasets.
 
 The algorithm is trained with the script `train_model.py` calling _detectron2_ algorithm. For object detection, instance segmentation is used `COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_1x.yaml`. The model characteristics can be tuned by modifying parameters in `detectron2_config_dqry.yaml`.
 Especially pay attention to the **MAX_ITER** and **STEPS** values (Last **STEPS** < **MAX_ITER**). Choose a number of iterations to ensure robust model training. The model training evolution can be monitored with a `tensorboard`. The library `PyTorch` must be installed (installed and activated in the virtual environment). 
@@ -180,12 +194,13 @@ The prediction of objects requires the use of `object-detector` scripts. The wor
 
 The first script to run is [`prepare_data.py`](/../scripts/README.md) in order to create tiles and labels files that will be then used by the object detector scripts. The `prepare_data.py` section of the _yaml_ configuration file is expected as follow:
 
-    prepare_data.py:
-        srs: "EPSG:2056"
-        datasets:
-            labels_shapefile: ../input/input-trne/[AOI_Shapefile]
-      output_folder: ../output/output-prd
-      zoom_level: [z]
+    srs: "EPSG:2056"
+    datasets:
+        labels_shapefile: ../input/input-prd/[AOI_Shapefile]
+    empty_tiles:
+        enable: False 
+    output_folder: ../output/output-prd
+    zoom_level: [z]
 
 Set the path to the desired label shapefile (AOI) (create a new folder: /proj-dqry/input/input-prd/ to the project). For prediction, the **labels_shapefile** corresponds to the AOI on which the object detection must be performed. It can be the whole Switzerland or part of it such as the footprint where _SWISSIMAGE_ has been acquired for a given year.  
 
@@ -195,12 +210,13 @@ For the quarries example:
 
 Specify the **zoom level** _z_. The zoom level will act on the tiles size (and so tiles number) and on the pixel resolution. We advise using zoom levels between 16 (1.6 m/px) and 17 (0.8 m/px). The zoom level should be the same as the used model has been trained.
 The **srs** key provides the working geographical frame to ensure all the input data are compatible together.
+For the **Prediction** workflow there is no need to add empty tiles and the option must be kept as False.
 
 Then, by running `generate_tilesets.py` the images will be downloaded from a _WMTS_ server according to the tiles characteristics defined previously. A _XYZ_ connector is used to access _SWISSIMAGE_ for a given year. Be careful to set the desired **[YEAR]** in the url:
 
       https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/[YEAR]/3857/{z}/{x}/{y}.jpeg
 
-A **debug mode** can be activated in order to run the script on a sub set of images to perform some test. The number of images sampled is hard coded in the script `generate_tileset.py` of `object-detector`. Inference predictions are performed (no Ground Truth data provided). One dataset will be defined (_oth_).
+A **debug mode** can be activated in order to run the script on a sub set of images (number to define)to perform some test. Inference predictions are performed (no Ground Truth data provided). One dataset will be defined (_oth_). For the **Prediction** workflow there is no need to add empty tiles and the option must be kept as False.
 
 The object predictions are computed with a previously trained model. Copy the desired `logs_*` folder obtained during the **Training and Evaluation** workflow into the folder proj-dqry/input/input-prd/.
 

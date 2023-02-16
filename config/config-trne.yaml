@@ -13,7 +13,7 @@ prepare_data.py:
   empty_tiles:
     enable: False                                                 # Enable adding random empty tiles to the dataset for model training
     tiles_frac: 0.5                                               # Proportion of empty tiles to add  
-    border_shapefile: ../input/input-trne/[AOI_shapefile]         # AOI for which additional empty tiles can be selected   
+    bound_shapefile: ../input/input-trne/[Bound_shapefile]        # AOI for which additional empty tiles can be selected   
   output_folder: ../output/output-trne
   zoom_level: 16                                                  #z, keep between 17 and 20  
 

@@ -9,11 +9,11 @@
 prepare_data.py:  
   srs: "EPSG:2056"                                                # Projection of the input file
   datasets:
-    labels_shapefile: ../input/input-trne/[Label_Shapefile]       # Ground Truth 
-  empty_tiles:
-    enable: False                                                 # Enable adding random empty tiles to the dataset for model training
-    tiles_frac: 0.5                                               # Proportion of empty tiles to add  
-    bound_shapefile: ../input/input-trne/[Bound_shapefile]        # AOI for which additional empty tiles can be selected   
+    labels_shapefile: ../input/input-trne/[Label_Shapefile]      # Ground Truth 
+    empty_tiles:
+      enable: False                                                 # Enable adding random empty tiles to the dataset for model training
+      tiles_frac: 0.5                                               # Proportion of empty tiles to add  
+      bound_shapefile: ../input/input-trne/[Bound_Shapefile]         # AOI for which additional empty tiles can be selected   
   output_folder: ../output/output-trne
   zoom_level: 16                                                  #z, keep between 17 and 20  
 
@@ -21,13 +21,13 @@ prepare_data.py:
 generate_tilesets.py:
   debug_mode: 
     enable: False                                                 # Enable to work on a subset of tiles 
-    nb_tiles: 2000
-  empty_tiles:
-    enable: False                                                 # Enable option to take into account empty tiles in the model training datasets  
-    add_trn_frac: 1.0                                             # Proportion of empty tiles to add to the training dataset. The rest is split in half between test and validation datasets 
+    nb_tiles: 100
   datasets:
     aoi_tiles_geojson: ../output/output-trne/tiles.geojson
     ground_truth_labels_geojson: ../output/output-trne/labels.geojson
+    empty_tiles:
+      enable: False                                                 # Enable option to take into account empty tiles in the model training datasets  
+      add_trn_frac: 1.0                                             # Proportion of empty tiles to add to the training dataset. The rest is split in half between test and validation datasets 
     orthophotos_web_service:
       type: XYZ                                                   # Supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ
       url: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/2020/3857/{z}/{x}/{y}.jpeg

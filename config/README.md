@@ -197,8 +197,6 @@ The first script to run is [`prepare_data.py`](/../scripts/README.md) in order t
     srs: "EPSG:2056"
     datasets:
         labels_shapefile: ../input/input-prd/[AOI_Shapefile]
-    empty_tiles:
-        enable: False 
     output_folder: ../output/output-prd
     zoom_level: [z]
 
@@ -210,13 +208,12 @@ For the quarries example:
 
 Specify the **zoom level** _z_. The zoom level will act on the tiles size (and so tiles number) and on the pixel resolution. We advise using zoom levels between 16 (1.6 m/px) and 17 (0.8 m/px). The zoom level should be the same as the used model has been trained.
 The **srs** key provides the working geographical frame to ensure all the input data are compatible together.
-For the **Prediction** workflow there is no need to add empty tiles and the option must be kept as False.
 
 Then, by running `generate_tilesets.py` the images will be downloaded from a _WMTS_ server according to the tiles characteristics defined previously. A _XYZ_ connector is used to access _SWISSIMAGE_ for a given year. Be careful to set the desired **[YEAR]** in the url:
 
       https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/[YEAR]/3857/{z}/{x}/{y}.jpeg
 
-A **debug mode** can be activated in order to run the script on a sub set of images (number to define)to perform some test. Inference predictions are performed (no Ground Truth data provided). One dataset will be defined (_oth_). For the **Prediction** workflow there is no need to add empty tiles and the option must be kept as False.
+A **debug mode** can be activated in order to run the script on a sub set of images (number to define)to perform some test. Inference predictions are performed (no Ground Truth data provided). One dataset will be defined (_oth_).
 
 The object predictions are computed with a previously trained model. Copy the desired `logs_*` folder obtained during the **Training and Evaluation** workflow into the folder proj-dqry/input/input-prd/.
 

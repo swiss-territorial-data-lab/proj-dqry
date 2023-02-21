@@ -41,134 +41,135 @@ In addition, the object detection itself is performed by tools developed in `obj
 The folders/files structure of the project is orgranised as follow. The path names can be customed by the end-user and * indicates number value that can vary:
 
 <pre>.
-├── config
-│   ├── input-dm.yaml
-│   ├── input-prd.template.yaml
-│   ├── input-prd.yaml
-│   ├── input-trne.yaml
-│   ├── detectron2_config_dqry.yaml
-│   ├── logging.conf
-│   └── README.md
-├── images
+├── config                                          # configurations files folder
+│   ├── input-dm.yaml                               # detection monitoring workflow configuration file
+│   ├── input-prd.template.yaml                     # prediction workflow for several years configuration file template
+│   ├── input-prd.yaml                              # prediction workflow configuration file
+│   ├── input-trne.yaml                             # training and evaluation workflow configuration file
+│   ├── detectron2_config_dqry.yaml                 # detectron 2 configuration file 
+│   ├── logging.conf                                # logging configuration
+│   └── README.md                                   # detailled description to run workflows 
+├── images                                          # storage of images used in README.md files 
 │   ├── prediction_filter_after.png
 │   ├── prediction_filter_before.png
 │   ├── quarries_area-year.png
 │   ├── quarry_monitoring_strategy.png
 │   └── tiles_examples.png
-├── input
-│   ├── input-dm
-│   │   ├── oth_prediction_at_0dot*_threshold_year-*_score-0dot*_area-*_elevation-*_distance-*.geojson # Final filtered predictions file for a given year.
-│   ├── input-prd
-│   |   ├── z*
-│   │   │   ├── logs
+├── input                                           # inputs folders. Have to be created by the end-user 
+│   ├── input-dm                                    # detection monitoring input 
+│   │   ├── oth_prediction_at_0dot*_threshold_year-*_score-0dot*_area-*_elevation-*_distance-*.geojson # final filtered predictions file for a given year. Copy output of `prediction_filter.py`  
+│   ├── input-prd                                   # prediction inputs
+│   |   ├── z*                                      # trained model for a given zoom level z, _i.e._ z16 
+│   │   │   ├── logs                                # folder containing trained model 
 │   │   │   │   ├── inference
+│   │   │   │   │   ├── coco_instances_results.json
+│   │   │   │   │   └── instances_predictions.pth
 │   │   │   │   ├── events.out.tfevents.*.vm-gpu-02.*.0
 │   │   │   │   ├── last_checkpoint
-│   │   │   │   ├── metrics.json
-│   │   │   │   ├── model_*.pth
-│   │   │   │   └── model_final.pth
-│   │   │   │       ├── coco_instances_results.json
-│   │   │   │       └── instances_predictions.pth
-│   │   │   ├── lr.svg
-│   │   │   ├── metrics_ite-*
-│   │   │   ├── precision_vs_recall.html
-│   │   │   ├── total_loss.svg
-│   │   │   ├── trn_metrics_vs_threshold.html
-│   │   │   ├── trn_TP-FN-FP_vs_threshold.html
-│   │   │   ├── tst_metrics_vs_threshold.html
-│   │   │   ├── tst_TP-FN-FP_vs_threshold.html
-│   │   │   ├── val_metrics_vs_threshold.html
-│   │   │   ├── val_TP-FN-FP_vs_threshold.html
-│   │   │   └──validation_loss.svg
-│   │   ├── swissimage_footprint_*.prj
-│   │   ├── swissimage_footprint_*.shp
-│   │   └── swissimage_footprint_*.shx
-│   └── input-trne
-│       ├── tlm-hr-trn-topo.prj
-│       ├── tlm-hr-trn-topo.shp
-│       └── tlm-hr-trn-topo.shx
-├── output
-│   ├── output-dm
-│   │   └── oth_prediction_at_0dot*_threshold_year-*_score-0dot*_area-*_elevation-*_distance-*
-│   │   │   ├── plots
-│   │   │   │   └── quarry_area.png
-│   │   │   ├── quarry_tiles.csv
-│   │   │   └── quarry_times.geojson
-│   ├── output-prd
-│   │   ├── all-images
+│   │   │   │   ├── metrics.json                    # computed metrics for the given interval and bin size
+│   │   │   │   ├── model_*.pth                     # saved trained model at a given iteration * 
+│   │   │   │   └── model_final.pth                 # last iteration saved model 
+
+│   │   │   ├── lr.svg                              # learning rate plot (downloaded from tensorboard)
+│   │   │   ├── metrics_ite-*                       # metrics value at threshold value for the optimum model iteration * (saved manually after run assess_prediction.py) 
+│   │   │   ├── precision_vs_recall.html            # plot precision vs recall
+│   │   │   ├── total_loss.svg                      # total loss plot (downloaded from tensorboard)
+│   │   │   ├── trn_metrics_vs_threshold.html       # plot metrics of train DS (r, p, f1) vs threshold values
+│   │   │   ├── trn_TP-FN-FP_vs_threshold.html      # plot train DS TP-FN-FP vs threshold values threshold values
+│   │   │   ├── tst_metrics_vs_threshold.html       # plot metrics of test DS (r, p, f1) vs threshold values
+│   │   │   ├── tst_TP-FN-FP_vs_threshold.html      # plot test DS TP-FN-FP vs threshold valuesthreshold values
+│   │   │   ├── val_metrics_vs_threshold.html       # plot valiadation DS metrics (r, p, f1) vs threshold values
+│   │   │   ├── val_TP-FN-FP_vs_threshold.html      # plot validation DS TP-FN-FP vs threshold values
+│   │   │   └──validation_loss.svg                  # validation loss curve (downloaded from tensorboard)
+│   │   ├── swissimage_footprint_*.prj              # shapefile projection of the AOI for a given year *
+│   │   ├── swissimage_footprint_*.shp              # shapefile of the AOI for a given year *              
+│   │   └── swissimage_footprint_*.shx              # shapefile indexes of the AOI for a given year *
+│   └── input-trne                                  # training and evaluation inputs
+│       ├── tlm-hr-trn-topo.prj                     # shapefile projection of the labels
+│       ├── tlm-hr-trn-topo.shp                     # shapefile of the labels 
+│       └── tlm-hr-trn-topo.shx                     # shapefile indexes of the labels
+├── output                                          # outputs folders. Created automatically by running scripts
+│   ├── output-dm                                   # detection monitoring outputs 
+│   │   └── oth_prediction_at_0dot*_threshold_year-*_score-0dot*_area-*_elevation-*_distance-*   # final filtered predictions file for a given year
+│   │       ├── plots                               # plots storage 
+│   │       │   └── quarry_area.png                 # quarry area vs year plot  
+│   │       ├── quarry_tiles.csv                    # table containing prediction (id, geometry, area, year...) for a list of given Year. Overlapping predictions between years display the same unique ID 
+│   │       └── quarry_times.geojson                # geometry file containing prediction (id, geometry, area, year...) for a list of given Year. Overlapping predictions between years display the same unique ID 
+│   ├── output-prd                                  # prediction outputs 
+│   │   ├── all-images                              # images downloaded from wmts server (XYZ values)
 │   │   │   ├── z_y_x.json
 │   │   │   └── z_y_x.tif
-│   │   ├── oth-images
+│   │   ├── oth-images                              # tagged images other DataSet
 │   │   │   └── z_y_x.tif
-│   │   ├── sample_tagged_images
+│   │   ├── sample_tagged_images                    # examples of annoted prediction on images (XYZ values)
 │   │   │   └── oth_pred_z_y_x.png
-│   │   ├── COCO_oth.json
-│   │   ├── img_metadata.json
-│   │   ├── labels.json
+│   │   ├── COCO_oth.json                           # COCO annotations on other DS  
+│   │   ├── img_metadata.json                       # images info
+│   │   ├── labels.json                             # AOI geometries 
 │   │   ├── oth_prediction_at_0dot*_threshold_year-*_score-0dot*_area-*_elevation-*_distance-*.geojson
-│   │   ├── oth_predictions_at_0dot*_threshold.gpkg
-│   │   ├── split_aoi_tiles.geojson
-│   │   └── tiles.geojson
-│   └── output-trne
-│   │   ├── all-images
-│   │   │   ├── z_y_x.json
-│   │   │   └── z_y_x.tif
-│   │   ├── logs
-│   │   │   ├── inference
-│   │   │   │   ├── coco_instances_results.json
-│   │   │   │   └── instances_predictions.pth
-│   │   │   ├── events.out.tfevents.*.vm-gpu-02.*.0
-│   │   │   ├── last_checkpoint
-│   │   │   ├── metrics.json
-│   │   │   ├── model_*.pth
-│   │   │   └── model_final.pth
-│   │   ├── sample_tagged_images
-│   │   │   └── pred_z_y_x.png
-│   │   │   └── tagged_z_y_x.png
-│   │   │   └── trn_pred_z_y_x.png
-│   │   │   └── tst_pred_z_y_x.png
-│   │   │   └── val_pred_z_y_x.png
-│   │   ├── trn-images
-│   │   │   └── z_y_x.tif
-│   │   ├── tst-images
-│   │   │   └── z_y_x.tif
-│   │   ├── val-images
-│   │   │   └── z_y_x.tif
-│   │   ├── clipped_labels.geojson
-│   │   ├── COCO_trn.json
-│   │   ├── COCO_tst.json
-│   │   ├── COCO_val.json
-│   │   ├── img_metadata.json
-│   │   ├── labels.json
-│   │   ├── metrics_ite-*
-│   │   ├── lr.svg
-│   │   ├── precision_vs_recall.html
-│   │   ├── split_aoi_tiles.geojson
-│   │   ├── tagged_predictions.gpkg
-│   │   ├── tiles.json
-│   │   ├── total_loss.svg
-│   │   ├── trn_metrics_vs_threshold.html
-│   │   ├── trn_predictions_at_0dot*_threshold.gpkg
-│   │   ├── trn_TP-FN-FP_vs_threshold.html
-│   │   ├── tst_metrics_vs_threshold.html
-│   │   ├── tst_predictions_at_0dot*_threshold.gpkg
-│   │   ├── tst_TP-FN-FP_vs_threshold.html
-│   │   ├── val_metrics_vs_threshold.html
-│   │   ├── val_predictions_at_0dot*_threshold.gpkg
-│   │   ├── val_TP-FN-FP_vs_threshold.html
-│   │   └── validation_loss.svg
+│   │   ├── oth_predictions_at_0dot*_threshold.gpkg # prediction results at a given score threshold * in geopackage format
+│   │   ├── split_aoi_tiles.geojson                 # labels shape clipped to tiles shape 
+│   │   └── tiles.geojson                           # tiles geometries 
+│   └── output-trne                                 # training and evaluation outputs  
+│       ├── all-images                              # images downloaded from wmts server (XYZ values)
+│       │   ├── z_y_x.json
+│       │   └── z_y_x.tif
+│       ├── logs                                    # folder containing trained model 
+│       │   ├── inference
+│       │   │   ├── coco_instances_results.json
+│       │   │   └── instances_predictions.pth
+│       │   ├── events.out.tfevents.*.vm-gpu-02.*.0
+│       │   ├── last_checkpoint
+│       │   ├── metrics.json                        # computed metrics for the given interval and bin size
+│       │   ├── model_*.pth                         # saved trained model at a given iteration *
+│       │   └── model_final.pth                     # last iteration saved model
+│       ├── sample_tagged_images                    # examples of annoted prediction on images (XYZ values)
+│       │   └── pred_z_y_x.png
+│       │   └── tagged_z_y_x.png
+│       │   └── trn_pred_z_y_x.png
+│       │   └── tst_pred_z_y_x.png
+│       │   └── val_pred_z_y_x.png
+│       ├── trn-images                              # tagged images train DataSet  
+│       │   └── z_y_x.tif
+│       ├── tst-images                              # tagged images test DataSet
+│       │   └── z_y_x.tif
+│       ├── val-images                              # tagged images validation DataSet
+│       │   └── z_y_x.tif
+│       ├── clipped_labels.geojson                  # labels shape clipped to tiles shape 
+│       ├── COCO_trn.json                           # COCO annotations on train DS
+│       ├── COCO_tst.json                           # COCO annotations on test DS
+│       ├── COCO_val.json                           # COCO annotations on validation DS
+│       ├── img_metadata.json                       # images info
+│       ├── labels.json                             # labels geometries
+│       ├── metrics_ite-*                           # metrics value at threshold value for the optimum model iteration * (saved manually after run assess_prediction.py)
+│       ├── lr.svg                                  # learning rate plot (downloaded from tensorboard)
+│       ├── precision_vs_recall.html                # plot precision vs recall
+│       ├── split_aoi_tiles.geojson                 # tagged DS tiles 
+│       ├── tagged_predictions.gpkg                 # tagged predictions (TP, FP, FN) 
+│       ├── tiles.json                              # tiles geometries
+│       ├── total_loss.svg                          # total loss plot (downloaded from tensorboard)
+│       ├── trn_metrics_vs_threshold.html           # plot metrics of train DS (r, p, f1) vs threshold values
+│       ├── trn_predictions_at_0dot*_threshold.gpkg # prediction results for train DS at a given score threshold * in geopackage
+│       ├── trn_TP-FN-FP_vs_threshold.html          # plot train DS TP-FN-FP vs threshold values
+│       ├── tst_metrics_vs_threshold.html           # plot metrics of test DS (r, p, f1) vs threshold values
+│       ├── tst_predictions_at_0dot*_threshold.gpkg # prediction results for test DS at a given score threshold * in geopackage
+│       ├── tst_TP-FN-FP_vs_threshold.html          # plot test DS TP-FN-FP vs threshold values
+│       ├── val_metrics_vs_threshold.html           # plot metrics of validation DS (r, p, f1) vs threshold values
+│       ├── val_predictions_at_0dot*_threshold.gpkg # prediction results for validation DS at a given score threshold * in geopackage
+│       ├── val_TP-FN-FP_vs_threshold.html          # plot validation DS TP-FN-FP vs threshold values
+│       └── validation_loss.svg                     # validation loss curve (downloaded from tensorboard)
 ├── scripts
-│   └── batch_process.sh
-│   └── detection_monitoring.py
-│   └── plots.py
-│   └── prediction_filter.py
-│   └── prepare_data.py
-│   └── README.md
-├── .gitignore
+│   ├── batch_process.sh                            # batch script automatising the prediction workflow (config/input-prd.template.yaml) 
+│   ├── detection_monitoring.py                     # script tracking quarries in several years DS (config/input-dm.yaml) 
+│   ├── plots.py                                    # script plotting figures (config/input-dm.yaml) 
+│   ├── prediction_filter.py                        # script filtering predictions according to threshold values (config/input-prd.yaml) 
+│   ├── prepare_data.py                             # script preparing files to run the object-detector scripts (config/input-tren.yaml and config/input-prd.yaml) 
+│   └── README.md                                   # file explaining the role of each script 
+├── .gitignore                                      # content added to this file is ignored by git 
 ├── LICENCE
-├── README.md
-├── requirements.in
-└── requirements.txt
+├── README.md                                       # presentation of the project, requirements and execution of the project 
+├── requirements.in                                 # python dependencies (modules and packages) required by the project
+└── requirements.txt                                # compiled from requirements.in file. List of python dependencies for virtual environment creation
 </pre>
 
  ## Global workflow

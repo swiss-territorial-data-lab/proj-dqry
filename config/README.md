@@ -18,6 +18,15 @@ A config file dedicated to set the parameters of the detectron2 algorithm is als
  A synthetic list of command lines to run the whole project can be found [here](../README.md).
 
 
+**TOC**
+- [Python libraries](#python-libraries)
+- [Input data](#input-data)
+- [Workflows](#workflows)
+    - [Training and Evaluation](#training-and-evaluation)
+    - [Prediction](#prediction)
+    - [Detection monitoring](#detection-monitoring)
+
+
 ## Python libraries
 
 The scripts have been developed with Python 3.8 by importing libraries that are listed in `requirements.in` and `requirements.txt`. Before starting to run scripts make sure the required Python libraries that have been used during the code development are installed, otherwise incompatibilities and errors could poltentially occur. A clean method to install Python libraries is to work with a virtual environment preserving the package dependencies.
@@ -335,9 +344,7 @@ The prediction of objects requires the use of `object-detector` scripts. The wor
 
 The outputs are a _geojson_ and _csv_ (`quarry_time`) files saving predictions over years with their caracteristics (_ID_object_, _ID_feature_, _year_, _score_, _area_, _geometry_). The prediction files computed for previous years and `quarry_times` files can be found on the STDL S3 storage with the following access path: /s3/proj-quarries/03_Results/Detection_monitoring/.
 
-### Plots
-
-Script to draw basic plots is provided with [`plots.py`](/../scripts/README.md).
+A script to draw basic plots is provided with [`plots.py`](/../scripts/README.md).
 
 - Working directory
 

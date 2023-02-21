@@ -63,12 +63,14 @@ if __name__ == "__main__":
     OUTPUT_DIR = cfg['output_folder']
     LABELS_SHPFILE = cfg['datasets']['labels_shapefile']
     ZOOM_LEVEL = cfg['zoom_level']
-    ADD_TILES = cfg['empty_tiles']['enable']
 
-    if ADD_TILES == True:
-        NB_TILES_FRAC = cfg['empty_tiles']['tiles_frac']
-        BORDER_SHPFILE = cfg['empty_tiles']['border_shapefile']
-
+    if 'empty_tiles' in cfg['datasets'].keys():        
+        EMPTY_TILES = cfg['datasets']['empty_tiles']['enable']
+        if EMPTY_TILES == True:
+            NB_TILES_FRAC = cfg['datasets']['empty_tiles']['tiles_frac']
+            BORDER_SHPFILE = cfg['datasets']['empty_tiles']['bound_shapefile']
+    else:
+        EMPTY_TILES = None
 
     # Create an output directory in case it doesn't exist
     if not os.path.exists(OUTPUT_DIR):
@@ -120,12 +122,12 @@ if __name__ == "__main__":
 
     # - Remove duplicated tiles
     if nb_labels > 1:
-        tiles_aoi.drop_duplicates('geometry', inplace=True)
+        tiles_aoi.drop_duplicates('title', inplace=True)
     nb_tiles = len(tiles_aoi)
     logger.info('Number of tiles = ' + str(nb_tiles))
     
     # Add tiles not intersecting labels to improve training  
-    if ADD_TILES == True:
+    if EMPTY_TILES == True:
         nb_add = int(NB_TILES_FRAC * nb_tiles)
         logger.info(str(int(NB_TILES_FRAC * 100)) + ' perc of empty tiles = ' + str(nb_add) + ' empty tiles to add')
         
@@ -149,13 +151,13 @@ if __name__ == "__main__":
         empty_tiles_3857_aoi = gpd.GeoDataFrame(pd.concat(empty_tiles_3857_all, ignore_index=True))
 
         # Filter tiles intersecting labels 
-        empty_tiles_3857_aoi = empty_tiles_3857_aoi[~empty_tiles_3857_aoi['geometry'].isin(tiles_aoi['geometry'])] 
+        empty_tiles_3857_aoi = empty_tiles_3857_aoi[~empty_tiles_3857_aoi['title'].isin(tiles_aoi['title'])] 
 
         border_3857=border_4326.to_crs(epsg=3857)
         # border_3857.rename(columns={'FID': 'id_aoi'},inplace=True)
         # fct_misc.test_crs(tms.crs,labels_3857.crs)
         empty_tiles_random_aoi=gpd.sjoin(empty_tiles_3857_aoi, border_3857, how='inner').sample(n=nb_add, random_state=1)
-        empty_tiles_random_aoi.drop_duplicates('geometry', inplace=True)      
+        empty_tiles_random_aoi.drop_duplicates('title', inplace=True)      
         tiles_aoi = pd.concat([tiles_aoi, empty_tiles_random_aoi])
 
     # - Remove useless columns, reinitilize feature id and redifined it according to xyz format  

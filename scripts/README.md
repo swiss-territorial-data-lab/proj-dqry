@@ -12,8 +12,12 @@ Input and output paths of the config files must be adapted if necessary. The `pr
     prepare_data.py:
         srs: [crs] 
         datasets:
-            labels_shapefile: ../input/input-trne/[AOI_Shapefile]
-      output_folder: ../output/output-prd
+            labels_shapefile: ../input/input-*/[*_Shapefile]
+        empty_tiles:
+            enable: False                                                 
+            tiles_frac: [value]                                                
+            border_shapefile: ../input/input-*/[AOI_shapefile]   
+      output_folder: ../output/output-*
       zoom_level: [z]
  
 The **srs** key provides the working geographical frame to ensure all the input data are compatible together. Specify the **zoom_level**. Set the path to the desired label shapefile (AOI) (create a new folder /proj-dqry/input/input-prd/ to the project). 
@@ -24,7 +28,13 @@ For the quarry case, the **labels_shapefile** corresponds to the tiles intersect
     
 and to the tiles covering the desired AOI (_i.e._ it can be the whole Switzerland or part of it such as the footprint where SWISSIMAGE has been acquired for a given year) for the 'Prediction' workflow:
 
-    [Label_Shapefile] = swissimage_footprint_[year].shp
+    [AOI_Shapefile] = swissimage_footprint_[year].shp
+
+For the **Training and evaluation** workflow, tiles not intersecting labels (_i.e._ empty tiles) can be defined randomly and add to the dataset for model training by enabling **empty_tiles** option. The fraction (relative to initial tiles dataset) of empty tiles to add can be specified and the AOI for the selection as well:
+
+    bound_shapefile: [Bound_Shapefile] = switzerland_border.shp
+
+For the **Prediction** workflow the empty tiles option is absent of the `config-prd.yaml` file as useless.
 
 
 The script can be run by exectuting the following command:

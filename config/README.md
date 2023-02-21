@@ -15,7 +15,7 @@ Configuration files are used to set the variables parameters. They must be adapt
 
 A config file dedicated to set the parameters of the detectron2 algorithm is also provided: `detectron2_config_dqry.yaml`
 
- A synthetic list of command lines to run the whole project can be found at the end of the document.
+ A synthetic list of command lines to run the whole project can be found [here](../README.md).
 
 
 ## Python libraries
@@ -363,50 +363,3 @@ Paths must be adapted if necessary. The script takes as input a `quarry_times.ge
 -Run scripts
 
 	$ python3 ../scripts/prediction-filter.py [config_yaml]
-
-## Global workflow
-    
-Following the end to end workflow can be run by issuing the following list of actions and commands:
-
-Copy `proj-dqry` and `object-detector` repository in a same folder.  
-
-    $ cd proj-dqry/
-    $ python3 -m venv <dir_path>/[name of the virtual environment]
-    $ source <dir_path>/[name of the virtual environment]/bin/activate
-    $ pip install -r requirements.txt
-
-    $ mkdir input
-    $ mkdir input-trne
-    $ mkdir input-prd
-    $ mkdir input-dm
-    $ cd proj-dqry/config/
-
-Adapt the paths and input value of the configuration files accordingly.
-
-**Training and evaluation**: copy the required input files (labels shapefile (tlm-hr-trn-topo.shp) and trained model is necessary (`z*/logs`)) to **input-trne** folder.
-
-    $ python3 ../scripts/prepare_data.py config-trne.yaml
-    $ python3 ../../object-detector/scripts/generate_tilesets.py config-trne.yaml
-    $ python3 ../../object-detector/scripts/train_model.py config-trne.yaml
-    $ tensorboard --logdir ../output/output-trne/logs
-
-Open the following link with a web browser: `http://localhost:6006` and identified the iteration minimizing the validation loss curve and the selected model name (**pth_file**) in `config-trne` to run `make_predictions.py`. 
-
-    $ python3 ../../object-detector/scripts/make_predictions.py config-trne.yaml
-    $ python3 ../../object-detector/scripts/assess_predictions.py config-trne.yaml
-
-**Predictions**: copy the required input files (AOI shapefile (`swissimage_footprint_[YEAR].shp`), trained model (`/z*/logs`) and DEM (`switzerland_dem_EPSG:2056.tif`)) to **input-prd** folder.
-
-    $ python3 ../scripts/prepare_data.py config-prd.yaml
-    $ python3 ../../object-detector/scripts/generate_tilesets.py config-prd.yaml
-    $ python3 ../../object-detector/scripts/make_predictions.py config-prd.yaml
-    $ python3 ../scripts/prediction-filter.py config-prd.yaml 
-
-The workflow has been automatized and can be run for batch of years by running this command:
-
-    $ ../scripts/batch_process.sh
-
-**Object Monitoring**: copy the required input files (filtered prediction files (`oth_prediction_filter_year-{year}_[filters_list].geojson`)) to **input-dm** folder.
-
-    $ python3 ../scripts/detection_monitoring.py config-dm.yaml
-    $ python3 ../scripts/plots.py config-dm.yaml

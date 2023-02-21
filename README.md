@@ -9,7 +9,14 @@ The procedure is defined in three distinct workflows:
 
 A global documentation of the project can be found [here](https://github.com/swiss-territorial-data-lab/stdl-tech-website/tree/master/docs/PROJ-DQRY). 
 
-## Hardware and OS requirements
+**TOC**
+- [Requirements](#requirements)
+- [Python libraries](#python-libraries)
+- [Files structure](#files-structure)
+- [Global workflow](#global-workflow)
+- [Copyright and License](#copyright-and-license)
+
+## Requirements
 
 Workflows have been run with Ubuntu 20.04 OS on a 32 GiB RAM machine with 15GiB GPU. The main limitation is the number of tiles to proceed and the amount of prediction. The provided requirements stand for a zoom level equal to or below 17 and for an AOI corresponding to SWISSIMAGE acquisition footprints (about a third of Switzerland surface max). For higher zoom level and/or a larger AOI, the number of data to process might lead to memory saturation. In this case either a more powerful machine is be required, or the AOI needs to be subdivided in a smaller area.
 
@@ -17,7 +24,7 @@ Workflows have been run with Ubuntu 20.04 OS on a 32 GiB RAM machine with 15GiB 
 
 The scripts have been developed with Python 3.8 by importing libraries that are listed in `requirements.in` and `requirements.txt`. Before starting to run scripts make sure the required Python libraries that have been used during the code development are installed, otherwise incompatibilities and errors might occur. A clean method to install Python libraries is to work with a virtual environment preserving the package dependencies.
 
-## Scripts and configuration files
+## Files structure
 
 The `proj-dqry` repository (https://github.com/swiss-territorial-data-lab/proj-dqry) contains **scripts** to prepare and post-process the datasets:
 
@@ -31,13 +38,138 @@ The description of each script can be found [here](/scripts/README.md).
 
 In addition, the object detection itself is performed by tools developed in `object-detector` git repository. The description of the scripts used are presented [here](https://github.com/swiss-territorial-data-lab/object-detector)
 
-Configurations files used to set the input parameters of the scripts and model are located in the **config** folder:
+The folders/files structure of the project is orgranised as follow. The path names can be customed by the end-user and * indicates number value that can vary:
 
-1. `config-trne.yaml` 
-2. `config-prd.yaml` 
-3. `config-prd.template.yaml` 
-4. `config-dm.yaml` 
-5. `detectron2_config_dqry.yaml` 
+<pre>.
+├── config
+│   ├── input-dm.yaml
+│   ├── input-prd.template.yaml
+│   ├── input-prd.yaml
+│   ├── input-trne.yaml
+│   ├── detectron2_config_dqry.yaml
+│   ├── logging.conf
+│   └── README.md
+├── images
+│   ├── prediction_filter_after.png
+│   ├── prediction_filter_before.png
+│   ├── quarries_area-year.png
+│   ├── quarry_monitoring_strategy.png
+│   └── tiles_examples.png
+├── input
+│   ├── input-dm
+│   │   ├── oth_prediction_at_0dot*_threshold_year-*_score-0dot*_area-*_elevation-*_distance-*.geojson # Final filtered predictions file for a given year.
+│   ├── input-prd
+│   |   ├── z*
+│   │   │   ├── logs
+│   │   │   │   ├── inference
+│   │   │   │   ├── events.out.tfevents.*.vm-gpu-02.*.0
+│   │   │   │   ├── last_checkpoint
+│   │   │   │   ├── metrics.json
+│   │   │   │   ├── model_*.pth
+│   │   │   │   └── model_final.pth
+│   │   │   │       ├── coco_instances_results.json
+│   │   │   │       └── instances_predictions.pth
+│   │   │   ├── lr.svg
+│   │   │   ├── metrics_ite-*
+│   │   │   ├── precision_vs_recall.html
+│   │   │   ├── total_loss.svg
+│   │   │   ├── trn_metrics_vs_threshold.html
+│   │   │   ├── trn_TP-FN-FP_vs_threshold.html
+│   │   │   ├── tst_metrics_vs_threshold.html
+│   │   │   ├── tst_TP-FN-FP_vs_threshold.html
+│   │   │   ├── val_metrics_vs_threshold.html
+│   │   │   ├── val_TP-FN-FP_vs_threshold.html
+│   │   │   └──validation_loss.svg
+│   │   ├── swissimage_footprint_*.prj
+│   │   ├── swissimage_footprint_*.shp
+│   │   └── swissimage_footprint_*.shx
+│   └── input-trne
+│       ├── tlm-hr-trn-topo.prj
+│       ├── tlm-hr-trn-topo.shp
+│       └── tlm-hr-trn-topo.shx
+├── output
+│   ├── output-dm
+│   │   └── oth_prediction_at_0dot*_threshold_year-*_score-0dot*_area-*_elevation-*_distance-*
+│   │   │   ├── plots
+│   │   │   │   └── quarry_area.png
+│   │   │   ├── quarry_tiles.csv
+│   │   │   └── quarry_times.geojson
+│   ├── output-prd
+│   │   ├── all-images
+│   │   │   ├── z_y_x.json
+│   │   │   └── z_y_x.tif
+│   │   ├── oth-images
+│   │   │   └── z_y_x.tif
+│   │   ├── sample_tagged_images
+│   │   │   └── oth_pred_z_y_x.png
+│   │   ├── COCO_oth.json
+│   │   ├── img_metadata.json
+│   │   ├── labels.json
+│   │   ├── oth_prediction_at_0dot*_threshold_year-*_score-0dot*_area-*_elevation-*_distance-*.geojson
+│   │   ├── oth_predictions_at_0dot*_threshold.gpkg
+│   │   ├── split_aoi_tiles.geojson
+│   │   └── tiles.geojson
+│   └── output-trne
+│   │   ├── all-images
+│   │   │   ├── z_y_x.json
+│   │   │   └── z_y_x.tif
+│   │   ├── logs
+│   │   │   ├── inference
+│   │   │   │   ├── coco_instances_results.json
+│   │   │   │   └── instances_predictions.pth
+│   │   │   ├── events.out.tfevents.*.vm-gpu-02.*.0
+│   │   │   ├── last_checkpoint
+│   │   │   ├── metrics.json
+│   │   │   ├── model_*.pth
+│   │   │   └── model_final.pth
+│   │   ├── sample_tagged_images
+│   │   │   └── pred_z_y_x.png
+│   │   │   └── tagged_z_y_x.png
+│   │   │   └── trn_pred_z_y_x.png
+│   │   │   └── tst_pred_z_y_x.png
+│   │   │   └── val_pred_z_y_x.png
+│   │   ├── trn-images
+│   │   │   └── z_y_x.tif
+│   │   ├── tst-images
+│   │   │   └── z_y_x.tif
+│   │   ├── val-images
+│   │   │   └── z_y_x.tif
+│   │   ├── clipped_labels.geojson
+│   │   ├── COCO_trn.json
+│   │   ├── COCO_tst.json
+│   │   ├── COCO_val.json
+│   │   ├── img_metadata.json
+│   │   ├── labels.json
+│   │   ├── metrics_ite-*
+│   │   ├── lr.svg
+│   │   ├── precision_vs_recall.html
+│   │   ├── split_aoi_tiles.geojson
+│   │   ├── tagged_predictions.gpkg
+│   │   ├── tiles.json
+│   │   ├── total_loss.svg
+│   │   ├── trn_metrics_vs_threshold.html
+│   │   ├── trn_predictions_at_0dot*_threshold.gpkg
+│   │   ├── trn_TP-FN-FP_vs_threshold.html
+│   │   ├── tst_metrics_vs_threshold.html
+│   │   ├── tst_predictions_at_0dot*_threshold.gpkg
+│   │   ├── tst_TP-FN-FP_vs_threshold.html
+│   │   ├── val_metrics_vs_threshold.html
+│   │   ├── val_predictions_at_0dot*_threshold.gpkg
+│   │   ├── val_TP-FN-FP_vs_threshold.html
+│   │   └── validation_loss.svg
+├── scripts
+│   └── batch_process.sh
+│   └── detection_monitoring.py
+│   └── plots.py
+│   └── prediction_filter.py
+│   └── prepare_data.py
+│   └── README.md
+├── .gitignore
+├── LICENCE
+├── README.md
+├── requirements.in
+└── requirements.txt
+</pre>
 
  ## Global workflow
     

@@ -13,7 +13,7 @@ A global documentation of the project can be found [here](https://github.com/swi
 - [Requirements](#requirements)
 - [Python libraries](#python-libraries)
 - [Files structure](#files-structure)
-- [Global workflow](#global-workflow)
+- [Workflow](#workflow)
 - [Copyright and License](#copyright-and-license)
 
 ## Requirements
@@ -172,8 +172,15 @@ The folders/files structure of the project is orgranised as follow. The path nam
 └── requirements.txt                                # compiled from requirements.in file. List of python dependencies for virtual environment creation
 </pre>
 
- ## Global workflow
-    
+ ## Workflow
+
+<p align="center">
+<img src="./images/dqry_workflow_graph.png?raw=true" width="100%">
+<br />
+<i>Workflow scheme.</i>
+</p>
+
+
 Following the end to end workflow can be run by issuing the following list of actions and commands:
 
 Copy `proj-dqry` and `object-detector` repository in a same folder.  

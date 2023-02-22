@@ -69,7 +69,7 @@ The folders/files structure of the project is orgranised as follow. The path nam
 │   │   │   │   ├── metrics.json                    # computed metrics for the given interval and bin size
 │   │   │   │   ├── model_*.pth                     # saved trained model at a given iteration * 
 │   │   │   │   └── model_final.pth                 # last iteration saved model 
-
+│   │   │   │
 │   │   │   ├── lr.svg                              # learning rate plot (downloaded from tensorboard)
 │   │   │   ├── metrics_ite-*                       # metrics value at threshold value for the optimum model iteration * (saved manually after run assess_prediction.py) 
 │   │   │   ├── precision_vs_recall.html            # plot precision vs recall
@@ -215,7 +215,7 @@ Open the following link with a web browser: `http://localhost:6006` and identifi
     $ python3 ../scripts/prepare_data.py config-prd.yaml
     $ python3 ../../object-detector/scripts/generate_tilesets.py config-prd.yaml
     $ python3 ../../object-detector/scripts/make_predictions.py config-prd.yaml
-    $ python3 ../scripts/prediction-filter.py config-prd.yaml 
+    $ python3 ../scripts/prediction_filter.py config-prd.yaml 
 
 The workflow has been automatized and can be run for batch of years by running this command:
 

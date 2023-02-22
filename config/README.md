@@ -302,7 +302,7 @@ The script expects a prediction file (`oth_predictions_at_0dot*_threshold.gpkg`)
 
 The script `prediction_filter.py` is run as follow:
 
-    $ python3 ../scripts/prediction-filter.py [config_yaml]
+    $ python3 ../scripts/prediction_filter.py [config_yaml]
 
 
 It has to be noted that different versions of the `prediction_filter.py` have been used to produce the results. The predictions obtained during the test phase (**debug_mode**) and provided were produced by taking `oth_predictions_at_0dot*_threshold.geojson` as input. In this case, the elevation filtering was processed at the end with DEM `swiss_srtm.tif`.
@@ -369,4 +369,4 @@ Paths must be adapted if necessary. The script takes as input a `quarry_times.ge
 
 -Run scripts
 
-	$ python3 ../scripts/prediction-filter.py [config_yaml]
+	$ python3 ../scripts/prediction_filter.py [config_yaml]

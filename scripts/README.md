@@ -104,7 +104,7 @@ Input and output paths of the config file must be adapted if necessary. The scri
 
 The script can be run by executing the following command:
 
-    $ python3 <dir_path>/scripts/prediction-filter.py <dir_path>/config/config-prd.yaml
+    $ python3 <dir_path>/scripts/prediction_filter.py <dir_path>/config/config-prd.yaml
 
 
 ## detection monitoring
@@ -152,7 +152,7 @@ Input ou output paths must be adapted if necessary. The script takes as input a 
 
 The script can be run by executing the following command:
 
-    $ python3  <dir_path>/scripts/prediction-filter.py <dir_path>/config/config-dm.yaml
+    $ python3  <dir_path>/scripts/prediction_filter.py <dir_path>/config/config-dm.yaml
 
 Plot(s) will be produced in _png_ format
 

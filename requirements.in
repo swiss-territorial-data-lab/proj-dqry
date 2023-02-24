@@ -6,12 +6,15 @@ GDAL==3.0.4
 rtree
 geopandas
 joblib
+pip-tools
 pillow
 pyyaml
 rasterio
+rdp
 requests
 supermercado
 tqdm
+morecantile
 opencv-python
 # cf. https://pytorch.org/get-started/locally/
 torch @ https://download.pytorch.org/whl/cu113/torch-1.10.2%2Bcu113-cp38-cp38-linux_x86_64.whl

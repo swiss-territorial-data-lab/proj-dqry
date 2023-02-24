@@ -29,7 +29,7 @@ A config file dedicated to set the parameters of the detectron2 algorithm is als
 
 ## Python libraries
 
-The scripts have been developed with Python 3.8 by importing libraries that are listed in `requirements.in` and `requirements.txt`. Before starting to run scripts make sure the required Python libraries that have been used during the code development are installed, otherwise incompatibilities and errors could poltentially occur. A clean method to install Python libraries is to work with a virtual environment preserving the package dependencies.
+The scripts have been developed with Python 3.8 by importing libraries that are listed in `requirements.in` that have been compiled to generate `requirements.txt`. Before starting to run scripts make sure the required Python libraries that have been used during the code development are installed, otherwise incompatibilities and errors could poltentially occur. A clean method to install Python libraries is to work with a virtual environment preserving the package dependencies.
 
 * create a dedicated Python virtual environment:
 	    
@@ -38,6 +38,10 @@ The scripts have been developed with Python 3.8 by importing libraries that are 
 * activate the virtual environment:
 
       source <dir_path>/[name of the virtual environment]/bin/activate
+
+* compile only to update dependencies or to add a new ones:
+
+      pip-compile requirements.in
 
 * install the required Python packages into the virtual environment:
 
@@ -64,7 +68,7 @@ In this main folder you can find subfolders:
 
 * Shapefiles
 	- `quarry_label_tlm_revised`: polygons shapefile of the quarries labels (_TLM_ data) reviewed by the domain experts. The data of this file have been used as Ground Truth data to train and assess the automatic detection algorithm.
-	- `swissimage_footprints_shape_year_per_year`: original _SWISSIMAGE_ footprints and processed/corrected polygons border shapefiles for every acquisition year. Shapefiles located in the forlder **swissimage_footprints_border** must be used except for years 2005, 2006, 2007 and 2021 for which shapefiles have been corrected and can be found in the folders  **swissimage_footprints_correction**. For year 2020, the _tiles.shp_ to be used as input of the `object-detector` is directly provided as there is currently issue to download some tiles (that have been removed for the shapefile). 
+	- `swissimage_footprints_shape_year_per_year`: original _SWISSIMAGE_ footprints and processed/corrected polygons border shapefiles for every acquisition year. Shapefiles located in the forlder **swissimage_footprints_border** must be used except for years 2005, 2006, 2007 and 2021 for which shapefiles have been corrected and can be found in the folders  **swissimage_footprints_correction**. For year 2020, the tiles.shp to be used as input of the `object-detector` is directly provided as there is currently issue to download some tiles (that have been removed for the shapefile). 
 	- `switzerland_border`: polygon shapefile of the Switzerland border.
 
 * SWISSIMAGE

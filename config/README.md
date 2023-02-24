@@ -29,7 +29,7 @@ A config file dedicated to set the parameters of the detectron2 algorithm is als
 
 ## Python libraries
 
-The scripts have been developed with Python 3.8 by importing libraries that are listed in `requirements.in` and `requirements.txt`. Before starting to run scripts make sure the required Python libraries that have been used during the code development are installed, otherwise incompatibilities and errors could poltentially occur. A clean method to install Python libraries is to work with a virtual environment preserving the package dependencies.
+The scripts have been developed with Python 3.8 by importing libraries that are listed in `requirements.in` that have been compiled to generate `requirements.txt`. Before starting to run scripts make sure the required Python libraries that have been used during the code development are installed, otherwise incompatibilities and errors could poltentially occur. A clean method to install Python libraries is to work with a virtual environment preserving the package dependencies.
 
 * create a dedicated Python virtual environment:
 	    
@@ -38,6 +38,10 @@ The scripts have been developed with Python 3.8 by importing libraries that are 
 * activate the virtual environment:
 
       source <dir_path>/[name of the virtual environment]/bin/activate
+
+* compile only to update dependencies or to add a new ones:
+
+      pip-compile requirements.in
 
 * install the required Python packages into the virtual environment:
 

@@ -105,7 +105,8 @@ matplotlib==3.6.1
     #   pycocotools
 mercantile==1.2.1
     # via supermercado
-morecantile
+morecantile==3.2.5
+    # via -r requirements.in
 munch==2.5.0
     # via fiona
 mypy-extensions==0.4.3

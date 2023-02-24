@@ -15,7 +15,16 @@ Configuration files are used to set the variables parameters. They must be adapt
 
 A config file dedicated to set the parameters of the detectron2 algorithm is also provided: `detectron2_config_dqry.yaml`
 
- A synthetic list of command lines to run the whole project can be found at the end of the document.
+ A synthetic list of command lines to run the whole project can be found [here](../README.md).
+
+
+**TOC**
+- [Python libraries](#python-libraries)
+- [Input data](#input-data)
+- [Workflows](#workflows)
+    - [Training and Evaluation](#training-and-evaluation)
+    - [Prediction](#prediction)
+    - [Detection monitoring](#detection-monitoring)
 
 
 ## Python libraries
@@ -55,7 +64,7 @@ In this main folder you can find subfolders:
 
 * Shapefiles
 	- `quarry_label_tlm_revised`: polygons shapefile of the quarries labels (_TLM_ data) reviewed by the domain experts. The data of this file have been used as Ground Truth data to train and assess the automatic detection algorithm.
-	- `swissimage_footprints_shape_year_per_year`: original _SWISSIMAGE 10 cm_ footprints and processed polygons border shapefiles for every acquisition year.
+	- `swissimage_footprints_shape_year_per_year`: original _SWISSIMAGE_ footprints and processed/corrected polygons border shapefiles for every acquisition year. Shapefiles located in the forlder **swissimage_footprints_border** must be used except for years 2005, 2006, 2007 and 2021 for which shapefiles have been corrected and can be found in the folders  **swissimage_footprints_correction**. For year 2020, the _tiles.shp_ to be used as input of the `object-detector` is directly provided as there is currently issue to download some tiles (that have been removed for the shapefile). 
 	- `switzerland_border`: polygon shapefile of the Switzerland border.
 
 * SWISSIMAGE
@@ -306,7 +315,7 @@ The script expects a prediction file (`oth_predictions_at_0dot*_threshold.gpkg`)
 
 The script `prediction_filter.py` is run as follow:
 
-    $ python3 ../scripts/prediction-filter.py [config_yaml]
+    $ python3 ../scripts/prediction_filter.py [config_yaml]
 
 
 It has to be noted that different versions of the `prediction_filter.py` have been used to produce the results. The predictions obtained during the test phase (**debug_mode**) and provided were produced by taking `oth_predictions_at_0dot*_threshold.geojson` as input. In this case, the elevation filtering was processed at the end with DEM `swiss_srtm.tif`.
@@ -348,9 +357,7 @@ The prediction of objects requires the use of `object-detector` scripts. The wor
 
 The outputs are a _geojson_ and _csv_ (`quarry_time`) files saving predictions over years with their caracteristics (_ID_object_, _ID_feature_, _year_, _score_, _area_, _geometry_). The prediction files computed for previous years and `quarry_times` files can be found on the STDL S3 storage with the following access path: /s3/proj-quarries/03_Results/Detection_monitoring/.
 
-### Plots
-
-Script to draw basic plots is provided with [`plots.py`](/../scripts/README.md).
+A script to draw basic plots is provided with [`plots.py`](/../scripts/README.md).
 
 - Working directory
 
@@ -375,51 +382,4 @@ Paths must be adapted if necessary. The script takes as input a `quarry_times.ge
 
 -Run scripts
 
-	$ python3 ../scripts/prediction-filter.py [config_yaml]
-
-## Global workflow
-    
-Following the end to end workflow can be run by issuing the following list of actions and commands:
-
-Copy `proj-dqry` and `object-detector` repository in a same folder.  
-
-    $ cd proj-dqry/
-    $ python3 -m venv <dir_path>/[name of the virtual environment]
-    $ source <dir_path>/[name of the virtual environment]/bin/activate
-    $ pip install -r requirements.txt
-
-    $ mkdir input
-    $ mkdir input-trne
-    $ mkdir input-prd
-    $ mkdir input-dm
-    $ cd proj-dqry/config/
-
-Adapt the paths and input value of the configuration files accordingly.
-
-**Training and evaluation**: copy the required input files (labels shapefile (tlm-hr-trn-topo.shp) and trained model is necessary (`z*/logs`)) to **input-trne** folder.
-
-    $ python3 ../scripts/prepare_data.py config-trne.yaml
-    $ python3 ../../object-detector/scripts/generate_tilesets.py config-trne.yaml
-    $ python3 ../../object-detector/scripts/train_model.py config-trne.yaml
-    $ tensorboard --logdir ../output/output-trne/logs
-
-Open the following link with a web browser: `http://localhost:6006` and identified the iteration minimizing the validation loss curve and the selected model name (**pth_file**) in `config-trne` to run `make_predictions.py`. 
-
-    $ python3 ../../object-detector/scripts/make_predictions.py config-trne.yaml
-    $ python3 ../../object-detector/scripts/assess_predictions.py config-trne.yaml
-
-**Predictions**: copy the required input files (AOI shapefile (`swissimage_footprint_[YEAR].shp`), trained model (`/z*/logs`) and DEM (`switzerland_dem_EPSG:2056.tif`)) to **input-prd** folder.
-
-    $ python3 ../scripts/prepare_data.py config-prd.yaml
-    $ python3 ../../object-detector/scripts/generate_tilesets.py config-prd.yaml
-    $ python3 ../../object-detector/scripts/make_predictions.py config-prd.yaml
-    $ python3 ../scripts/prediction-filter.py config-prd.yaml 
-
-The workflow has been automatized and can be run for batch of years by running this command:
-
-    $ ../scripts/batch_process.sh
-
-**Object Monitoring**: copy the required input files (filtered prediction files (`oth_prediction_filter_year-{year}_[filters_list].geojson`)) to **input-dm** folder.
-
-    $ python3 ../scripts/detection_monitoring.py config-dm.yaml
-    $ python3 ../scripts/plots.py config-dm.yaml
+	$ python3 ../scripts/prediction_filter.py [config_yaml]

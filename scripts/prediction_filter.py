@@ -110,7 +110,7 @@ if __name__ == "__main__":
     labels = model.predict(centroids)
     print("KMeans algorithm computed with k = " + str(k))
 
-    # Dissolve and Aggregate
+    # Dissolve and Aggregate (keep the max value of aggregate attributes)
     input['cluster'] = labels
     input = input.dissolve(by = 'cluster', aggfunc = 'max')
     total = len(input)
@@ -146,7 +146,7 @@ if __name__ == "__main__":
     data = {'id': geo_merge.index,'area': geo_merge.area, 'centroid_x': geo_merge.centroid.x, 'centroid_y': geo_merge.centroid.y, 'geometry': geo_merge}
     geo_tmp = gpd.GeoDataFrame(data, crs=input.crs)
 
-    # Get the averaged prediction score of the merge polygons  
+    # Get the averaged prediction score of the merged polygons  
     intersection = gpd.sjoin(geo_tmp, input, how='inner')
     intersection['id'] = intersection.index
     score_final=intersection.groupby(['id']).mean()

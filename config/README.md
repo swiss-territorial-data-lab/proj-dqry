@@ -311,7 +311,7 @@ The script `prediction_filter.py` is run as follow:
 
 It has to be noted that different versions of the `prediction_filter.py` have been used to produce the results. The predictions obtained during the test phase (**debug_mode**) and provided were produced by taking `oth_predictions_at_0dot*_threshold.geojson` as input. In this case, the elevation filtering was processed at the end with DEM `swiss_srtm.tif`.
 
-The final predictions for years from 1999 to 2000 are stored in the STDL S3 server with the following access path: /s3/proj-quarries/03_Results/Prediction/. 
+The final predictions for years from 1999 to 2021 are stored in the STDL S3 server with the following access path: /s3/proj-quarries/03_Results/Prediction/. 
 
 ### Detection monitoring
 

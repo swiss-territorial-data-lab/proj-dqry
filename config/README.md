@@ -290,7 +290,7 @@ The script expects a prediction file (`oth_predictions_at_0dot*_threshold.gpkg`)
         year:[YEAR] 
         input: ../output/output-prd/oth_predictions_at_0dot*_threshold.gpkg
         labels_shapefile: ../input/input-prd/[AOI_Shapefile] 
-        dem: ../input/input-prd/[DEM.tif] 
+        dem: ../input/input-prd/[DEM_raster] 
         elevation: [THRESHOLD VALUE]   
         score: [THRESHOLD VALUE]
         distance: [THRESHOLD VALUE] 
@@ -324,7 +324,7 @@ The script `prediction_filter.py` is run as follow:
 
 It has to be noted that different versions of the `prediction_filter.py` have been used to produce the results. The predictions obtained during the test phase (**debug_mode**) and provided were produced by taking `oth_predictions_at_0dot*_threshold.geojson` as input. In this case, the elevation filtering was processed at the end with DEM `swiss_srtm.tif`.
 
-The final predictions for years from 1999 to 2000 are stored in the STDL S3 server with the following access path: /s3/proj-quarries/03_Results/Prediction/. 
+The final predictions for years from 1999 to 2021 are stored in the STDL S3 server with the following access path: /s3/proj-quarries/03_Results/Prediction/. 
 
 ### Detection monitoring
 
@@ -352,7 +352,7 @@ The `detection_monitoring.py` section of the _yaml_ configuration file is expect
   
 Paths must be adapted if necessary (create a new folder: /proj-dqry/input/input-dm/ to the project to copy the input files of different years in it). The script takes as input a _geojson_ file (`oth_prediction_at_0dot*_threshold_year-{year}_[filters_list].geojson`) obtained previously with the script `prediction_filter.py` for different years. The list of years required for the object monitoring must be specified in **years**.
 
--Run scripts
+- Run scripts
 
 The prediction of objects requires the use of `object-detector` scripts. The workflow is processed in following way:
 
@@ -384,6 +384,6 @@ The `plots.py` section of the _yaml_ configuration file is expected as follow:
 
 Paths must be adapted if necessary. The script takes as input a `quarry_times.geojson` file produced with the script `detection_monitoring.py`. The list of object_id is required and the type of plot as well. So far only 'area-year' plot is available. Additional types of plots can be added in the future.
 
--Run scripts
+- Run scripts
 
 	$ python3 ../scripts/prediction_filter.py [config_yaml]

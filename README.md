@@ -229,7 +229,7 @@ The workflow has been automatized and can be run for batch of years by running t
 
 ## Disclaimer
 
-The results provided by the `proj-dqry` framework are resulting from numerical implementation providing segmentation of **potential** quarry sites. False positive and false negative detection, inherent to deep learning automatic methods, are present in the final detection dataset. A **manual inspection** of the detection must be performed prior to data exploitation and interpretation.
+The results provided by the `proj-dqry` framework are resulting from a numerical implementation providing segmentation of **potential** quarry sites. False positives and false negatives detection, inherent to deep learning automatic methods, are present in the final detection dataset. A **manual inspection** of the detection must be performed prior to exploitation and interpretation of the data.
 
 
 ## Copyright and License

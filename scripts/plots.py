@@ -4,11 +4,11 @@
 
 #  Proj quarry detection and time machine
 #
-#      Nils Hamel - nils.hamel@alumni.epfl.ch
-#      Huriel Reichel
 #      Clemence Herny 
 #      Shanci Li
 #      Alessandro Cerioni 
+#      Nils Hamel
+#      Huriel Reichel
 #      Copyright (c) 2020 Republic and Canton of Geneva
 #
 #  This program is free software: you can redistribute it and/or modify

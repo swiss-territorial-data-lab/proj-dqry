@@ -1,32 +1,68 @@
+# Automatic detection and monitoring of quarries in Switzerland
+
+Clémence Herny<sup>1,2</sup>, Shanci Li<sup>1,3</sup>, Alessandro Cerioni<sup>1,4</sup>, Roxane Pott<sup>1,5</sup>
+
+<sup>1</sup> STDL  <br/>
+<sup>2</sup> ExoLabs  <br/>
+<sup>3</sup> Uzufly  <br/>
+<sup>4</sup> Etat de Genève  <br/>
+<sup>5</sup> Swisstopo  <br/>
+
+
+Proposed by swisstopo - PROJ-DQRY <br />
+October 2022 to February 2023 - Published on ..., 2023
+
 ## Overview
 
-This project provides a suite of scripts and configuration files to perform quarries automatic detections with georeferenced raster images with Deep Learning method. For object detection, tools developed in `object-detector` git repository are used.
+This project provides a suite of scripts and configuration files to perform quarries automatic detections by Deep Learning method on georeferenced raster images. <br>
+The project `proj-dqry` provides the preparation and post processing scritps to be used along with the project `object-detector` developped by the STDL to perform object detection and segmentation.
 
 The procedure is defined in three distinct workflows:
-1. **Training and Evaluation** workflow allowing to train and evaluate the detection model with a customed dataset reviewed by domain experts and constituing the ground truth. The detector is initially trained on _SWISSIMAGE 10 cm_ mosaic of 2020 ([swisstopo](https://www.swisstopo.admin.ch/fr/geodata/images/ortho/swissimage10.html)), using the _TLM_ data of _swisstopo_ as Ground Truth.
-2. **Prediction** workflow performing inference detection of quarries in a given image dataset (_SWISSIMAGE_ acquisition year) thanks to the previously trained model.
+1. **Training and Evaluation** workflow allowing to train and evaluate the detection model with a customed dataset reviewed by domain experts and constituing the ground truth. The detector is initially trained on [_SWISSIMAGE 10 cm_](https://www.swisstopo.admin.ch/fr/geodata/images/ortho/swissimage10.html) mosaic of 2020, using the [swissTLM3D](https://www.swisstopo.admin.ch/fr/geodata/landscape/tlm3d.html) data of manually vectorized quarries as Ground Truth.
+2. **Prediction** workflow performing inference detection of quarries in a given image dataset ([_SWISSIMAGE Journey_](https://www.swisstopo.admin.ch/en/maps-data-online/maps-geodata-online/journey-through-time-images.html) release year) thanks to the previously trained model.
 3. **Detection monitoring** workflow tracking quarry evolution over years.
 
-A global documentation of the project can be found [here](https://github.com/swiss-territorial-data-lab/stdl-tech-website/tree/master/docs/PROJ-DQRY). 
+<p align="center">
+<img src="./images/dqry_workflow_graph.png?raw=true" width="100%">
+<br />
+<i>Workflow scheme.</i>
+</p>
+
+The trained model reached a **f1 score of 82%** for the validation dataset allowing an accurate detection of quarry. A detailed documentation of the project and results can be found [here](https://github.com/swiss-territorial-data-lab/stdl-tech-website/tree/master/docs/PROJ-DQRY). <br>
+Additionnal information about the [data](/config/README.md), [scripts](/scripts/README.md) and [running](/config/README.md) the project can be found in the repository sub-folders.
 
 **TOC**
 - [Requirements](#requirements)
+    - [Hardware](#hardware)
+    - [Installation](#installation)
 - [Python libraries](#python-libraries)
 - [Files structure](#files-structure)
-- [Workflow](#workflow)
+- [Workflow instructions](#workflow-instructions)
 - [Copyright and License](#copyright-and-license)
 
 ## Requirements
 
-Workflows have been run with Ubuntu 20.04 OS on a 32 GiB RAM machine with 15GiB GPU. The main limitation is the number of tiles to proceed and the amount of prediction. The provided requirements stand for a zoom level equal to or below 17 and for an AOI corresponding to SWISSIMAGE acquisition footprints (about a third of Switzerland surface max). For higher zoom level and/or a larger AOI, the number of data to process might lead to memory saturation. In this case either a more powerful machine is be required, or the AOI needs to be subdivided in a smaller area.
+### Hardware
 
-## Python libraries
+The scripts have been run with Ubuntu 20.04 OS on a 32 GiB RAM machine with 15 GiB GPU (NVIDIA) compatible with [CUDA](https://detectron2.readthedocs.io/en/latest/tutorials/install.html) to use the library [detectron2](https://github.com/facebookresearch/detectron2), dedicated to object detection with Deep Learning algorithms. <br>
+The main limitation for this project is the number of tiles to proceed and the amount of prediction. The provided requirements stand for a zoom level equal to or below 17 and for an AOI corresponding to SWISSIMAGE acquisition footprints (about a third of Switzerland surface max). For higher zoom level and/or a larger AOI, the number of data to process might lead to RAM saturation. In this case either a machine with larger RAM is required, or the AOI needs to be subdivided in a smaller area.
 
-The scripts have been developed with Python 3.8 by importing libraries that are listed in `requirements.in` and `requirements.txt`. Before starting to run scripts make sure the required Python libraries that have been used during the code development are installed, otherwise incompatibilities and errors might occur. A clean method to install Python libraries is to work with a virtual environment preserving the package dependencies.
+### Installation
+
+The scripts have been developed with Python 3.8 using PyTorch version 1.10 and CUDA version 11.3. All the dependencies required for the project are listed in `requirements.in` and `requirements.txt`. To install them:
+
+- Create a Python virtual environment
+
+        $ python3 -m venv <dir_path>/[name of the virtual environment]
+        $ source <dir_path>/[name of the virtual environment]/bin/activate
+
+- Install dependencies
+
+        $ pip install -r requirements.txt
 
 ## Files structure
 
-The `proj-dqry` repository (https://github.com/swiss-territorial-data-lab/proj-dqry) contains **scripts** to prepare and post-process the datasets:
+The `proj-dqry` repository (https://github.com/swiss-territorial-data-lab/proj-dqry) contains scripts to prepare and post-process the datasets:
 
 1. `prepare_data.py` 
 2. `prediction_filter.py` 
@@ -38,7 +74,7 @@ The description of each script can be found [here](/scripts/README.md).
 
 In addition, the object detection itself is performed by tools developed in `object-detector` git repository. The description of the scripts used are presented [here](https://github.com/swiss-territorial-data-lab/object-detector)
 
-The folders/files structure of the project is orgranised as follow. The path names can be customed by the end-user and * indicates number value that can vary:
+The general folders/files structure of the project `proj-dqry` is orgranised as follow. The path names can be customed by the end-user and * indicates number value that can vary:
 
 <pre>.
 ├── config                                          # configurations files folder
@@ -172,18 +208,13 @@ The folders/files structure of the project is orgranised as follow. The path nam
 └── requirements.txt                                # compiled from requirements.in file. List of python dependencies for virtual environment creation
 </pre>
 
- ## Workflow
 
-<p align="center">
-<img src="./images/dqry_workflow_graph.png?raw=true" width="100%">
-<br />
-<i>Workflow scheme.</i>
-</p>
 
+ ## Workflow instructions
 
 Following the end to end workflow can be run by issuing the following list of actions and commands:
 
-Copy `proj-dqry` and `object-detector` repository in a same folder.  
+Get `proj-dqry` and `object-detector` repository in a same folder.  
 
     $ cd proj-dqry/
     $ python3 -m venv <dir_path>/[name of the virtual environment]
@@ -198,7 +229,7 @@ Copy `proj-dqry` and `object-detector` repository in a same folder.
 
 Adapt the paths and input value of the configuration files accordingly.
 
-**Training and evaluation**: copy the required input files (labels shapefile (tlm-hr-trn-topo.shp) and trained model is necessary (`z*/logs`)) to **input-trne** folder.
+**Training and evaluation**: copy the required input files (labels shapefile (_tlm-hr-trn-topo.shp_) and trained model is necessary (`z*/logs`)) to **input-trne** folder.
 
     $ python3 ../scripts/prepare_data.py config-trne.yaml
     $ python3 ../../object-detector/scripts/generate_tilesets.py config-trne.yaml

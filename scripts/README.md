@@ -114,7 +114,7 @@ The script `detection_monitoring.py` has been developed in order to identify and
 The script identifies the position of polygons between different years in order to identify a single object in several datasets. All the detection shapes are added to a single dataframe. A union function is applied in order to merge overlapping polygons. Those polygons (single and merged) are added to a new dataframe with a unique ID attributed to each. This dataframe is then spatially (_sjoin_) compared to the initial dataframe containing all the polygons by year. The unique ID of the polygons of the second dataframe is then attributed to the intersecting polygons of the first dataframe. Therefore, overlapping polygons between years are assumed to describe the same object and receive the same unique ID allowing to track the object over years.
 
 <p align="center">
-<img src="../images/quarry_monitoring_strategy.png?raw=true" width="100%">
+<img src="../images/quarry_tracking_strategy.png" width="100%">
 <br />
 <i>Schematic representation of the object monitoring strategy.</i>
 </p>
@@ -157,7 +157,7 @@ The script can be run by executing the following command:
 Plot(s) will be produced in _png_ format
 
 <p align="center">
-<img src="../images/quarries_area-year.png?raw=true" width="100%">
+<img src="../images/quarry_area-year.png" width="100%">
 <br />
 <i>Quarries area vs time.</i>
 </p>

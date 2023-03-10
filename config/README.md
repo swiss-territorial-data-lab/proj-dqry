@@ -3,8 +3,8 @@
 This document provides a detailed description of the procedure to run `proj-dqry` and perform quarries automatic detections. For object detection, scripts developed in the git repository `object-detector` are used. The description of the scripts are presented here: https://github.com/swiss-territorial-data-lab/object-detector
 
 The procedure is defined in three distinct workflows:
-1. **Training and Evaluation** workflow allowing to train and evaluate the detection model with a customed dataset reviewed by domain experts and constituing the ground truth. The detector is initially trained on _SWISSIMAGE 10 cm_ mosaic of 2020 ([swisstopo](https://www.swisstopo.admin.ch/fr/geodata/images/ortho/swissimage10.html)) from using the _TLM_ data of _swisstopo_ as Ground Truth.
-2. **Prediction** workflow performing inference detection of quarries in a given image dataset (year) thanks to the previously trained model.
+1. **Training and Evaluation** workflow allowing to train and evaluate the detection model with a customed dataset reviewed by domain experts and constituing the ground truth. The detector is initially trained on [_SWISSIMAGE 10 cm_](https://www.swisstopo.admin.ch/fr/geodata/images/ortho/swissimage10.html) mosaic of 2020, using the [swissTLM3D](https://www.swisstopo.admin.ch/fr/geodata/landscape/tlm3d.html) data of manually vectorized quarries as Ground Truth.
+2. **Prediction** workflow performing inference detection of quarries in a given image dataset ([_SWISSIMAGE Journey_](https://www.swisstopo.admin.ch/en/maps-data-online/maps-geodata-online/journey-through-time-images.html) release year) thanks to the previously trained model.
 3. **Detection monitoring** workflow tracking quarry evolution over years.
 
 Configuration files are used to set the variables parameters. They must be adapted (_i.e._ path to file) if required. In **config** folder, config files relative to `proj-dqry` and `object-detector` are present, one for each defined workflow:
@@ -21,7 +21,7 @@ A config file dedicated to set the parameters of the detectron2 algorithm is als
 **TOC**
 - [Python libraries](#python-libraries)
 - [Input data](#input-data)
-- [Workflows](#workflows)
+- [Workflows instructions](#workflows-instructions)
     - [Training and Evaluation](#training-and-evaluation)
     - [Prediction](#prediction)
     - [Detection monitoring](#detection-monitoring)
@@ -29,7 +29,7 @@ A config file dedicated to set the parameters of the detectron2 algorithm is als
 
 ## Python libraries
 
-The scripts have been developed with Python 3.8 by importing libraries that are listed in `requirements.in` that have been compiled to generate `requirements.txt`. Before starting to run scripts make sure the required Python libraries that have been used during the code development are installed, otherwise incompatibilities and errors could poltentially occur. A clean method to install Python libraries is to work with a virtual environment preserving the package dependencies.
+The scripts have been developed with Python 3.8 by importing libraries that are listed in `requirements.in` that have been compiled to generate `requirements.txt`. Before starting to run scripts make sure the required Python libraries that have been used during the code development are installed, otherwise incompatibilities and errors could poltentially occur.
 
 * create a dedicated Python virtual environment:
 	    
@@ -67,7 +67,7 @@ In this main folder you can find subfolders:
 	- `z*/logs`: folders containing trained detection models obtained during the **Training and Evaluation** workflow using the Ground Truth data. The learning characteristics of the algorithm can be visualized using tensorboard (see below in Processing/Run scripts). Models at several iterations have been saved. The optimum model minimizes the validation loss curve as function of iteration. This model is selected to perform object detection. The algorithm has been trained on _SWISSIMAGE 10 cm_ 2020 mosaic for zoom levels 15 (3.2 m/px) to 18 (0.4 m/px). For each zoom level subfolders, a file `metrics_ite-*.txt` is provided summing-up the metrics values (_precision_, _recall_ and _f1-score_) obtained for the optimized model for which the iteration value corresponds to the value in the file name. The user can either use the already trained model or train his own model by running the **Training and Evaluation** workflow and use the produced model to detect quarries. It is important to note that the training procedure display some random components and therefore the training metrics and results of a new trained model might differ from the ones provided.
 
 * Shapefiles
-	- `quarry_label_tlm_revised`: polygons shapefile of the quarries labels (_TLM_ data) reviewed by the domain experts. The data of this file have been used as Ground Truth data to train and assess the automatic detection algorithm.
+	- `quarry_label_tlm_revised`: polygons shapefile of the quarries labels ([swissTLM3D](https://www.swisstopo.admin.ch/fr/geodata/landscape/tlm3d.html) data) reviewed by the domain experts. The data of this file have been used as Ground Truth data to train and assess the automatic detection algorithm.
 	- `swissimage_footprints_shape_year_per_year`: original _SWISSIMAGE_ footprints and processed/corrected polygons border shapefiles for every acquisition year. Shapefiles located in the forlder **swissimage_footprints_border** must be used except for years 2005, 2006, 2007 and 2021 for which shapefiles have been corrected and can be found in the folders  **swissimage_footprints_correction**. For year 2020, the tiles.shp to be used as input of the `object-detector` is directly provided as there is currently issue to download some tiles (that have been removed for the shapefile). 
 	- `switzerland_border`: polygon shapefile of the Switzerland border.
 
@@ -75,7 +75,7 @@ In this main folder you can find subfolders:
 	- `Explanation.txt`: file explaining the main characteristics of _SWISSIMAGE_ and the reference links.
 
 
-## Workflows
+## Workflows instructions
 
 This section detail the procedure and the command lines to execute in order to run the **Training and Evaluation** and **Prediction** workflows.
 
@@ -118,7 +118,7 @@ The fisrt script to run is [`prepare_data.py`](/../scripts/README.md) in order t
       output_folder: ../output/output-trne
       zoom_level: [z]
 
-Set the path to the desired label shapefile (AOI) (create a new folder: /proj-dqry/input/input-trne/ to the `proj-dqry` project). The **labels_shapefile** corresponds to polygons of quarries defined in the _TLM_ and manually reviewed by experts. It constitutes the ground truth.
+Set the path to the desired label shapefile (AOI) (create a new folder: /proj-dqry/input/input-trne/ to the `proj-dqry` project). The **labels_shapefile** corresponds to polygons of quarries defined in the _swissTLM3D_ and manually reviewed by experts. It constitutes the ground truth.
 
 For the quarries example:
 

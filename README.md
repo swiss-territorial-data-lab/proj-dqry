@@ -44,12 +44,17 @@ Additionnal information about the [data](/config/README.md), [scripts](/scripts/
 
 ### Hardware
 
-The scripts have been run with Ubuntu 20.04 OS on a 32 GiB RAM machine with 15 GiB GPU (NVIDIA) compatible with [CUDA](https://detectron2.readthedocs.io/en/latest/tutorials/install.html) to use the library [detectron2](https://github.com/facebookresearch/detectron2), dedicated to object detection with Deep Learning algorithms. <br>
+The scripts have been run with Ubuntu 20.04 OS on a 32 GiB RAM machine with 16 GiB GPU (NVIDIA Tesla T4) compatible with [CUDA](https://detectron2.readthedocs.io/en/latest/tutorials/install.html) to use the library [detectron2](https://github.com/facebookresearch/detectron2), dedicated to object detection with Deep Learning algorithms. <br>
 The main limitation for this project is the number of tiles to proceed and the amount of prediction. The provided requirements stand for a zoom level equal to or below 17 and for an AOI corresponding to SWISSIMAGE acquisition footprints (about a third of Switzerland surface max). For higher zoom level and/or a larger AOI, the number of data to process might lead to RAM saturation. In this case either a machine with larger RAM is required, or the AOI needs to be subdivided in a smaller area.
 
 ### Installation
 
-The scripts have been developed with Python 3.8 using PyTorch version 1.10 and CUDA version 11.3. All the dependencies required for the project are listed in `requirements.in` and `requirements.txt`. To install them:
+The scripts have been developed with Python 3.8 using PyTorch version 1.10 and CUDA version 11.3. 
+If not already done install GDAL:
+
+    sudo apt-get install -y python3-gdal gdal-bin libgdal-dev gcc g++ python3.8-dev
+
+All the dependencies required for the project are listed in `requirements.in` and `requirements.txt`. To install them:
 
 - Create a Python virtual environment
 
@@ -59,6 +64,10 @@ The scripts have been developed with Python 3.8 using PyTorch version 1.10 and C
 - Install dependencies
 
         $ pip install -r requirements.txt
+
+-_requirements.txt_ has been obtained by compiling _requirements.in_. Recompiling the file might lead to libraries version changes:
+
+        $ pip-compile requirements.in
 
 Pandas 1.5.3 is recommanded to avoid dependencies depreciation.
 

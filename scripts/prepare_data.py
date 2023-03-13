@@ -28,16 +28,11 @@ import logging.config
 import time
 import argparse
 import yaml
-import os, sys, inspect
-import requests
+import os, sys
 import geopandas as gpd
 import pandas as pd
 import morecantile
-import json
-import numpy as np
-import csv
 from tqdm import tqdm
-# import fct_misc
 import re
 
 from shapely.geometry import box
@@ -95,7 +90,7 @@ if __name__ == "__main__":
     logger.info('Creating tiles for the Area of Interest (AOI)...')   
     
     # Grid definition
-    tms = morecantile.tms.get("WebMercatorQuad")    # epsg:3857   
+    tms = morecantile.tms.get("WebMercatorQuad")    # epsg:3857
 
     # New gpd with only labels geometric info (minx, miny, maxx, maxy) 
     logger.info('- Get geometric boundaries of the label(s)')  
@@ -106,7 +101,7 @@ if __name__ == "__main__":
     logger.info('- Compute tiles for each label(s) geometry') 
     tiles_3857_all = [] 
     for row in range(len(boundary)):
-        coords = (boundary.iloc[row,0],boundary.iloc[row,1],boundary.iloc[row,2],boundary.iloc[row,3])      
+        coords = (boundary.iloc[row,0],boundary.iloc[row,1],boundary.iloc[row,2],boundary.iloc[row,3])   
         tiles_3857 = gpd.GeoDataFrame.from_features([tms.feature(x, projected=True) for x in tqdm(tms.tiles(*coords, zooms=[ZOOM_LEVEL]))])   
         tiles_3857.set_crs(epsg=3857, inplace=True)
         tiles_3857_all.append(tiles_3857)
@@ -118,7 +113,6 @@ if __name__ == "__main__":
     # - Keep only tiles that are intersecting the label   
     labels_3857=labels_4326.to_crs(epsg=3857)
     labels_3857.rename(columns={'FID': 'id_aoi'},inplace=True)
-    # fct_misc.test_crs(tms.crs,labels_3857.crs)
     tiles_aoi=gpd.sjoin(tiles_3857_aoi, labels_3857, how='inner')
 
     # - Remove duplicated tiles
@@ -127,7 +121,7 @@ if __name__ == "__main__":
 
     # - Remove useless columns, reinitilize feature id and redifined it according to xyz format  
     logger.info('- Format feature id and reorganise data set') 
-    tiles_aoi.drop(tiles_aoi.columns.difference(['geometry','id','title']), 1, inplace=True) 
+    tiles_aoi.drop(tiles_aoi.columns.difference(['geometry','id','title']), axis=1, inplace=True) 
     tiles_aoi.reset_index(drop=True, inplace=True)
 
     # Format the xyz parameters and filled in the attributes columns

@@ -60,6 +60,8 @@ The scripts have been developed with Python 3.8 using PyTorch version 1.10 and C
 
         $ pip install -r requirements.txt
 
+Pandas 1.5.3 is recommanded to avoid dependencies depreciation.
+
 ## Files structure
 
 The `proj-dqry` repository (https://github.com/swiss-territorial-data-lab/proj-dqry) contains scripts to prepare and post-process the datasets:

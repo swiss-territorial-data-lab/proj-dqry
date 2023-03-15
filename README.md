@@ -1,3 +1,5 @@
+[![Quality Gate Status](https://sonarqube.stdl.ch/api/project_badges/measure?project=swiss-territorial-data-lab_proj-dqry_AYbg2wJzr7JdaaSXwe08&metric=alert_status&token=19b8beaac256b37f6554986a3c27d10f01cf3445)](https://sonarqube.stdl.ch/dashboard?id=swiss-territorial-data-lab_proj-dqry_AYbg2wJzr7JdaaSXwe08)
+
 # Automatic detection and monitoring of quarries in Switzerland
 
 Clémence Herny<sup>1,2</sup>, Shanci Li<sup>1,3</sup>, Alessandro Cerioni<sup>1,4</sup>, Roxane Pott<sup>1,5</sup>

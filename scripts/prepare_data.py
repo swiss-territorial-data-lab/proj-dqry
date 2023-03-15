@@ -23,8 +23,6 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#import logging
-#import logging.config
 import time
 import argparse
 import yaml
@@ -36,8 +34,6 @@ import re
 
 from tqdm import tqdm
 from loguru import logger
-# from shapely.geometry import box
-# from shapely.geometry import Polygon
 
 # the following allows us to import modules from within this file's parent folder
 sys.path.insert(0, '.')
@@ -128,7 +124,7 @@ if __name__ == "__main__":
     # Format the xyz parameters and filled in the attributes columns
     xyz=[]
     for idx in tiles_aoi.index:
-        xyz.append([re.sub('[^0-9]','',coor) for coor in tiles_aoi.loc[idx,'title'].split(',')])
+        xyz.append([re.sub('\D','',coor) for coor in tiles_aoi.loc[idx,'title'].split(',')])
     tiles_aoi['id'] = [x+', '+y+', '+z for x, y, z in xyz]
     tiles_aoi = tiles_aoi[['geometry', 'title', 'id']]
 

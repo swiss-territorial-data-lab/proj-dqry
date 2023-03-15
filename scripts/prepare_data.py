@@ -23,8 +23,6 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import logging
-import logging.config
 import time
 import argparse
 import yaml
@@ -32,19 +30,16 @@ import os, sys
 import geopandas as gpd
 import pandas as pd
 import morecantile
-import numpy as np
-from tqdm import tqdm
-# import fct_misc
 import re
 
-from shapely.geometry import box
-from shapely.geometry import Polygon
+from tqdm import tqdm
+from loguru import logger
 
 # the following allows us to import modules from within this file's parent folder
 sys.path.insert(0, '.')
 
-logging.config.fileConfig('logging.conf')
-logger = logging.getLogger('root')
+logger.remove()
+logger.add(sys.stderr, format="{time:YYYY-MM-DD HH:mm:ss} - {level} - {message}", level="INFO")
 
 if __name__ == "__main__":
 
@@ -100,7 +95,7 @@ if __name__ == "__main__":
     logger.info('Creating tiles for the Area of Interest (AOI)...')   
     
     # Grid definition
-    tms = morecantile.tms.get("WebMercatorQuad")    # epsg:3857   
+    tms = morecantile.tms.get("WebMercatorQuad")    # epsg:3857
 
     # New gpd with only labels geometric info (minx, miny, maxx, maxy) 
     logger.info('- Get geometric boundaries of the label(s)')  
@@ -111,7 +106,7 @@ if __name__ == "__main__":
     logger.info('- Compute tiles for each label(s) geometry') 
     tiles_3857_all = [] 
     for row in range(len(boundary)):
-        coords = (boundary.iloc[row,0],boundary.iloc[row,1],boundary.iloc[row,2],boundary.iloc[row,3])      
+        coords = (boundary.iloc[row,0],boundary.iloc[row,1],boundary.iloc[row,2],boundary.iloc[row,3])   
         tiles_3857 = gpd.GeoDataFrame.from_features([tms.feature(x, projected=True) for x in tqdm(tms.tiles(*coords, zooms=[ZOOM_LEVEL]))])   
         tiles_3857.set_crs(epsg=3857, inplace=True)
         tiles_3857_all.append(tiles_3857)
@@ -120,7 +115,6 @@ if __name__ == "__main__":
     # - Keep only tiles that are intersecting the label   
     labels_3857=labels_4326.to_crs(epsg=3857)
     labels_3857.rename(columns={'FID': 'id_aoi'},inplace=True)
-    # # fct_misc.test_crs(tms.crs,labels_3857.crs)
     tiles_aoi=gpd.sjoin(tiles_3857_aoi, labels_3857, how='inner')
 
     # - Remove duplicated tiles
@@ -165,13 +159,13 @@ if __name__ == "__main__":
 
     # - Remove useless columns, reinitilize feature id and redifined it according to xyz format  
     logger.info('- Format feature id and reorganise data set') 
-    tiles_aoi.drop(tiles_aoi.columns.difference(['geometry','id','title']), 1, inplace=True) 
+    tiles_aoi.drop(tiles_aoi.columns.difference(['geometry','id','title']), axis=1, inplace=True) 
     tiles_aoi.reset_index(drop=True, inplace=True)
 
     # Format the xyz parameters and filled in the attributes columns
     xyz=[]
     for idx in tiles_aoi.index:
-        xyz.append([re.sub('[^0-9]','',coor) for coor in tiles_aoi.loc[idx,'title'].split(',')])
+        xyz.append([re.sub('\D','',coor) for coor in tiles_aoi.loc[idx,'title'].split(',')])
     tiles_aoi['id'] = [x+', '+y+', '+z for x, y, z in xyz]
     tiles_aoi = tiles_aoi[['geometry', 'title', 'id']]
 

@@ -31,19 +31,18 @@
  
 
 import os, sys
-import logging
-import logging.config
 import argparse
 import yaml
 import geopandas as gpd
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
+from loguru import logger
 
 # the following allows us to import modules from within this file's parent folder
 sys.path.insert(0, '.')
 
-logging.config.fileConfig('logging.conf')
-logger = logging.getLogger('root')
+logger.remove()
+logger.add(sys.stderr, format="{time:YYYY-MM-DD HH:mm:ss} - {level} - {message}", level="INFO")
 
 if __name__ == "__main__":
 

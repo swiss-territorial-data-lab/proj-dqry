@@ -29,7 +29,6 @@
 #  Inputs are defined in config-prd.yaml
 
 
-import logging, logging.config
 import time
 import geopandas as gpd
 import pandas as pd
@@ -38,13 +37,14 @@ import argparse
 import yaml
 import os, sys, inspect
 from sklearn.cluster import KMeans
+from loguru import logger
 
 
 # the following allows us to import modules from within this file's parent folder
 sys.path.insert(0, '.')
 
-logging.config.fileConfig('logging.conf')
-logger = logging.getLogger('root')
+logger.remove()
+logger.add(sys.stderr, format="{time:YYYY-MM-DD HH:mm:ss} - {level} - {message}", level="INFO")
 
 if __name__ == "__main__":
 

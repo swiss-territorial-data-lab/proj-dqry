@@ -23,8 +23,8 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import logging
-import logging.config
+#import logging
+#import logging.config
 import time
 import argparse
 import yaml
@@ -32,17 +32,18 @@ import os, sys
 import geopandas as gpd
 import pandas as pd
 import morecantile
-from tqdm import tqdm
 import re
 
-from shapely.geometry import box
-from shapely.geometry import Polygon
+from tqdm import tqdm
+from loguru import logger
+# from shapely.geometry import box
+# from shapely.geometry import Polygon
 
 # the following allows us to import modules from within this file's parent folder
 sys.path.insert(0, '.')
 
-logging.config.fileConfig('logging.conf')
-logger = logging.getLogger('root')
+logger.remove()
+logger.add(sys.stderr, format="{time:YYYY-MM-DD HH:mm:ss} - {level} - {message}", level="INFO")
 
 if __name__ == "__main__":
 

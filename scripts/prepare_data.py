@@ -151,8 +151,6 @@ if __name__ == "__main__":
         empty_tiles_3857_aoi = empty_tiles_3857_aoi[~empty_tiles_3857_aoi['title'].isin(tiles_aoi['title'])] 
 
         border_3857=border_4326.to_crs(epsg=3857)
-        # border_3857.rename(columns={'FID': 'id_aoi'},inplace=True)
-        # fct_misc.test_crs(tms.crs,labels_3857.crs)
         empty_tiles_random_aoi=gpd.sjoin(empty_tiles_3857_aoi, border_3857, how='inner').sample(n=nb_add, random_state=1)
         empty_tiles_random_aoi.drop_duplicates('title', inplace=True)      
         tiles_aoi = pd.concat([tiles_aoi, empty_tiles_random_aoi])

@@ -75,7 +75,7 @@ if __name__ == "__main__":
                 g_y = y;
 
                 # Prevent tile duplication
-                if not ( g_x, g_y ) in dupl:
+                if ( g_x, g_y ) not in dupl:
 
                     # Add tile definition
                     geo_tiling.loc[indexation,'geometry'] = Polygon( [ ( g_x, g_y ), ( g_x + args.size, g_y ), ( g_x + args.size, g_y + args.size ), ( g_x, g_y + args.size ), ( g_x, g_y ) ] )

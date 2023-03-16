@@ -72,7 +72,7 @@ Copy the polygons shapefile defining the AoI to a new folder /proj-dqry/input/in
 For the quarries example:
 
     [polygon_shapefile] = /proj-dqry/input/input-trne/tlm-hr-trn-topo.shp
-    [tile_size] = 500 (in px)
+    [tile_size] = 500 (m)
     [output_directory]: /proj-dqry/input/input-trne/
 
 - Processing

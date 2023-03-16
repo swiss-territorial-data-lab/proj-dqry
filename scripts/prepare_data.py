@@ -160,7 +160,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # Check YAML key
-    if not 'srs' in cfg:
+    if 'srs' not in cfg:
 
         # Logging info & abort
         logger.error("Key <srs> missing")
@@ -168,7 +168,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # Check YAML key
-    if not 'label' in cfg:
+    if 'label' not in cfg:
 
         # Logging info & abort
         logger.error("Missing label key")
@@ -176,7 +176,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # Check YAML key
-    if not 'tiling' in cfg:
+    if 'tiling' not in cfg:
 
         # Logging info & abort
         logger.error("Missing tiling key")
@@ -220,7 +220,7 @@ if __name__ == "__main__":
     if 'csv' in cfg['tiling']:
 
         # Check YAML key
-        if not 'split' in cfg['tiling']:
+        if 'split' not in cfg['tiling']:
 
             # Logging info & abort
             logger.error("Missing split key in tiling")

@@ -1,6 +1,6 @@
 [![Quality Gate Status](https://sonarqube.stdl.ch/api/project_badges/measure?project=swiss-territorial-data-lab_proj-dqry_AYbg2wJzr7JdaaSXwe08&metric=alert_status&token=19b8beaac256b37f6554986a3c27d10f01cf3445)](https://sonarqube.stdl.ch/dashboard?id=swiss-territorial-data-lab_proj-dqry_AYbg2wJzr7JdaaSXwe08)
 
-# Automatic detection and monitoring of quarries in Switzerland
+# Automatic detection and monitoring of mineral extraction sites in Switzerland
 
 Clémence Herny<sup>1,2</sup>, Shanci Li<sup>1,3</sup>, Alessandro Cerioni<sup>1,4</sup>, Roxane Pott<sup>1,5</sup>
 
@@ -14,15 +14,19 @@ Clémence Herny<sup>1,2</sup>, Shanci Li<sup>1,3</sup>, Alessandro Cerioni<sup>1
 Proposed by swisstopo - PROJ-DQRY <br />
 October 2022 to February 2023 - Published on ..., 2023
 
+## Abstract
+
+_Mineral extraction site (MES) monitoring is primordial for mineral resources management and environmental impact assessment. Within this scope, swisstopo has solicited the STDL to automatize the vectorization of MES over the years. This tedious task was previously performed manually and was not regularly updated. Automatic object detection has been done with Deep Learning methods on open data SWISSIMAGE RGB orthophotos (spatial resolution of 1.6 m px<sup>-1</sup>). The model proved its ability to detect MES accurately (achieving an F1 score of 82%). Inference prediction of potential MES was performed in images from 1999 to 2021, allowing us to follow the MES evolution through several years. Although the results are satisfactory, a careful review of detection must be performed by experts to validate it as actual MES. Despite this remaining manual work, the process is sped up compared to manual vectorization and can be used in the future to keep up-to-date with the MES information._
+
 ## Overview
 
-This project provides a suite of scripts and configuration files to perform quarries automatic detections by Deep Learning method on georeferenced raster images. <br>
-The project `proj-dqry` provides the preparation and post processing scritps to be used along with the project `object-detector` developped by the STDL to perform object detection and segmentation.
+This project provides a suite of scripts and configuration files to perform mineral extraction site (latter referred to as quarry) automatic detections by Deep Learning methods on georeferenced raster images. <br>
+The project `proj-dqry` provides the preparation and post-processing scripts to be used along with the project `object-detector` developed by the STDL to perform object detection and segmentation.
 
 The procedure is defined in three distinct workflows:
-1. **Training and Evaluation** workflow allowing to train and evaluate the detection model with a customed dataset reviewed by domain experts and constituing the ground truth. The detector is initially trained on [_SWISSIMAGE 10 cm_](https://www.swisstopo.admin.ch/fr/geodata/images/ortho/swissimage10.html) mosaic of 2020, using the [swissTLM3D](https://www.swisstopo.admin.ch/fr/geodata/landscape/tlm3d.html) data of manually vectorized quarries as Ground Truth.
+1. **Training and Evaluation** workflow allows to train and evaluate the detection model with a customed dataset reviewed by domain experts and constituting the ground truth. The detector is initially trained on [_SWISSIMAGE 10 cm_](https://www.swisstopo.admin.ch/fr/geodata/images/ortho/swissimage10.html) mosaic of 2020, using the [swissTLM3D](https://www.swisstopo.admin.ch/fr/geodata/landscape/tlm3d.html) data of manually vectorized quarries as Ground Truth.
 2. **Prediction** workflow performing inference detection of quarries in a given image dataset ([_SWISSIMAGE Journey_](https://www.swisstopo.admin.ch/en/maps-data-online/maps-geodata-online/journey-through-time-images.html) release year) thanks to the previously trained model.
-3. **Detection monitoring** workflow tracking quarry evolution over years.
+3. **Detection monitoring** workflow tracking quarry evolution over the years.
 
 <p align="center">
 <img src="./images/dqry_workflow_graph.png?raw=true" width="100%">
@@ -30,8 +34,8 @@ The procedure is defined in three distinct workflows:
 <i>Workflow scheme.</i>
 </p>
 
-The trained model reached a **f1 score of 82%** for the validation dataset allowing an accurate detection of quarry. A detailed documentation of the project and results can be found [here](https://github.com/swiss-territorial-data-lab/stdl-tech-website/tree/master/docs/PROJ-DQRY). <br>
-Additionnal information about the [data](/config/README.md), [scripts](/scripts/README.md) and [running](/config/README.md) the project can be found in the repository sub-folders.
+The trained model reached an **F1 score of 82%** for the validation dataset allowing accurate detection of quarry. Detailed documentation of the project and results can be found [here](https://github.com/swiss-territorial-data-lab/stdl-tech-website/tree/master/docs/PROJ-DQRY). <br>
+Additional information about the [data](/config/README.md), [scripts](/scripts/README.md), and [running](/config/README.md) of the project can be found in the repository sub-folders.
 
 **TOC**
 - [Requirements](#requirements)
@@ -47,7 +51,7 @@ Additionnal information about the [data](/config/README.md), [scripts](/scripts/
 ### Hardware
 
 The scripts have been run with Ubuntu 20.04 OS on a 32 GiB RAM machine with 16 GiB GPU (NVIDIA Tesla T4) compatible with [CUDA](https://detectron2.readthedocs.io/en/latest/tutorials/install.html) to use the library [detectron2](https://github.com/facebookresearch/detectron2), dedicated to object detection with Deep Learning algorithms. <br>
-The main limitation for this project is the number of tiles to proceed and the amount of prediction. The provided requirements stand for a zoom level equal to or below 17 and for an AOI corresponding to SWISSIMAGE acquisition footprints (about a third of Switzerland surface max). For higher zoom level and/or a larger AOI, the number of data to process might lead to RAM saturation. In this case either a machine with larger RAM is required, or the AOI needs to be subdivided in a smaller area.
+The main limitation of this project is the number of tiles to proceed with and the amount of prediction. The provided requirements stand for a zoom level equal to or below 17 and an AOI corresponding to SWISSIMAGE acquisition footprints (about a third of Switzerland's surface at maximum). For a higher zoom level and/or a larger AOI, the number of data to process might lead to RAM saturation. In this case, either a machine with larger RAM is required, or the AOI needs to be subdivided into a smaller area.
 
 ### Installation
 
@@ -71,7 +75,7 @@ All the dependencies required for the project are listed in `requirements.in` an
 
         $ pip-compile requirements.in
 
-Pandas 1.5.3 is recommanded to avoid dependencies depreciation.
+Pandas 1.5.3 is recommended to avoid dependencies depreciation.
 
 ## Files structure
 
@@ -85,9 +89,9 @@ The `proj-dqry` repository (https://github.com/swiss-territorial-data-lab/proj-d
 
 The description of each script can be found [here](/scripts/README.md).  
 
-In addition, the object detection itself is performed by tools developed in `object-detector` git repository. The description of the scripts used are presented [here](https://github.com/swiss-territorial-data-lab/object-detector)
+In addition, object detection is performed by tools developed in `object-detector` git repository. A description of the scripts used is presented [here](https://github.com/swiss-territorial-data-lab/object-detector)
 
-The general folders/files structure of the project `proj-dqry` is orgranised as follow. The path names can be customed by the end-user and * indicates number value that can vary:
+The general folders/files structure of the project `proj-dqry` is organized as follows. The path names can be customized by the end-user, and * indicates numbers that can vary:
 
 <pre>.
 ├── config                                          # configurations files folder
@@ -222,12 +226,11 @@ The general folders/files structure of the project `proj-dqry` is orgranised as 
 </pre>
 
 
-
  ## Workflow instructions
 
-Following the end to end workflow can be run by issuing the following list of actions and commands:
+Following the end-to-end, the workflow can be run by issuing the following list of actions and commands:
 
-Get `proj-dqry` and `object-detector` repository in a same folder.  
+Get `proj-dqry` and `object-detector` repositories in the same folder.  
 
     $ cd proj-dqry/
     $ python3 -m venv <dir_path>/[name of the virtual environment]
@@ -240,7 +243,7 @@ Get `proj-dqry` and `object-detector` repository in a same folder.
     $ mkdir input-dm
     $ cd proj-dqry/config/
 
-Adapt the paths and input value of the configuration files accordingly.
+Adapt the paths and input values of the configuration files accordingly.
 
 **Training and evaluation**: copy the required input files (labels shapefile (_tlm-hr-trn-topo.shp_) and trained model is necessary (`z*/logs`)) to **input-trne** folder.
 
@@ -261,7 +264,7 @@ Open the following link with a web browser: `http://localhost:6006` and identifi
     $ python3 ../../object-detector/scripts/make_predictions.py config-prd.yaml
     $ python3 ../scripts/prediction_filter.py config-prd.yaml 
 
-The workflow has been automatized and can be run for batch of years by running this command:
+The workflow has been automatized and can be run for a batch of years by running this command:
 
     $ ../scripts/batch_process.sh
 
@@ -273,7 +276,7 @@ The workflow has been automatized and can be run for batch of years by running t
 
 ## Disclaimer
 
-The results provided by the `proj-dqry` framework are resulting from a numerical implementation providing segmentation of **potential** quarry sites. False positives and false negatives detection, inherent to deep learning automatic methods, are present in the final detection dataset. A **manual inspection** of the detection must be performed prior to exploitation and interpretation of the data.
+Depending on the end purpose, we strongly recommend users not to take for granted the detections obtained through this code. Indeed, results can exhibit false positives and false negatives, as is the case in all Machine Learning-based approaches.
 
 
 ## Copyright and License

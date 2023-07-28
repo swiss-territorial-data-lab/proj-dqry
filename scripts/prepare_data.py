@@ -66,8 +66,7 @@ if __name__ == "__main__":
     if not os.path.exists(OUTPUT_DIR):
         os.makedirs(OUTPUT_DIR)
 
-   # Prepare the tiles  
-
+    # Prepare the tiles
     written_files = []
 
     ## Convert datasets shapefiles into geojson format
@@ -122,10 +121,11 @@ if __name__ == "__main__":
     tiles_aoi.reset_index(drop=True, inplace=True)
 
     # Format the xyz parameters and filled in the attributes columns
+    # TODO: review this!
     xyz=[]
     for idx in tiles_aoi.index:
         xyz.append([re.sub('\D','',coor) for coor in tiles_aoi.loc[idx,'title'].split(',')])
-    tiles_aoi['id'] = [x+', '+y+', '+z for x, y, z in xyz]
+    tiles_aoi['id'] = [f'({x}, {y}, {z})' for x, y, z in xyz]
     tiles_aoi = tiles_aoi[['geometry', 'title', 'id']]
 
     nb_tiles = len(tiles_aoi)

@@ -113,7 +113,7 @@ if __name__ == "__main__":
 
     # - Remove duplicated tiles
     if nb_labels > 1:
-        tiles_aoi.drop_duplicates('geometry', inplace=True)
+        tiles_aoi.drop_duplicates('title', inplace=True)
 
     # - Remove useless columns, reinitilize feature id and redifined it according to xyz format  
     logger.info('- Format feature id and reorganise data set') 

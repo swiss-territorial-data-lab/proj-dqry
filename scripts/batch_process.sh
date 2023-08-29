@@ -6,7 +6,7 @@
 
 echo 'Run batch processes to make quarries prediction over several years'
 
-for year in YEAR1 YEAR2 YEAR3 ...       #list of years to process 
+for year in 2022       #list of years to process 
 do
     echo ' '
     echo '-----------'

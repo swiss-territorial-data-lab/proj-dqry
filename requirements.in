@@ -1,2 +1,2 @@
-stdl-object-detector @ git+https://github.com/swiss-territorial-data-lab/object-detector.git@ac/add-setuptools
+stdl-object-detector @ git+https://github.com/swiss-territorial-data-lab/object-detector.git@v1.0.0
 morecantile

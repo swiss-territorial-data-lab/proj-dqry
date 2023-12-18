@@ -104,10 +104,10 @@ The _yaml_ configuration file has been set for the object detector workflow by r
 The training and detection of objects require the use of `object-detector` scripts. The workflow is processed in the following way:
 
     $ python3 scripts/prepare_data.py config/config_trne.yaml
-    $ python3 stdl-objdet generate_tilesets config_trne.yaml
-    $ python3 stdl-objdet train_model config_trne.yaml
-    $ python3 stdl-objdet make_detections config_trne.yaml
-    $ python3 stdl-objdet assess_detections config_trne.yaml
+    $ stdl-objdet generate_tilesets config/config_trne.yaml
+    $ stdl-objdet train_model config/config_trne.yaml
+    $ stdl-objdet make_detections config/config_trne.yaml
+    $ stdl-objdet assess_detections config/config_trne.yaml
 
 The first script to run is [`prepare_data.py`](/../scripts/README.md) to create tiles and label files that will be then used by the object detector scripts. The `prepare_data.py` section of the _yaml_ configuration file is expected as follow:
 
@@ -187,9 +187,10 @@ The _yaml_ configuration file has been set for the object detector workflow by r
 
 The prediction of objects requires the use of `object-detector` scripts. The workflow is processed in the following way:
 
-    $ python3 ../scripts/prepare_data.py [config_yaml]
-    $ python3 <path to object-detector>/scripts/generate_tilesets.py [config_yaml]
-    $ python3 <path to object-detector>/scripts/make_predictions.py [config_yaml]
+    $ python3 scripts/prepare_data.py config/config_det.yaml
+    $ stdl-objdet generate_tilesets config/config_det.yaml
+    $ stdl-objdet make_detections config/config_det.yaml
+    $ python3 scripts/filter_detections.py config/config_det.yaml
 
 The first script to run is [`prepare_data.py`](/../scripts/README.md) to create tiles and label files that will be then used by the object detector scripts. The `prepare_data.py` section of the _yaml_ configuration file is expected as follow:
 

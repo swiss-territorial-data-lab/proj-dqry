@@ -39,8 +39,8 @@ generate_tilesets.py:
       name: Unknown
       url:
     category:
-        name: "Quarry"
-        supercategory: "Land usage"
+      name: "Quarry"
+      supercategory: "Land usage"
 
 # 3-Perform the object detection based on the optimized trained model
 make_predictions.py:
@@ -48,10 +48,10 @@ make_predictions.py:
   log_subfolder: logs
   sample_tagged_img_subfolder: sample_tagged_images
   COCO_files: # relative paths, w/ respect to the working_folder
-      oth: COCO_oth.json
+    oth: COCO_oth.json
   detectron2_config_file: '../../../config/detectron2_config_dqry.yaml' # path relative to the working_folder
   model_weights:
-      pth_file: '../../../input/input-prd/z16/replicate_3/logs/model_0002999.pth'    #!!!Chose the optimized trained model, i.e. the one minimizing the validation loss curve 
+    pth_file: '../../../input/input-prd/logs/model_0002999.pth'    #!!!Chose the optimized trained model, i.e. the one minimizing the validation loss curve 
   image_metadata_json: '../output/output-prd/SWISSIMAGE_YEAR/img_metadata.json'
   rdp_simplification: # rdp = Ramer-Douglas-Peucker
     enabled: True

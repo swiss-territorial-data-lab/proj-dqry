@@ -1,45 +1,35 @@
 #!/bin/python
 # -*- coding: utf-8 -*-
 
-#  Proj quarry detection and time machine
-#
-#      Clemence Herny 
-#      Shanci Li
-#      Alessandro Cerioni 
-#      Nils Hamel
-#      Huriel Reichel
-#      Copyright (c) 2020 Republic and Canton of Geneva
-#
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# This source code is licensed under the license found in the
+# LICENSE file in the root directory of this source tree.
 
+import os
+import sys
 import time
 import argparse
 import yaml
-import os, sys
-import geopandas as gpd
-import pandas as pd
-import morecantile
 import re
 
-from tqdm import tqdm
-from loguru import logger
+import geopandas as gpd
+import morecantile
+import pandas as pd
 
-# the following allows us to import modules from within this file's parent folder
 sys.path.insert(0, '.')
+from helpers import misc
+from helpers.constants import DONE_MSG
 
-logger.remove()
-logger.add(sys.stderr, format="{time:YYYY-MM-DD HH:mm:ss} - {level} - {message}", level="INFO")
+from loguru import logger
+logger = misc.format_logger(logger)
+
+
+def add_tile_id(row):
+
+    re_search = re.search('(x=(?P<x>\d*), y=(?P<y>\d*), z=(?P<z>\d*))', row.title)
+    row['id'] = f"({re_search.group('x')}, {re_search.group('y')}, {re_search.group('z')})"
+    
+    return row
+
 
 if __name__ == "__main__":
 
@@ -48,7 +38,7 @@ if __name__ == "__main__":
     logger.info('Starting...')
 
     # Argument and parameter specification
-    parser = argparse.ArgumentParser(description="The script prepares dataset to process the quarries detection project (STDL.proj-dqry)")
+    parser = argparse.ArgumentParser(description="The script prepares the Mineral Extraction Sites dataset to be processed by the object-detector scripts")
     parser.add_argument('config_file', type=str, help='Framework configuration file')
     args = parser.parse_args()
 
@@ -66,8 +56,9 @@ if __name__ == "__main__":
     if not os.path.exists(OUTPUT_DIR):
         os.makedirs(OUTPUT_DIR)
 
-    # Prepare the tiles
     written_files = []
+    
+    # Prepare the tiles
 
     ## Convert datasets shapefiles into geojson format
     logger.info('Convert labels shapefile into GeoJSON format (EPSG:4326)...')
@@ -77,68 +68,62 @@ if __name__ == "__main__":
     nb_labels = len(labels)
     logger.info('There is/are ' + str(nb_labels) + ' polygon(s) in ' + LABELS_SHPFILE)
 
-    feature = 'labels.geojson'
-    feature_path = os.path.join(OUTPUT_DIR, feature)
-    labels_4326.to_file(feature_path, driver='GeoJSON')
-    written_files.append(feature_path)  
-    logger.info(f"...done. A file was written: {feature_path}")
+    label_filename = 'labels.geojson'
+    label_filepath = os.path.join(OUTPUT_DIR, label_filename)
+    labels_4326.to_file(label_filepath, driver='GeoJSON')
+    written_files.append(label_filepath)  
+    logger.success(f"{DONE_MSG} A file was written: {label_filepath}")
 
-    logger.info('Creating tiles for the Area of Interest (AOI)...')   
+    logger.info('Creating tiles for the Area of Interest (AoI)...')   
     
     # Grid definition
     tms = morecantile.tms.get("WebMercatorQuad")    # epsg:3857
 
     # New gpd with only labels geometric info (minx, miny, maxx, maxy) 
     logger.info('- Get geometric boundaries of the label(s)')  
-    boundary = labels_4326.bounds
+    label_boundaries_df = labels_4326.bounds
 
     # Iterate on geometric coordinates to defined tiles for a given label at a given zoom level
     # A gpd is created for each label and are then concatenate into a single gpd 
     logger.info('- Compute tiles for each label(s) geometry') 
-    tiles_3857_all = [] 
-    for row in range(len(boundary)):
-        coords = (boundary.iloc[row,0],boundary.iloc[row,1],boundary.iloc[row,2],boundary.iloc[row,3])   
-        tiles_3857 = gpd.GeoDataFrame.from_features([tms.feature(x, projected=True) for x in tqdm(tms.tiles(*coords, zooms=[ZOOM_LEVEL]))])   
-        tiles_3857.set_crs(epsg=3857, inplace=True)
-        tiles_3857_all.append(tiles_3857)
-    tiles_3857_aoi = gpd.GeoDataFrame(pd.concat(tiles_3857_all, ignore_index=True) )
+    tiles_4326_all = [] 
+
+    for label_boundary in label_boundaries_df.itertuples():
+        coords = (label_boundary.minx, label_boundary.miny, label_boundary.maxx, label_boundary.maxy)   
+        tiles_4326 = gpd.GeoDataFrame.from_features([tms.feature(x, projected=False) for x in tms.tiles(*coords, zooms=[ZOOM_LEVEL])])   
+        tiles_4326.set_crs(epsg=4326, inplace=True)
+        tiles_4326_all.append(tiles_4326)
+    tiles_4326_aoi = gpd.GeoDataFrame(pd.concat(tiles_4326_all, ignore_index=True))
 
     # Remove unrelevant tiles and reorganized the data set:
     logger.info('- Remove duplicated tiles and tiles that are not intersecting labels') 
 
-    # - Keep only tiles that are intersecting the label   
-    labels_3857=labels_4326.to_crs(epsg=3857)
-    labels_3857.rename(columns={'FID': 'id_aoi'},inplace=True)
-    tiles_aoi=gpd.sjoin(tiles_3857_aoi, labels_3857, how='inner')
+    # - Keep only tiles that are actually intersecting labels
+    labels_4326.rename(columns={'FID': 'id_aoi'}, inplace=True)
+    tiles_4326 = gpd.sjoin(tiles_4326_aoi, labels_4326, how='inner')
 
     # - Remove duplicated tiles
     if nb_labels > 1:
-        tiles_aoi.drop_duplicates('title', inplace=True)
+        tiles_4326.drop_duplicates('title', inplace=True)
 
-    # - Remove useless columns, reinitilize feature id and redifined it according to xyz format  
-    logger.info('- Format feature id and reorganise data set') 
-    tiles_aoi.drop(tiles_aoi.columns.difference(['geometry','id','title']), axis=1, inplace=True) 
-    tiles_aoi.reset_index(drop=True, inplace=True)
+    # - Remove useless columns, reset feature id and redefine it according to xyz format  
+    logger.info('- Add tile IDs and reorganise data set')
+    tiles_4326 = tiles_4326[['geometry', 'title']].copy()
+    tiles_4326.reset_index(drop=True, inplace=True)
 
-    # Format the xyz parameters and filled in the attributes columns
-    # TODO: review this!
-    xyz=[]
-    for idx in tiles_aoi.index:
-        xyz.append([re.sub('\D','',coor) for coor in tiles_aoi.loc[idx,'title'].split(',')])
-    tiles_aoi['id'] = [f'({x}, {y}, {z})' for x, y, z in xyz]
-    tiles_aoi = tiles_aoi[['geometry', 'title', 'id']]
-
-    nb_tiles = len(tiles_aoi)
+    # Add the ID column
+    tiles_4326 = tiles_4326.apply(add_tile_id, axis=1)
+    
+    nb_tiles = len(tiles_4326)
     logger.info('There was/were ' + str(nb_tiles) + ' tiles(s) created')
 
-    # Convert datasets shapefiles into geojson format
-    logger.info('Convert tiles shapefile into GeoJSON format (EPSG:4326)...')  
-    feature = 'tiles.geojson'
-    feature_path = os.path.join(OUTPUT_DIR, feature)
-    tiles_4326=tiles_aoi.to_crs(epsg=4326)
-    tiles_4326.to_file(feature_path, driver='GeoJSON')
-    written_files.append(feature_path)  
-    logger.info(f"...done. A file was written: {feature_path}")
+    # Export tiles to GeoJSON
+    logger.info('Export tiles to GeoJSON (EPSG:4326)...')  
+    tile_filename = 'tiles.geojson'
+    tile_filepath = os.path.join(OUTPUT_DIR, tile_filename)
+    tiles_4326.to_file(tile_filepath, driver='GeoJSON')
+    written_files.append(tile_filepath)  
+    logger.success(f"{DONE_MSG} A file was written: {tile_filepath}")
 
     print()
     logger.info("The following files were written. Let's check them out!")
@@ -149,5 +134,5 @@ if __name__ == "__main__":
     # Stop chronometer  
     toc = time.time()
     logger.info(f"Nothing left to be done: exiting. Elapsed time: {(toc-tic):.2f} seconds")
-
+    
     sys.stderr.flush()

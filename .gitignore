@@ -2,4 +2,4 @@ input/*
 output/*
 tools/*
 pre-processing/*
-config/config-prd_*
+config/config_det_*

@@ -13,7 +13,7 @@ prepare_data.py:
 
 # 2-Request tiles according to the provided AOI and tiles parameters
 generate_tilesets.py:
-  debug_mode: False
+  debug_mode: True
   datasets:
     aoi_tiles_geojson: ./output/output_det/SWISSIMAGE_YEAR/tiles.geojson
     orthophotos_web_service:
@@ -23,7 +23,7 @@ generate_tilesets.py:
       srs: "EPSG:2056"
       # type: XYZ # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ
       # url: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/2020/3857/{z}/{x}/{y}.jpeg
-  output_folder: ../output/output_det/SWISSIMAGE_YEAR
+  output_folder: ./output/output_det/SWISSIMAGE_YEAR
   tile_size: 256 # per side, in pixels
   overwrite: True
   n_jobs: 10
@@ -61,7 +61,7 @@ filter_detections.py:
   year: SWISSIMAGE_YEAR
   input: ./output/output_det/SWISSIMAGE_YEAR/oth_detections_at_0dot3_threshold.gpkg
   labels_shapefile: ./input/input_det/swissimage_footprint_SWISSIMAGE_YEAR.shp
-  dem: ./input/input_det/[DEM_raster]  
+  dem: ./input/input_det/switzerland_dem_EPSG2056.tif
   elevation: 1200.0 # m, altitude threshold
   score: 0.95 # detection score (from 0 to 1) provided by detectron2
   distance: 10 # m, distance use as a buffer to merge close polygons (likely to belong to the same object) together

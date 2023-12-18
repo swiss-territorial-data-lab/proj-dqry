@@ -1,28 +1,28 @@
 #  Proj quarry detection and time machine
 ################################################################
-#  Script used to run automatically Prediction workflow for quarries detection
-#  Inputs are defined in config-prd.template.yaml
+#  Script used to run automatically Detections workflow for quarries detection
+#  Inputs are defined in config_det.template.yaml
 
 
-echo 'Run batch processes to make quarries prediction over several years'
+echo 'Run batch processes to make quarries detection over several years'
 
-for year in 2022       #list of years to process 
+for year in 2022       # list of years to process 
 do
     echo ' '
     echo '-----------'
     echo Year = $year
-    sed 's/#YEAR#/$year/g' config-prd.template.yaml > config-prd_$year.yaml
-    sed -i "s/SWISSIMAGE_YEAR/$year/g" config-prd_$year.yaml
+    sed 's/#YEAR#/$year/g' config/config_det.template.yaml > config/config_det_$year.yaml
+    sed -i "s/SWISSIMAGE_YEAR/$year/g" config/config_det_$year.yaml
     echo ' '
     echo 'prepare_data.py'
-    python3 ../scripts/prepare_data.py config-prd_$year.yaml
+    python3 ./scripts/prepare_data.py config/config_det_$year.yaml
     echo ' '
     echo 'generate_tilesets.py'
-    python3 ../../object-detector/scripts/generate_tilesets.py config-prd_$year.yaml
+    stdl-objdet generate_tilesets config/config_det_$year.yaml
     echo ' '
-    echo 'make_prediction.py'
-    python3 ../../object-detector/scripts/make_predictions.py config-prd_$year.yaml
+    echo 'make_detections.py'
+    stdl-objdet make_detections config/config_det_$year.yaml
     echo ' '
-    echo 'prediction_filter.py'
-    python3 ../scripts/prediction_filter.py config-prd_$year.yaml
+    echo 'filter_detections.py'
+    python3 ./scripts/filter_detections.py config/config_det_$year.yaml
 done

@@ -105,7 +105,8 @@ if __name__ == "__main__":
     # KMeans Unsupervised Learning
     centroids = pd.DataFrame({'x': centroids.geometry.x, 'y': centroids.geometry.y})
     k = int( ( len(input) / 3 ) + 1 )
-    cluster = KMeans(n_clusters=k, algorithm = 'auto', random_state = 1)
+    cluster = KMeans(n_clusters=k, algorithm='auto', random_state=1)
+    
     model = cluster.fit(centroids)
     labels = model.predict(centroids)
     logger.info(f"KMeans algorithm computed with k = {str(k)}")

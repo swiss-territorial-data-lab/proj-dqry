@@ -12,7 +12,7 @@ prepare_data.py:
 
 # 2-Request tiles according to the provided AOI and tiles parameters
 generate_tilesets.py:
-  debug_mode: True  # sample of tiles
+  debug_mode: False  # sample of tiles
   datasets:
     aoi_tiles_geojson: ./output/output_det/tiles.geojson
     orthophotos_web_service:

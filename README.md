@@ -227,15 +227,15 @@ The workflow can be executed by running the following list of actions and comman
 
 ```bash
 $ python3 scripts/prepare_data.py config/config_trne.yaml
-$ stdl-objdet generate_tilesets config_trne.yaml config/config_trne.yaml
-$ stdl-objdet train_model config_trne.yaml config/config_trne.yaml
+$ stdl-objdet generate_tilesets config/config_trne.yaml
+$ stdl-objdet train_model config/config_trne.yaml
 $ tensorboard --logdir output/output_trne/logs
 ```
 
 Open the following link with a web browser: `http://localhost:6006` and identify the iteration minimizing the validation loss curve and select the model accordingly (**pth_file**) in `config_trne`. 
 
 ```bash
-$ stdl-objdet make_detections config_trne.yaml config/config_trne.yaml
+$ stdl-objdet make_detections config/config_trne.yaml
 $ stdl-objdet assess_detections config/config_trne.yaml
 ```
 

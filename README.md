@@ -101,9 +101,9 @@ The general folders/files structure of the project `proj-dqry` is organized as f
 │   │   ├── logs                                    # folder containing trained model 
 │   │   │   └── model_*.pth                         # selected model at iteration *
 │   │   ├── AoI
-│   │   │   ├── AoI_*.prj                           # shapefile projection of the AOI for a given year *
-│   │   │   ├── AoI_*.shp                           # shapefile of the AOI for a given year *              
-│   │   │   └── AoI_*.shx                           # shapefile indexes of the AOI for a given year *
+│   │   │   ├── AoI_*.prj                           # AoI shapefile projection for a given year *
+│   │   │   ├── AoI_*.shp                           # AoI shapefile for a given year *              
+│   │   │   └── AoI_*.shx                           # AoI shapefile indexes for a given year *
 │   └── input_trne                                  # training and evaluation inputs
 │       ├── tlm-hr-trn-topo.prj                     # shapefile projection of the labels
 │       ├── tlm-hr-trn-topo.shp                     # shapefile of the labels 
@@ -125,10 +125,10 @@ The general folders/files structure of the project `proj-dqry` is organized as f
 │   │   │   └── oth_pred_z_y_x.png
 │   │   ├── COCO_oth.json                           # COCO annotations on other DS  
 │   │   ├── img_metadata.json                       # images info
-│   │   ├── labels.json                             # AOI geometries 
+│   │   ├── labels.json                             # AoI contour 
 │   │   ├── oth_detections_at_0dot*_threshold_year-*_score-0dot*_area-*_elevation-*_distance-*.geojson
 │   │   ├── oth_detections_at_0dot*_threshold.gpkg  # detection results at a given score threshold * in geopackage format
-│   │   ├── split_aoi_tiles.geojson                 # labels shape clipped to tiles shape 
+│   │   ├── split_AoI_tiles.geojson                 # labels shape clipped to tiles shape 
 │   │   └── tiles.geojson                           # tiles geometries 
 │   └── output_trne                                 # training and evaluation outputs  
 │       ├── all-images                              # images downloaded from wmts server (XYZ values)
@@ -162,7 +162,7 @@ The general folders/files structure of the project `proj-dqry` is organized as f
 │       ├── img_metadata.json                       # images info
 │       ├── labels.json                             # labels geometries
 │       ├── precision_vs_recall.html                # plot precision vs recall
-│       ├── split_aoi_tiles.geojson                 # tagged DS tiles 
+│       ├── split_AoI_tiles.geojson                 # tagged DS tiles 
 │       ├── tagged_detections.gpkg                  # tagged detections (TP, FP, FN) 
 │       ├── tiles.json                              # tiles geometries
 │       ├── trn_metrics_vs_threshold.html           # plot metrics of train DS (r, p, f1) vs threshold values
@@ -208,7 +208,8 @@ The `proj-dqry` repository contains scripts to prepare and post-process the data
 2. `filter_detection.py` 
 3. `detection_monitoring.py` 
 4. `plots.py` 
-5. `batch_process.sh` 
+5. `get_DEM.sh` 
+6. `batch_process.sh` 
 
 The description of each script can be found [here](/scripts/README.md). 
 
@@ -228,14 +229,14 @@ $ stdl-objdet train_model config_trne.yaml config/config_trne.yaml
 $ tensorboard --logdir output/output_trne/logs
 ```
 
-Open the following link with a web browser: `http://localhost:6006` and identify the iteration minimizing the validation loss curve and selected the model accordinlgy (**pth_file**) in `config_trne`. 
+Open the following link with a web browser: `http://localhost:6006` and identify the iteration minimizing the validation loss curve and select the model accordingly (**pth_file**) in `config_trne`. 
 
 ```bash
 $ stdl-objdet make_detections config_trne.yaml config/config_trne.yaml
 $ stdl-objdet assess_detections config/config_trne.yaml
 ```
 
-**Detection**: copy the required input files (AoI shapefile (`swissimage_footprint_[YEAR].shp`) and selected trained model (`/logs`)) to **input_det** folder.
+**Detection**: copy the selected trained model to **input_det** `logs` folder (create it if it does not exist).
 
 ```bash
 $ python3 scripts/prepare_data.py config/config_det.yaml
@@ -255,7 +256,7 @@ $ scripts/batch_process.sh
 
 ```bash
 $ mkdir input_dm
-$ python3 scripts/detection_monitoring.py config/config_dm.yaml
+$ python3 scripts/detections_monitoring.py config/config_dm.yaml
 $ python3 scripts/plots.py config/config_dm.yaml
 ```
 

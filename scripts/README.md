@@ -1,6 +1,6 @@
 ## Overview
 
-Following, the scripts contained in `proj-dqry` are presented in detailed. The allow to pre- and post-process the data to perform Mineral Extraction Sites (MES, also refers to as quarry in this project) automatic detection.
+Following, the scripts contained in `proj-dqry` are presented in detailed. The allow to pre- and post-process the data to perform Mineral Extraction Sites (MES, also refered as quarry in this project) automatic detection.
 
 **TOC**
 - [Prepare data](#prepare-data)

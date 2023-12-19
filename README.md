@@ -1,6 +1,6 @@
 # Automatic detection and monitoring of mineral extraction sites in Switzerland
 
-The project aims to perform automatic detection of Quarries and Mineral Extraction Sites (MES) on georefrenced raster images of Switzerland over several years. A Deep Learning approach is used to train a model achiving a **F1 score of about 80%** (validation dataset), enabling accurate detection of MES. Detailed documentation of the project and results can be found on the [STDL technical website](https://github.com/swiss-territorial-data-lab/stdl-tech-website/tree/master/docs/PROJ-DQRY). <br>
+The project aims to perform automatic detection of Quarries and Mineral Extraction Sites (MES) on georefrenced raster images of Switzerland over several years. A Deep Learning approach is used to train a model achiving a **f1 score of about 80%** (validation dataset), enabling accurate detection of MES. Detailed documentation of the project and results can be found on the [STDL technical website](https://github.com/swiss-territorial-data-lab/stdl-tech-website/tree/master/docs/PROJ-DQRY). <br>
 
 **TOC**
 - [Overview](#overview)
@@ -260,6 +260,18 @@ $ python3 scripts/detections_monitoring.py config/config_dm.yaml
 $ python3 scripts/plots.py config/config_dm.yaml
 ```
 
+## Contributors
+
+`proj-dqry` was made possible with the help of several contributors (alphabetical):
+
+Alessandro Cerioni, Nils Hamel, Clémence Herny, Shanci Li, Adrian Meyer, Huriel Reichel
+
 ## Disclaimer
 
 Depending on the end purpose, we strongly recommend users not take for granted the detection obtained through this code. Indeed, results can exhibit false positives and false negatives, as is the case in all Machine Learning-based approaches.
+
+## License
+
+This project is licensed under the terms of the GNU GPLv3. Documentation and illustrations are licensed under the terms of the CC BY 4.0.
+
+Copyright (c) 2020-2022 Republic and Canton of Geneva

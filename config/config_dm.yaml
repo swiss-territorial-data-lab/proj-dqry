@@ -2,7 +2,7 @@
 ### Identify and monitor quarry through time ### 
 
 # Track object in different datasets over years
-detection_monitoring.py:  
+detections_monitoring.py:  
   years: [YEAR1, YEAR2, YEAR3, ...]        # Provide a list of years used for detection
   datasets:
     detection: ./input/input_dm/oth_detections_at_0dot3_threshold_year-{year}_score-0dot95_area-5000_elevation-1200_distance-10.geojson  # Final detection file, produced by detections_filter.py !!! Change value in squared bracket 

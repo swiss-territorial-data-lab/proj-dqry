@@ -13,7 +13,10 @@ The project aims to perform automatic detection of Mineral Extraction Sites (MES
     - [Data](#data)
     - [Scripts](#scripts)
     - [Workflow instructions](#workflow-instructions)
+- [Contributors](#contributors)
+- [Disclaimer](#disclaimer)
 - [Copyright and License](#copyright-and-license)
+
 
 ## Overview
 
@@ -270,7 +273,7 @@ Alessandro Cerioni, Nils Hamel, Clémence Herny, Shanci Li, Adrian Meyer, Huriel
 
 Depending on the end purpose, we strongly recommend users not take for granted the detection obtained through this code. Indeed, results can exhibit false positives and false negatives, as is the case in all Machine Learning-based approaches.
 
-## License
+## Copyright and license
 
 This project is licensed under the terms of the GNU GPLv3. Documentation and illustrations are licensed under the terms of the CC BY 4.0.
 

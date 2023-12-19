@@ -1,15 +1,16 @@
+# Automatic detection of mineral extraction sites in Switzerland
+
 ## Overview
 
 This set of scripts and configuration files are related to the _quarry/exploitation sites_ detection case. The detector is initially trained on _swissimage_ from _swisstopo_ using the _TLM_ data of _swisstopo_ for the labels.
 
-The worflow is defined in two disctinct procedures:
-* the Training and Evaluation procedure allowing to train the detection model on a given dataset and evaluated to ground truth dataset examined by domain experts.
-* the Prediction procedure performing detection of quarries in a given dataset thanks to the previously trained model.
+The workflow is defined in two distinct procedures:
+* the Training and Evaluation procedure allows for the training of the detection model on a given dataset and its evaluation with the ground truth dataset examined by domain experts.
+* the detections procedure performing detection of quarries in a given dataset thanks to the previously trained model.
 
-The quarry are detected with the tools developped in `object-detector`. 
+The quarry are detected with the tools developped in the `object-detector` developped by the STDL and located [here](https://github.com/swiss-territorial-data-lab/object-detector). Version 1.0.0 of `proj-dqry` works along with version 1.0.0 of `object-detector`. 
 
-_(to be improved)_
-
+Full documentation of the project can be found [here](https://tech.stdl.ch/PROJ-DQRY/).
 
 ## Python virtual environment
 
@@ -36,22 +37,20 @@ The requirements.txt file used for the quarries detection can be found in the `p
 
 ## Required input data
 
-The input data for the ‘Training and Evaluation’ and ‘Prediction’ workflow for the quarry detection project are stored on the STDL kDrive (https://kdrive.infomaniak.com/app/drive/548133/files) with the following access path: /STDL/Common Documents/Projets/En_cours/Quarries_TimeMachine/02_Data/
+The input data for the **Training and Evaluation** and **Detection** workflows for the quarry detection project can either be found in input folders and/or are stored on the STDL kDrive (https://kdrive.infomaniak.com/app/drive/548133/files) with the following access path: /STDL/Common Documents/Projets/En_cours/Quarries_TimeMachine/02_Data/, available on request.
 
-In this folder you can find different folders:
-*	DEM
-    -	swiss-srtm.tif: DEM of Switzerland produced from SRTM instrument (_add reference and source_). The raster is used to filter the detection according to an elevation threshold.
+* DEM
+    - swiss-srtm.tif: DEM of Switzerland produced from SRTM instrument. The raster is used to filter the detection according to an elevation threshold. It is available on request.
 * Learning models
-    - logs: folder containing trained detection model at several learning iteration. They have been obtained during the model training phase. The optimum model minimizing the validation loss curve. The learning characteristics of the algorithm can be visualized using tensorboard (see below in Processing/Run scripts). The optimum model obtained during the ‘Training and Evaluation’ phase is used to perform the ‘Prediction’ phase. The algorithm has been trained on SWISSIMAGE data with a 1 m/px resolution.
+    - logs: folder containing trained detection model at several learning iteration. They have been obtained during the model training phase. The optimum model minimizing the validation loss curve. The learning characteristics of the algorithm can be visualized using tensorboard (see below in Processing/Run scripts). The optimum model obtained during the **Training and Evaluation** phase is used to perform the **Detections** phase. The algorithm has been trained on [SWISSIMAGE 10 cm](https://www.swisstopo.admin.ch/fr/geodata/images/ortho/swissimage10.html) data with a 1 m/px resolution.
 * Shapefiles
-    -	quarry_label_tlm_revised: polygons shapefile of the quarries labels (TLM data) reviewed by the domain experts. This file has been used to train and assess the automatic detection algorithms = Ground Truth.
+    - quarry_label_tlm_revised: `tlm-hr-trn-topo.shp` is a polygons shapefile of the quarries labels (TLM data) reviewed by the domain experts. This file has been used to train and assess the automatic detection algorithms = Ground Truth.
     - swissimage_footprints_shape_year_per_year: original SWISSIMAGE footprints and processed polygons border shapefiles for every SWISSIMAGE acquisition year.
     - switzerland_border: polygon shapefile of the Switzerland border. 
-    -	tiles_prd: tiles shapefile (tiles_500_0_0_[number].shp) of the defined AoI. This file can be created with the pre-processing script `tile-generator.py` (see below in Pre-processing).   
-    -	tiles_trne: tiles shapefile (tiles_500_0_0.shp) intersecting labeled quarries in tlm-hr-trn-topo.shp file. This file can be created with the pre-processing script `tile-generator.py` (see below in Pre-processing). It contains the tiles as simple _polygons_ providing the shape of each tile.
-
+    - tiles_prd: tiles shapefile (tiles_500_0_0_[number].shp) of the defined AoI. This file can be created with the pre-processing script `tile-generator.py` with `tiles_prediction0x.geojson` as input.   
+    - tiles_trne: tiles shapefile (tiles_500_0_0.shp) intersecting labeled quarries in `tlm-hr-trn-topo.shp` file. This file can be created with the pre-processing script `tile-generator.py`. It contains the tiles as simple _polygons_ providing the shape of each tile.
 *	SWISSIMAGE
-    -	Explanation.txt: file explaining the main characteristics of SWISSIMAGE and the references links (written by R. Pott).
+    - Explanation.txt: file explaining the main characteristics of SWISSIMAGE and the references links (written by R. Pott).
 
 
 ## Workflow
@@ -60,20 +59,21 @@ In this folder you can find different folders:
 
 - Pre-processing
 
-The pre-processing, performed with the script `tile-generator.py`, generates a shapefile with tiles of a given size for an AoI defined by polygons.
+The pre-processing, performed with the script `tile-generator.py`, generates a shapefile with tiles of a given size for an AoI defined by an input shapefile.
 
-Copy the polygons shapefile defining the AoI to a new folder /proj-dqry/input/input-trne/ and proceed the command:
-
-    $ python3 tile-generator.py --labels [polygon_shapefile] 
-                                --size [tile_size]
-                                --output [output_directory]
-                                [--x-shift/--y-shift [grid origin shift]]
+```bash
+$ python3 pre-processing/tile-generator.py 
+                                    --labels [polygon_shapefile] 
+                                    --size [tile_size]
+                                    --output [output_directory]
+                                    [--x-shift/--y-shift [grid origin shift]]
+```
 
 For the quarries example:
 
-    [polygon_shapefile] = /proj-dqry/input/input-trne/tlm-hr-trn-topo.shp
+    [polygon_shapefile] = ./input/input-trne/tlm-hr-trn-topo.shp
     [tile_size] = 500 (m)
-    [output_directory]: /proj-dqry/input/input-trne/
+    [output_directory]: ./input/input-trne/
 
 - Processing
 
@@ -92,81 +92,81 @@ Two config files are provided in `proj-dqry`:
 
 The logging format file can be used as provided. The configuration _YAML_ has been set for the object detector workflow by reading dedicated section. It has to be adapted in terms of input and output location and files.
 
-In the config file verify (and custom) the paths and set the paths to the input data to the tiles shapefile (tiling) and to the AoI shapefile (label).
+The `prepare_data.py` section of the _yaml_ configuration file is expected as follows :
 
-In the config file verify (and custom) the paths of input and output. The `prepare_data.py` section of the _yaml_ configuration file is expected as follows :
-
-    prepare_data.py:
-      srs: "EPSG:2056"
-      tiling:
+```bash
+prepare_data.py:
+    srs: "EPSG:2056"
+    tiling:
         shapefile: ../input/input-trne/[Tile_Shapefile]
-      label:
+    label:
         shapefile: ../input/input-trne/[Label_Shapefile]
-      output_folder: ../output/output-trne
+    output_folder: ../output/output-trne
+```
 
 Set the path to the desired tiles shapefile (tiling) and to the AoI shapefile (label).
 
 For the quarries example:
 
-    [Tile_Shapefile] = tiles_500_0_0.shp
+    [Tile_Shapefile] = tiles_500_0_0.shp   # Output of the script `tile-generator.py`  
     [Label_Shapefile] = tlm-hr-trn-topo.shp
-
-The labels section can be missing, indicating that tiles are prepared for inference only.
 
 In both case, the _srs_ key provides the working geographical frame in order for all the input data to work together.
 
 -Run scripts
 
-The `object-detector` scripts are then called in the following way: :
+The scripts can be executed as follow:
 
-    $ python3 prepare_data.py --config [yaml_config] --logger [logging_config]
-    $ python3 [object-detector_path]/scripts/generate_tilesets.py [yaml_config]
-    $ cd [output_directory]
-    $ tar -cvf images-[image_size].tar COCO_{trn,val,tst}.json && \
-      tar -rvf images-[image_size].tar {trn,val,tst}-images-[image_size] && \
-      gzip < images-[image_size].tar > images-[image_size].tar.gz && \
-      rm all-images-[image_size].tar
-    $ cd -
-    $ cd [process_directory]
-    $ python3 [object-detector_path]/scripts/train_model.py config.yaml
-    $ python3 [object-detector_path]/scripts/make_prediction.py config.yaml
-    $ python3 [object-detector_path]/scripts/assess_predictions.py config.yaml
+```bash
+$ python3 ../scripts/prepare_data.py --config [yaml_config] --logger [logging_config]
+$ python3 [object-detector_path]/scripts/generate_tilesets.py [yaml_config]
+$ cd [output_directory]
+$ tar -cvf images-[image_size].tar COCO_{trn,val,tst}.json && \
+    tar -rvf images-[image_size].tar {trn,val,tst}-images-[image_size] && \
+    gzip < images-[image_size].tar > images-[image_size].tar.gz && \
+    rm all-images-[image_size].tar
+$ cd -
+$ cd [process_directory]
+$ python3 [object-detector_path]/scripts/train_model.py config.yaml
+$ python3 [object-detector_path]/scripts/make_detections.py config.yaml
+$ python3 [object-detector_path]/scripts/assess_detections.py config.yaml
+```
 
-In between the `train_model.py` and `make_prediction.py` script execution, the output of the detection model training must be checked and the optimum model , i.e. the one minimizing the validation loss curve, must be chosen (obtained for a given iteration number) and set as input (model_weights: pth_file:./logs/[chosen model].pth) to make the prediction. For the quarry example the optimum is obtained for a learning iteration around 2000. The file model_final correspond to the last iteration recorded during the training procedure.
+In between the `train_model.py` and `make_detections.py` script execution, the output of the detection model training must be checked and the optimum model , i.e. the one minimizing the validation loss curve, must be chosen (obtained for a given iteration number) and set as input (model_weights: pth_file:./logs/[chosen model].pth) to make the detections. For the quarry example the optimum is obtained for a learning iteration around 2000-3000. The file model_final correspond to the last iteration recorded during the training procedure.
 
 The validation loss curve can be visualized with `tensorboard` 
 
     tensorboard --logdir [logs folder]
+
 And open the following link with a web browser: `http://localhost:6006`
 
--Output
 
-Finally we obtained the following results in the folder /proj-dqry/output/output-trne/:
-
-_(to be completed)_
-
-### Prediction
+### Detection
 
 - Pre-processing
 
-_(skip this part for the moment)_
+The pre-processing, performed with the script `tile-generator.py`, generates a shapefile with tiles of a given size for an AoI defined by an input shapefile.
 
-The pre-processing, performed with the script `tile-generator.py`, generates a shapefile with tiles of a given size for an AoI defined by polygons.
-
-Copy the polygons shapefile defining the AoI to a new folder /proj-dqry/input/input-prd/ and proceed the command:
-
-    $ python3 tile-generator.py --labels [polygon_shapefile] 
-                                --size [tile_size]
-                                --output [output_directory]
-                                [--x-shift/--y-shift [grid origin shift]]
+```bash
+$ python3 pre-processing/tile-generator.py --labels [polygon_shapefile] 
+                                    --size [tile_size]
+                                    --output [output_directory]
+                                    [--x-shift/--y-shift [grid origin shift]]
+```
 
 For the quarries example:
 
-    [polygon_shapefile] = proj-dqry/input/input-prd/[AoI].shp
+    [polygon_shapefile] = ./input/input-prd/tiles_detections0x.geojson
     [tile_size] = 500 (in px)
-    [output_directory]: proj-dqry/input/input-prd/
+    [output_directory]: ./input/input-prd/
 
 - Processing
+
+-Working directory and paths
+
+By default the working directory is:
+
+    $ cd /proj-dqry/config/
 
 -Config and input data
 
@@ -175,62 +175,64 @@ Two config files are provided in `proj-dqry`:
     [yaml_config] = config-prd.yaml 
     [logging_config] = logging.conf
 
-For the quarries example, copy the following files into the folder proj-dqry/input/input-prd/
+Choose the relevant `model_*.pth` file, i.e. the one minimizing the validation loss curve (see above Training and Evaluation/Processing/Run scripts) and copy it to input/input-prd/logs/. 
 
-      model_weights:pth_file = logs
-      aoi_tiles_geojson = tiles_prediction.geojson
-      ground_truth_labels_geojson = labels.geojson 
-      tiles.geojson
+The `prepare_data.py` section of the _yaml_ configuration file is expected as follows :
 
-Choose the relevant log.pth file, i.e. the one minimizing the validation loss curve (see above Training and Evaluation/Processing/Run scripts). 
+```bash
+prepare_data.py:
+    srs: "EPSG:2056"
+    tiling:
+        shapefile: ../input/input-trne/[Tile_Shapefile]
+    label:
+        shapefile: ../input/input-trne/[Label_Shapefile]
+    output_folder: ../output/output-trne
+```
 
--Working directory and paths
+Set the path to the desired tiles shapefile (tiling) and to the AoI shapefile (label).
 
-By default the working directory is:
+For the quarries example:
 
-    $ cd /proj-dqry/config/
+    [Tile_Shapefile] = tiles_500_0_0.shp
+    [Label_Shapefile] = tiles_500_0_0.shp
 
-In the config file verify (and custom) the paths.
+In both case, the _srs_ key provides the working geographical frame in order for all the input data to work together.
 
 -Run scripts
 
-The `object-detector` scripts are then called in the following way: :
+The scripts can be executed as follow:
 
-    $ python3 [object-detector_path]/scripts/generate_tilesets.py [yaml_config]
-    $ cd [output_directory]
-    $ tar -cvf images-[image_size].tar COCO_{trn,val,tst}.json && \
-      tar -rvf images-[image_size].tar {trn,val,tst}-images-[image_size] && \
-      gzip < images-[image_size].tar > images-[image_size].tar.gz && \
-      rm all-images-[image_size].tar
-    $ cd -
-    $ cd [process_directory]
-    $ python3 [object-detector_path]/scripts/make_prediction.py config.yaml
-    $ python3 [object-detector_path]/scripts/assess_predictions.py config.yaml
-
-<em>There is still an error running the `assess_prediction.py` script as it requires groundtruh for the val, trn and prd dataset in addition to the oth dataset. It will be corrected in the future.  </em>
-
--Output:
-
-Finally we obtained the following results stored in the folder /proj-dqry/output/output-prd/:
-
-_(to be completed)_
+```bash
+$ python3 ../scripts/prepare_data.py --config [yaml_config] --logger [logging_config]
+$ python3 [object-detector_path]/scripts/generate_tilesets.py [yaml_config]
+$ cd [output_directory]
+$ tar -cvf images-[image_size].tar COCO_{trn,val,tst}.json && \
+    tar -rvf images-[image_size].tar {trn,val,tst}-images-[image_size] && \
+    gzip < images-[image_size].tar > images-[image_size].tar.gz && \
+    rm all-images-[image_size].tar
+$ cd -
+$ cd [process_directory]
+$ python3 [object-detector_path]/scripts/make_detections.py config.yaml
+```
 
 - Post-processing
 
-The quarry prediction output as a polygons shapefile needs a filtering procedure to discard false detections and improve the aesthetic of the polygons (merge polygons belonging to a single quarry). This is performed the script `prediction-filter.py`:
+The quarry detections output as a polygons shapefile needs a filtering procedure to discard false detections and improve the aesthetic of the polygons (merge polygons belonging to a single quarry). This is performed the script `prediction-filter.py`:
 
-    $ python prediction-filter.py --input [prediction shapefile GeoJSON]
+```bash
+$ python post-processing/prediction-filter.py --input [detections shapefile GeoJSON]
 				     	                --dem [digital elevation model GeoTiff]
                           	            --score [threshold value]
                                         --area [threshold value]
                                         --distance [threshold value]
                                         --output [Output GeoJSON]
+```
 
--input: indicate path to the input geojson file that needs to be filtered, i.e. oth_predictions.geojson
+-input: indicate path to the input geojson file that needs to be filtered, i.e. oth_detections.geojson
 
 -dem: indicate the path to the DEM of Switzerland. A SRTM derived product is used and can be found in the STDL kDrive. A threshold elevation is used to discard detection above the given value. Indeed 1st tests have shown numerous false detection were due to snow cover area (reflectance value close to bedrock reflectance) or mountain bedrock exposure. By default the threshold elevation has been set to 1155 m.
 
--score: each polygon comes with a confidence score given by the prediction algorithm. Polygons with low scores can be discarded. By default the value is set to 0.96.
+-score: each polygon comes with a confidence score given by the detections algorithm. Polygons with low scores can be discarded. By default the value is set to 0.96.
 
 -area: small area polygons can be discarded assuming a quarry has a minimal area. The default value is set to 1728 m2.
 

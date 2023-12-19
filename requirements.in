@@ -6,9 +6,11 @@ GDAL==3.0.4
 rtree
 geopandas
 joblib
+loguru
 pillow
 pyyaml
 rasterio
+rdp
 requests
 supermercado
 tqdm

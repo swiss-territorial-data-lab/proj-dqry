@@ -245,13 +245,14 @@ $ stdl-objdet assess_detections config/config_trne.yaml
 $ python3 scripts/prepare_data.py config/config_det.yaml
 $ python3 stdl-objdet generate_tilesets config/config_det.yaml
 $ python3 stdl-objdet make_detections config/config_det.yaml
-$ script/get_dem.sh
+$ scripts/get_dem.sh
 $ python3 scripts/filter_detections.py config/config_det.yaml
 ```
 
 The **Detection** workflow has been automated and can be run for a batch of years by executing this command:
 
 ```bash
+$ scripts/get_dem.sh
 $ scripts/batch_process.sh
 ```
 

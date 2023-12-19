@@ -1,5 +1,6 @@
 input/input_det/*
 input/input_dm/*
 input/input-prd/logs/*
+input/input-prd/DEM/*
 output/*
 tools/*

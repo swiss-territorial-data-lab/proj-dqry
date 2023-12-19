@@ -1,32 +1,29 @@
-[![Quality Gate Status](https://sonarqube.stdl.ch/api/project_badges/measure?project=swiss-territorial-data-lab_proj-dqry_AYbg2wJzr7JdaaSXwe08&metric=alert_status&token=19b8beaac256b37f6554986a3c27d10f01cf3445)](https://sonarqube.stdl.ch/dashboard?id=swiss-territorial-data-lab_proj-dqry_AYbg2wJzr7JdaaSXwe08)
-
 # Automatic detection and monitoring of mineral extraction sites in Switzerland
 
-Clémence Herny<sup>1,2</sup>, Shanci Li<sup>1,3</sup>, Alessandro Cerioni<sup>1,4</sup>, Roxane Pott<sup>1,5</sup>
+The project aims to perform automatic detection of Quarries and Mineral Extraction Sites (MES) on georefrenced raster images of Switzerland over several years. A Deep Learning approach is used to train a model achiving a **F1 score of about 80%** (validation dataset), enabling accurate detection of MES. Detailed documentation of the project and results can be found on the [STDL technical website](https://github.com/swiss-territorial-data-lab/stdl-tech-website/tree/master/docs/PROJ-DQRY). <br>
 
-<sup>1</sup> STDL  <br/>
-<sup>2</sup> ExoLabs  <br/>
-<sup>3</sup> Uzufly  <br/>
-<sup>4</sup> Etat de Genève  <br/>
-<sup>5</sup> Swisstopo  <br/>
-
-
-Proposed by swisstopo - PROJ-DQRY <br />
-October 2022 to February 2023 - Published on ..., 2023
-
-## Abstract
-
-_Mineral extraction site (MES) monitoring is primordial for mineral resources management and environmental impact assessment. Within this scope, swisstopo has solicited the STDL to automatize the vectorization of MES over the years. This tedious task was previously performed manually and was not regularly updated. Automatic object detection has been done with Deep Learning methods on open data SWISSIMAGE RGB orthophotos (spatial resolution of 1.6 m px<sup>-1</sup>). The model proved its ability to detect MES accurately (achieving an F1 score of 82%). Inference prediction of potential MES was performed in images from 1999 to 2021, allowing us to follow the MES evolution through several years. Although the results are satisfactory, a careful review of detection must be performed by experts to validate it as actual MES. Despite this remaining manual work, the process is sped up compared to manual vectorization and can be used in the future to keep up-to-date with the MES information._
+**TOC**
+- [Overview](#overview)
+- [Requirements](#requirements)
+    - [Hardware](#hardware)
+    - [Hardware](#software)
+    - [Installation](#installation)
+- [Getting started](#getting-started)
+    - [Files structure](#files-structure)
+    - [Data](#data)
+    - [Scripts](#scripts)
+    - [Workflow instructions](#workflow-instructions)
+- [Copyright and License](#copyright-and-license)
 
 ## Overview
 
-This project provides a suite of scripts and configuration files to perform mineral extraction site (latter referred to as quarry) automatic detections by Deep Learning methods on georeferenced raster images. <br>
-The project `proj-dqry` provides the preparation and post-processing scripts to be used along with the project `object-detector` developed by the STDL to perform object detection and segmentation.
+The project `proj-dqry` provides preparation and post-processing scripts. Object detection is performed with the `object-detector` framework developed by the STDL, based on Deep Learning method. Documentation can be found [here](https://tech.stdl.ch/TASK-IDET/).
 
 The procedure is defined in three distinct workflows:
-1. **Training and Evaluation** workflow allows to train and evaluate the detection model with a customed dataset reviewed by domain experts and constituting the ground truth. The detector is initially trained on [_SWISSIMAGE 10 cm_](https://www.swisstopo.admin.ch/fr/geodata/images/ortho/swissimage10.html) mosaic of 2020, using the [swissTLM3D](https://www.swisstopo.admin.ch/fr/geodata/landscape/tlm3d.html) data of manually vectorized quarries as Ground Truth.
-2. **Prediction** workflow performing inference detection of quarries in a given image dataset ([_SWISSIMAGE Journey_](https://www.swisstopo.admin.ch/en/maps-data-online/maps-geodata-online/journey-through-time-images.html) release year) thanks to the previously trained model.
-3. **Detection monitoring** workflow tracking quarry evolution over the years.
+
+1. **Training and Evaluation** enables the detection model to be trained and evaluated using a customised dataset reviewed by domain experts and constituting the ground truth. The detector is first trained on the [_SWISSIMAGE 10 cm_](https://www.swisstopo.admin.ch/fr/geodata/images/ortho/swissimage10.html) mosaic of 2020, using the [swissTLM3D](https://www.swisstopo.admin.ch/fr/geodata/landscape/tlm3d.html) data of manually vectorized MES.
+2. **Detection** detects MES in a given set of images by inference ([_SWISSIMAGE Journey_](https://www.swisstopo.admin.ch/en/maps-data-online/maps-geodata-online/journey-through-time-images.html) release year) using the previously trained model.
+3. **Detection monitoring** tracks MES evolution over the years.
 
 <p align="center">
 <img src="./images/dqry_workflow_graph.png?raw=true" width="100%">
@@ -34,149 +31,119 @@ The procedure is defined in three distinct workflows:
 <i>Workflow scheme.</i>
 </p>
 
-The trained model reached an **F1 score of 82%** for the validation dataset allowing accurate detection of quarry. Detailed documentation of the project and results can be found [here](https://github.com/swiss-territorial-data-lab/stdl-tech-website/tree/master/docs/PROJ-DQRY). <br>
-Additional information about the [data](/config/README.md), [scripts](/scripts/README.md), and [running](/config/README.md) of the project can be found in the repository sub-folders.
-
-**TOC**
-- [Requirements](#requirements)
-    - [Hardware](#hardware)
-    - [Installation](#installation)
-- [Python libraries](#python-libraries)
-- [Files structure](#files-structure)
-- [Workflow instructions](#workflow-instructions)
-- [Copyright and License](#copyright-and-license)
-
 ## Requirements
 
 ### Hardware
 
-The scripts have been run with Ubuntu 20.04 OS on a 32 GiB RAM machine with 16 GiB GPU (NVIDIA Tesla T4) compatible with [CUDA](https://detectron2.readthedocs.io/en/latest/tutorials/install.html) to use the library [detectron2](https://github.com/facebookresearch/detectron2), dedicated to object detection with Deep Learning algorithms. <br>
-The main limitation of this project is the number of tiles to proceed with and the amount of prediction. The provided requirements stand for a zoom level equal to or below 17 and an AOI corresponding to SWISSIMAGE acquisition footprints (about a third of Switzerland's surface at maximum). For a higher zoom level and/or a larger AOI, the number of data to process might lead to RAM saturation. In this case, either a machine with larger RAM is required, or the AOI needs to be subdivided into a smaller area.
+A CUDA-enabled GPU is required. <br>
+The project has been run on a 32 GiB RAM machine with 16 GiB GPU (NVIDIA Tesla T4) compatible with [CUDA](https://detectron2.readthedocs.io/en/latest/tutorials/install.html) to use the library [detectron2](https://github.com/facebookresearch/detectron2), dedicated to object detection with Deep Learning algorithm. <br>
+The main potential limitation is the number of tiles to proceed with and the amount of detection that might lead to RAM saturation. The provided requirements stand for a zoom level equal to or below 17 and an AoI corresponding to typical [SWISSIMAGE acquisition footprints](https://map.geo.admin.ch/?lang=fr&topic=ech&bgLayer=ch.swisstopo.pixelkarte-farbe&layers=ch.swisstopo.zeitreihen,ch.bfs.gebaeude_wohnungs_register,ch.bav.haltestellen-oev,ch.swisstopo.swisstlm3d-wanderwege,ch.astra.wanderland-sperrungen_umleitungen,ch.swisstopo.swissimage-product,ch.swisstopo.swissimage-product.metadata&layers_opacity=1,1,1,0.8,0.8,1,0.7&layers_visibility=false,false,false,false,false,true,true&layers_timestamp=18641231,,,,,2021,2021&time=2021) (about a third of Switzerland's surface at maximum). 
+
+### Software
+
+- OS: Ubuntu 20.04
+- The scripts have been developed with Python 3.8 using PyTorch version 1.10 and CUDA version 11.3. 
+- Python dependencies may be installed with either `pip` or `conda`, using the provided `requirements.txt` file. We advise using a [Python virtual environment](https://docs.python.org/3/library/venv.html).
 
 ### Installation
 
-The scripts have been developed with Python 3.8 using PyTorch version 1.10 and CUDA version 11.3. 
 If not already done install GDAL:
 
-    sudo apt-get install -y python3-gdal gdal-bin libgdal-dev gcc g++ python3.8-dev
+```bash
+sudo apt-get install -y python3-gdal gdal-bin libgdal-dev gcc g++ python3.8-dev
+```
 
-All the dependencies required for the project are listed in `requirements.in` and `requirements.txt`. To install them:
+All the dependencies required for the project are listed in `requirements.txt` compiled from `requirements.in`. To install them:
 
 - Create a Python virtual environment
-
-        $ python3 -m venv <dir_path>/[name of the virtual environment]
-        $ source <dir_path>/[name of the virtual environment]/bin/activate
+```bash
+$ python3 -m venv <dir_path>/[name of the virtual environment]
+$ source <dir_path>/[name of the virtual environment]/bin/activate
+```
 
 - Install dependencies
 
-        $ pip install -r requirements.txt
+```bash
+$ pip install -r requirements.txt
+```
 
--_requirements.txt_ has been obtained by compiling _requirements.in_. Recompiling the file might lead to libraries version changes:
+- If needed (update dependencies or add a new Python library), _requirements.in_ can be compiled to generate a new _requirements.txt_. This operation might lead to libraries version changes:
 
-        $ pip-compile requirements.in
+```bash
+$ pip-compile requirements.in
+```
 
-Pandas 1.5.3 is recommended to avoid dependencies depreciation.
+## Getting started
 
-## Files structure
-
-The `proj-dqry` repository (https://github.com/swiss-territorial-data-lab/proj-dqry) contains scripts to prepare and post-process the datasets:
-
-1. `prepare_data.py` 
-2. `prediction_filter.py` 
-3. `detection_monitoring.py` 
-4. `plots.py` 
-5. `batch_process.sh` 
-
-The description of each script can be found [here](/scripts/README.md).  
-
-In addition, object detection is performed by tools developed in `object-detector` git repository. A description of the scripts used is presented [here](https://github.com/swiss-territorial-data-lab/object-detector)
+### Files structure
 
 The general folders/files structure of the project `proj-dqry` is organized as follows. The path names can be customized by the end-user, and * indicates numbers that can vary:
 
 <pre>.
 ├── config                                          # configurations files folder
-│   ├── input-dm.yaml                               # detection monitoring workflow configuration file
-│   ├── input-prd.template.yaml                     # prediction workflow for several years configuration file template
-│   ├── input-prd.yaml                              # prediction workflow configuration file
-│   ├── input-trne.yaml                             # training and evaluation workflow configuration file
-│   ├── detectron2_config_dqry.yaml                 # detectron 2 configuration file 
-│   ├── logging.conf                                # logging configuration
-│   └── README.md                                   # detailled description to run workflows 
-├── images                                          # storage of images used in README.md files 
-│   ├── prediction_filter_after.png
-│   ├── prediction_filter_before.png
+│   ├── config_det.template.yaml                     # detection workflow for several years configuration file template
+│   ├── config_dm.yaml                               # detection monitoring workflow configuration file
+│   ├── config_det.yaml                              # detection workflow configuration file
+│   ├── config_trne.yaml                             # training and evaluation workflow configuration file
+│   ├── detectron2_config_dqry.yaml                  # detectron 2 configuration file 
+│   └── logging.conf                                 # logging configuration
+├── images
+│   ├── dqry_workflow_graph.png
+│   ├── detection_filter_after.png
+│   ├── detection_filter_before.png
 │   ├── quarries_area-year.png
-│   ├── quarry_monitoring_strategy.png
+│   ├── quarry_tracking_strategy.png
 │   └── tiles_examples.png
 ├── input                                           # inputs folders. Have to be created by the end-user 
-│   ├── input-dm                                    # detection monitoring input 
-│   │   ├── oth_prediction_at_0dot*_threshold_year-*_score-0dot*_area-*_elevation-*_distance-*.geojson # final filtered predictions file for a given year. Copy output of `prediction_filter.py`  
-│   ├── input-prd                                   # prediction inputs
-│   |   ├── z*                                      # trained model for a given zoom level z, _i.e._ z16 
-│   │   │   ├── logs                                # folder containing trained model 
-│   │   │   │   ├── inference
-│   │   │   │   │   ├── coco_instances_results.json
-│   │   │   │   │   └── instances_predictions.pth
-│   │   │   │   ├── events.out.tfevents.*.vm-gpu-02.*.0
-│   │   │   │   ├── last_checkpoint
-│   │   │   │   ├── metrics.json                    # computed metrics for the given interval and bin size
-│   │   │   │   ├── model_*.pth                     # saved trained model at a given iteration * 
-│   │   │   │   └── model_final.pth                 # last iteration saved model 
-│   │   │   │
-│   │   │   ├── lr.svg                              # learning rate plot (downloaded from tensorboard)
-│   │   │   ├── metrics_ite-*                       # metrics value at threshold value for the optimum model iteration * (saved manually after run assess_prediction.py) 
-│   │   │   ├── precision_vs_recall.html            # plot precision vs recall
-│   │   │   ├── total_loss.svg                      # total loss plot (downloaded from tensorboard)
-│   │   │   ├── trn_metrics_vs_threshold.html       # plot metrics of train DS (r, p, f1) vs threshold values
-│   │   │   ├── trn_TP-FN-FP_vs_threshold.html      # plot train DS TP-FN-FP vs threshold values threshold values
-│   │   │   ├── tst_metrics_vs_threshold.html       # plot metrics of test DS (r, p, f1) vs threshold values
-│   │   │   ├── tst_TP-FN-FP_vs_threshold.html      # plot test DS TP-FN-FP vs threshold valuesthreshold values
-│   │   │   ├── val_metrics_vs_threshold.html       # plot valiadation DS metrics (r, p, f1) vs threshold values
-│   │   │   ├── val_TP-FN-FP_vs_threshold.html      # plot validation DS TP-FN-FP vs threshold values
-│   │   │   └──validation_loss.svg                  # validation loss curve (downloaded from tensorboard)
-│   │   ├── swissimage_footprint_*.prj              # shapefile projection of the AOI for a given year *
-│   │   ├── swissimage_footprint_*.shp              # shapefile of the AOI for a given year *              
-│   │   └── swissimage_footprint_*.shx              # shapefile indexes of the AOI for a given year *
-│   └── input-trne                                  # training and evaluation inputs
+│   ├── input_dm                                    # detections monitoring input 
+│   │   ├── oth_detections_at_0dot*_threshold_year-*_score-0dot*_area-*_elevation-*_distance-*.geojson # final filtered detections file for a given year. Copy output of `filter_detections.py`  
+│   ├── input_det                                   # detection inputs
+│   │   ├── logs                                    # folder containing trained model 
+│   │   │   └── model_*.pth                         # selected model at iteration *
+│   │   ├── AoI
+│   │   │   ├── AoI_*.prj                           # shapefile projection of the AOI for a given year *
+│   │   │   ├── AoI_*.shp                           # shapefile of the AOI for a given year *              
+│   │   │   └── AoI_*.shx                           # shapefile indexes of the AOI for a given year *
+│   └── input_trne                                  # training and evaluation inputs
 │       ├── tlm-hr-trn-topo.prj                     # shapefile projection of the labels
 │       ├── tlm-hr-trn-topo.shp                     # shapefile of the labels 
 │       └── tlm-hr-trn-topo.shx                     # shapefile indexes of the labels
 ├── output                                          # outputs folders. Created automatically by running scripts
-│   ├── output-dm                                   # detection monitoring outputs 
-│   │   └── oth_prediction_at_0dot*_threshold_year-*_score-0dot*_area-*_elevation-*_distance-*   # final filtered predictions file for a given year
+│   ├── output_dm                                   # detection monitoring outputs 
+│   │   └── oth_detections_at_0dot*_threshold_year-*_score-0dot*_area-*_elevation-*_distance-*   # final filtered detections file for a given year
 │   │       ├── plots                               # plots storage 
 │   │       │   └── quarry_area.png                 # quarry area vs year plot  
-│   │       ├── quarry_tiles.csv                    # table containing prediction (id, geometry, area, year...) for a list of given Year. Overlapping predictions between years display the same unique ID 
-│   │       └── quarry_times.geojson                # geometry file containing prediction (id, geometry, area, year...) for a list of given Year. Overlapping predictions between years display the same unique ID 
-│   ├── output-prd                                  # prediction outputs 
+│   │       ├── quarry_tiles.csv                    # table containing detections (id, geometry, area, year...) for a list of given Year. Overlapping detections between years display the same unique ID 
+│   │       └── quarry_times.geojson                # geometry file containing detections (id, geometry, area, year...) for a list of given Year. Overlapping detections between years display the same unique ID 
+│   ├── output_det                                  # detection outputs 
 │   │   ├── all-images                              # images downloaded from wmts server (XYZ values)
 │   │   │   ├── z_y_x.json
 │   │   │   └── z_y_x.tif
 │   │   ├── oth-images                              # tagged images other DataSet
 │   │   │   └── z_y_x.tif
-│   │   ├── sample_tagged_images                    # examples of annoted prediction on images (XYZ values)
+│   │   ├── sample_tagged_images                    # examples of annoted detection on images (XYZ values)
 │   │   │   └── oth_pred_z_y_x.png
 │   │   ├── COCO_oth.json                           # COCO annotations on other DS  
 │   │   ├── img_metadata.json                       # images info
 │   │   ├── labels.json                             # AOI geometries 
-│   │   ├── oth_prediction_at_0dot*_threshold_year-*_score-0dot*_area-*_elevation-*_distance-*.geojson
-│   │   ├── oth_predictions_at_0dot*_threshold.gpkg # prediction results at a given score threshold * in geopackage format
+│   │   ├── oth_detections_at_0dot*_threshold_year-*_score-0dot*_area-*_elevation-*_distance-*.geojson
+│   │   ├── oth_detections_at_0dot*_threshold.gpkg  # detection results at a given score threshold * in geopackage format
 │   │   ├── split_aoi_tiles.geojson                 # labels shape clipped to tiles shape 
 │   │   └── tiles.geojson                           # tiles geometries 
-│   └── output-trne                                 # training and evaluation outputs  
+│   └── output_trne                                 # training and evaluation outputs  
 │       ├── all-images                              # images downloaded from wmts server (XYZ values)
 │       │   ├── z_y_x.json
 │       │   └── z_y_x.tif
 │       ├── logs                                    # folder containing trained model 
 │       │   ├── inference
 │       │   │   ├── coco_instances_results.json
-│       │   │   └── instances_predictions.pth
+│       │   │   └── instances_detections.pth
 │       │   ├── events.out.tfevents.*.vm-gpu-02.*.0
 │       │   ├── last_checkpoint
 │       │   ├── metrics.json                        # computed metrics for the given interval and bin size
 │       │   ├── model_*.pth                         # saved trained model at a given iteration *
 │       │   └── model_final.pth                     # last iteration saved model
-│       ├── sample_tagged_images                    # examples of annoted prediction on images (XYZ values)
+│       ├── sample_tagged_images                    # examples of annoted detection on images (XYZ values)
 │       │   └── pred_z_y_x.png
 │       │   └── tagged_z_y_x.png
 │       │   └── trn_pred_z_y_x.png
@@ -194,30 +161,27 @@ The general folders/files structure of the project `proj-dqry` is organized as f
 │       ├── COCO_val.json                           # COCO annotations on validation DS
 │       ├── img_metadata.json                       # images info
 │       ├── labels.json                             # labels geometries
-│       ├── metrics_ite-*                           # metrics value at threshold value for the optimum model iteration * (saved manually after run assess_prediction.py)
-│       ├── lr.svg                                  # learning rate plot (downloaded from tensorboard)
 │       ├── precision_vs_recall.html                # plot precision vs recall
 │       ├── split_aoi_tiles.geojson                 # tagged DS tiles 
-│       ├── tagged_predictions.gpkg                 # tagged predictions (TP, FP, FN) 
+│       ├── tagged_detections.gpkg                  # tagged detections (TP, FP, FN) 
 │       ├── tiles.json                              # tiles geometries
-│       ├── total_loss.svg                          # total loss plot (downloaded from tensorboard)
 │       ├── trn_metrics_vs_threshold.html           # plot metrics of train DS (r, p, f1) vs threshold values
-│       ├── trn_predictions_at_0dot*_threshold.gpkg # prediction results for train DS at a given score threshold * in geopackage
+│       ├── trn_detections_at_0dot*_threshold.gpkg  # detection results for train DS at a given score threshold * in geopackage
 │       ├── trn_TP-FN-FP_vs_threshold.html          # plot train DS TP-FN-FP vs threshold values
 │       ├── tst_metrics_vs_threshold.html           # plot metrics of test DS (r, p, f1) vs threshold values
-│       ├── tst_predictions_at_0dot*_threshold.gpkg # prediction results for test DS at a given score threshold * in geopackage
+│       ├── tst_detections_at_0dot*_threshold.gpkg  # detection results for test DS at a given score threshold * in geopackage
 │       ├── tst_TP-FN-FP_vs_threshold.html          # plot test DS TP-FN-FP vs threshold values
 │       ├── val_metrics_vs_threshold.html           # plot metrics of validation DS (r, p, f1) vs threshold values
-│       ├── val_predictions_at_0dot*_threshold.gpkg # prediction results for validation DS at a given score threshold * in geopackage
-│       ├── val_TP-FN-FP_vs_threshold.html          # plot validation DS TP-FN-FP vs threshold values
-│       └── validation_loss.svg                     # validation loss curve (downloaded from tensorboard)
+│       ├── val_detections_at_0dot*_threshold.gpkg # detection results for validation DS at a given score threshold * in geopackage
+│       └── val_TP-FN-FP_vs_threshold.html          # plot validation DS TP-FN-FP vs threshold values
 ├── scripts
-│   ├── batch_process.sh                            # batch script automatising the prediction workflow (config/input-prd.template.yaml) 
-│   ├── detection_monitoring.py                     # script tracking quarries in several years DS (config/input-dm.yaml) 
-│   ├── plots.py                                    # script plotting figures (config/input-dm.yaml) 
-│   ├── prediction_filter.py                        # script filtering predictions according to threshold values (config/input-prd.yaml) 
-│   ├── prepare_data.py                             # script preparing files to run the object-detector scripts (config/input-tren.yaml and config/input-prd.yaml) 
-│   └── README.md                                   # file explaining the role of each script 
+│   ├── batch_process.sh                            # batch script automatising the detection workflow
+│   ├── detection_monitoring.py                     # script tracking detections in several years DS 
+│   ├── filter_detection.py                         # script filtering detections according to threshold values
+│   ├── get_dem.sh                                  # batch script downloading DEM of Switzerland
+│   ├── plots.py                                    # script plotting figures
+│   ├── prepare_data.py                             # script preparing files to run the object-detector scripts
+│   └── README.md                                   # detail description of each script 
 ├── .gitignore                                      # content added to this file is ignored by git 
 ├── LICENCE
 ├── README.md                                       # presentation of the project, requirements and execution of the project 
@@ -225,63 +189,76 @@ The general folders/files structure of the project `proj-dqry` is organized as f
 └── requirements.txt                                # compiled from requirements.in file. List of python dependencies for virtual environment creation
 </pre>
 
+## Data
+
+Below the source of input data used for this project. The input data can be adapted as required.
+
+- images: annual dataset of aerial images of Switzerland from ([_SWISSIMAGE Journey_](https://www.swisstopo.admin.ch/en/maps-data-online/maps-geodata-online/journey-through-time-images.html) release year). Only RGB images are used, from 1999 to current. It includes [_SWISSIMAGE 10 cm_](https://www.swisstopo.admin.ch/fr/geodata/images/ortho/swissimage10.html), _SWISSIMAGE 25 cm_ and _SWISSIMAGE 50 cm_. The images are downloaded from [geo.admin.ch](https://www.geo.admin.ch/fr) servor using XYZ connector with this url format: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/[YEAR]/3857/{z}/{x}/{y}.jpeg
+- labels: MES labels come from [swissTLM3D](https://www.swisstopo.admin.ch/fr/geodata/landscape/tlm3d.html) product. The file _tlm-hr-trn-topo.shp_, used for training, has been reviewed and synchronised with the 2020 _SWISSIMAGE 10 cm_ mosaic.
+- AoI: image acquisition footprint by year (AoI_[YEAR].shp) are visible [here](https://map.geo.admin.ch/?lang=fr&topic=ech&bgLayer=ch.swisstopo.pixelkarte-farbe&layers=ch.swisstopo.zeitreihen,ch.bfs.gebaeude_wohnungs_register,ch.bav.haltestellen-oev,ch.swisstopo.swisstlm3d-wanderwege,ch.astra.wanderland-sperrungen_umleitungen,ch.swisstopo.swissimage-product,ch.swisstopo.swissimage-product.metadata&layers_opacity=1,1,1,0.8,0.8,1,0.7&layers_visibility=false,false,false,false,false,true,true&layers_timestamp=18641231,,,,,2021,2021&time=2021).
+- Switzerland DEM: the DEM model of Switzerland has been processed by Lukas Martinelli and can be downloaded [here](https://github.com/lukasmartinelli/swissdem).
+- trained model: the trained model used to produce the results presented in the [documentation](https://github.com/swiss-territorial-data-lab/stdl-tech-website/tree/master/docs/PROJ-DQRY) and achieving a f1 score of 82% is available on request.
+
+
+## Scripts
+
+The `proj-dqry` repository contains scripts to prepare and post-process the datasets:
+
+1. `prepare_data.py` 
+2. `filter_detection.py` 
+3. `detection_monitoring.py` 
+4. `plots.py` 
+5. `batch_process.sh` 
+
+The description of each script can be found [here](/scripts/README.md). 
+
+In addition, object detection is performed by tools developed in the `object-detector` git repository. A description of the scripts used is presented [here](https://github.com/swiss-territorial-data-lab/object-detector).
+
 
  ## Workflow instructions
 
-Following the end-to-end, the workflow can be run by issuing the following list of actions and commands:
+The workflow can be executed by running the following list of actions and commands. Adjust the paths and input values of the configuration files accordingly.
 
-Get `proj-dqry` and `object-detector` repositories in the same folder.  
+**Training and evaluation**: 
 
-    $ cd proj-dqry/
-    $ python3 -m venv <dir_path>/[name of the virtual environment]
-    $ source <dir_path>/[name of the virtual environment]/bin/activate
-    $ pip install -r requirements.txt
+```bash
+$ python3 scripts/prepare_data.py config/config_trne.yaml
+$ stdl-objdet generate_tilesets config_trne.yaml config/config_trne.yaml
+$ stdl-objdet train_model config_trne.yaml config/config_trne.yaml
+$ tensorboard --logdir output/output_trne/logs
+```
 
-    $ mkdir input
-    $ mkdir input-trne
-    $ mkdir input-prd
-    $ mkdir input-dm
-    $ cd proj-dqry/config/
+Open the following link with a web browser: `http://localhost:6006` and identify the iteration minimizing the validation loss curve and selected the model accordinlgy (**pth_file**) in `config_trne`. 
 
-Adapt the paths and input values of the configuration files accordingly.
+```bash
+$ stdl-objdet make_detections config_trne.yaml config/config_trne.yaml
+$ stdl-objdet assess_detections config/config_trne.yaml
+```
 
-**Training and evaluation**: copy the required input files (labels shapefile (_tlm-hr-trn-topo.shp_) and trained model is necessary (`z*/logs`)) to **input-trne** folder.
+**Detection**: copy the required input files (AoI shapefile (`swissimage_footprint_[YEAR].shp`) and selected trained model (`/logs`)) to **input_det** folder.
 
-    $ python3 ../scripts/prepare_data.py config-trne.yaml
-    $ python3 ../../object-detector/scripts/generate_tilesets.py config-trne.yaml
-    $ python3 ../../object-detector/scripts/train_model.py config-trne.yaml
-    $ tensorboard --logdir ../output/output-trne/logs
+```bash
+$ python3 scripts/prepare_data.py config/config_det.yaml
+$ python3 stdl-objdet generate_tilesets config/config_det.yaml
+$ python3 stdl-objdet make_detections config/config_det.yaml
+$ script/get_dem.sh
+$ python3 scripts/filter_detections.py config/config_det.yaml
+```
 
-Open the following link with a web browser: `http://localhost:6006` and identified the iteration minimizing the validation loss curve and the selected model name (**pth_file**) in `config-trne` to run `make_predictions.py`. 
+The **Detection** workflow has been automated and can be run for a batch of years by executing this command:
 
-    $ python3 ../../object-detector/scripts/make_predictions.py config-trne.yaml
-    $ python3 ../../object-detector/scripts/assess_predictions.py config-trne.yaml
+```bash
+$ scripts/batch_process.sh
+```
 
-**Predictions**: copy the required input files (AOI shapefile (`swissimage_footprint_[YEAR].shp`), trained model (`/z*/logs`) and DEM (`switzerland_dem_EPSG:2056.tif`)) to **input-prd** folder.
+**Object Monitoring**: copy the required input files (filtered detection files (`oth_detections_filter_year-{year}_[filters_list].geojson`)) to **input_dm** folder.
 
-    $ python3 ../scripts/prepare_data.py config-prd.yaml
-    $ python3 ../../object-detector/scripts/generate_tilesets.py config-prd.yaml
-    $ python3 ../../object-detector/scripts/make_predictions.py config-prd.yaml
-    $ python3 ../scripts/prediction_filter.py config-prd.yaml 
-
-The workflow has been automatized and can be run for a batch of years by running this command:
-
-    $ ../scripts/batch_process.sh
-
-**Object Monitoring**: copy the required input files (filtered prediction files (`oth_prediction_filter_year-{year}_[filters_list].geojson`)) to **input-dm** folder.
-
-    $ python3 ../scripts/detection_monitoring.py config-dm.yaml
-    $ python3 ../scripts/plots.py config-dm.yaml
-
+```bash
+$ mkdir input_dm
+$ python3 scripts/detection_monitoring.py config/config_dm.yaml
+$ python3 scripts/plots.py config/config_dm.yaml
+```
 
 ## Disclaimer
 
-Depending on the end purpose, we strongly recommend users not to take for granted the detections obtained through this code. Indeed, results can exhibit false positives and false negatives, as is the case in all Machine Learning-based approaches.
-
-
-## Copyright and License
- 
-**proj-dqry** - Nils Hamel, Adrian Meyer, Huriel Reichel, Clémence Herny, Shanci Li, Alessandro Cerioni, Roxane Pott <br >
-Copyright (c) 2020-2022 Republic and Canton of Geneva
-
-This program is licensed under the terms of the GNU GPLv3. Documentation and illustrations are licensed under the terms of the CC BY 4.0.
+Depending on the end purpose, we strongly recommend users not take for granted the detection obtained through this code. Indeed, results can exhibit false positives and false negatives, as is the case in all Machine Learning-based approaches.

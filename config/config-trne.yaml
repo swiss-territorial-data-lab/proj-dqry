@@ -1,9 +1,9 @@
 prepare_data.py:
   srs: "EPSG:2056"
   tiling:
-    shapefile: ../input/input-test/[AOI_Shapefile]
+    shapefile: ../input/input-trne/[AOI_Shapefile]
   label:
-    shapefile: ../input/input-test/tlm-hr-trn-topo.shp
+    shapefile: ../input/input-trne/tlm-hr-trn-topo.shp
   output_folder: ../output/output-trne
 
 generate_tilesets.py:

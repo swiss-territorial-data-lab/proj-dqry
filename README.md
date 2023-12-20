@@ -71,9 +71,9 @@ $ python3 pre-processing/tile-generator.py
 
 For the quarries example:
 
-    [polygon_shapefile] = ./input/input-trne/tlm-hr-trn-topo.shp
+    [polygon_shapefile] = input/input-trne/tlm-hr-trn-topo.shp
     [tile_size] = 500 (m)
-    [output_directory]: ./input/input-trne/
+    [output_directory]: input/input-trne/
 
 - Processing
 
@@ -118,8 +118,8 @@ In both case, the _srs_ key provides the working geographical frame in order for
 The scripts can be executed as follow:
 
 ```bash
-$ python3 ../scripts/prepare_data.py --config [yaml_config] --logger [logging_config]
-$ python3 [object-detector_path]/scripts/generate_tilesets.py [yaml_config]
+$ python3 ../scripts/prepare_data.py --config config-trne.yaml --logger logging.conf
+$ python3 [object-detector_path]/scripts/generate_tilesets.py config-trne.yaml
 $ cd [output_directory]
 $ tar -cvf images-[image_size].tar COCO_{trn,val,tst}.json && \
     tar -rvf images-[image_size].tar {trn,val,tst}-images-[image_size] && \
@@ -127,9 +127,9 @@ $ tar -cvf images-[image_size].tar COCO_{trn,val,tst}.json && \
     rm all-images-[image_size].tar
 $ cd -
 $ cd [process_directory]
-$ python3 [object-detector_path]/scripts/train_model.py config.yaml
-$ python3 [object-detector_path]/scripts/make_detections.py config.yaml
-$ python3 [object-detector_path]/scripts/assess_detections.py config.yaml
+$ python3 [object-detector_path]/scripts/train_model.py config-trne.yaml
+$ python3 [object-detector_path]/scripts/make_detections.py config-trne.yaml
+$ python3 [object-detector_path]/scripts/assess_detections.py config-trne.yaml
 ```
 
 In between the `train_model.py` and `make_detections.py` script execution, the output of the detection model training must be checked and the optimum model , i.e. the one minimizing the validation loss curve, must be chosen (obtained for a given iteration number) and set as input (model_weights: pth_file:./logs/[chosen model].pth) to make the detections. For the quarry example the optimum is obtained for a learning iteration around 2000-3000. The file model_final correspond to the last iteration recorded during the training procedure.
@@ -156,9 +156,9 @@ $ python3 pre-processing/tile-generator.py --labels [polygon_shapefile]
 
 For the quarries example:
 
-    [polygon_shapefile] = ./input/input-prd/tiles_detections0x.geojson
+    [polygon_shapefile] = input/input-prd/tiles_detections0x.geojson
     [tile_size] = 500 (in px)
-    [output_directory]: ./input/input-prd/
+    [output_directory]: input/input-prd/
 
 - Processing
 
@@ -203,8 +203,8 @@ In both case, the _srs_ key provides the working geographical frame in order for
 The scripts can be executed as follow:
 
 ```bash
-$ python3 ../scripts/prepare_data.py --config [yaml_config] --logger [logging_config]
-$ python3 [object-detector_path]/scripts/generate_tilesets.py [yaml_config]
+$ python3 ../scripts/prepare_data.py --config config-prd.yaml --logger logging.conf
+$ python3 [object-detector_path]/scripts/generate_tilesets.py config-prd.yaml
 $ cd [output_directory]
 $ tar -cvf images-[image_size].tar COCO_{trn,val,tst}.json && \
     tar -rvf images-[image_size].tar {trn,val,tst}-images-[image_size] && \
@@ -212,7 +212,7 @@ $ tar -cvf images-[image_size].tar COCO_{trn,val,tst}.json && \
     rm all-images-[image_size].tar
 $ cd -
 $ cd [process_directory]
-$ python3 [object-detector_path]/scripts/make_detections.py config.yaml
+$ python3 [object-detector_path]/scripts/make_detections.py config-prd.yaml
 ```
 
 - Post-processing

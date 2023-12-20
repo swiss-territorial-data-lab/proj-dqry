@@ -6,7 +6,7 @@ The project aims to perform automatic detection of Mineral Extraction Sites (MES
 - [Overview](#overview)
 - [Requirements](#requirements)
     - [Hardware](#hardware)
-    - [Hardware](#software)
+    - [Software](#software)
     - [Installation](#installation)
 - [Getting started](#getting-started)
     - [Files structure](#files-structure)

@@ -222,7 +222,7 @@ In addition, object detection is performed by tools developed in the `object-det
 
  ## Workflow instructions
 
-The workflow can be executed by running the following list of actions and commands. Adjust the paths and input values of the configuration files accordingly.
+The workflow can be executed by running the following list of actions and commands. Adjust the paths and input values of the configuration files accordingly. Content of config files in [] must be assigned.  
 
 **Training and evaluation**: 
 

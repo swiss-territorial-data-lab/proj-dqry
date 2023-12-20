@@ -239,12 +239,12 @@ $ stdl-objdet make_detections config/config_trne.yaml
 $ stdl-objdet assess_detections config/config_trne.yaml
 ```
 
-**Detection**: copy the selected trained model to **input_det** `logs` folder (create it if it does not exist).
+**Detection**: copy the selected trained model to `input/input_det/logs` folder (create it if it does not exist).
 
 ```bash
 $ python3 scripts/prepare_data.py config/config_det.yaml
-$ python3 stdl-objdet generate_tilesets config/config_det.yaml
-$ python3 stdl-objdet make_detections config/config_det.yaml
+$ stdl-objdet generate_tilesets config/config_det.yaml
+$ stdl-objdet make_detections config/config_det.yaml
 $ scripts/get_dem.sh
 $ python3 scripts/filter_detections.py config/config_det.yaml
 ```

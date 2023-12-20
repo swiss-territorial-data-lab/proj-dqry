@@ -6,7 +6,7 @@
 
 echo 'Run batch processes to make quarries detection over several years'
 
-for year in 2022       # list of years to process 
+for year in 2000, 2001, 2002       # list of years to process 
 do
     echo ' '
     echo '-----------'

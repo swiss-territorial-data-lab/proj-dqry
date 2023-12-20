@@ -6,7 +6,7 @@
 prepare_data.py: 
   srs: "EPSG:2056"  # Projection of the input file
   datasets:
-    labels_shapefile: ./input/input_det/[AOI_Shapefile]
+    labels_shapefile: ./input/input_det/AoI/[AOI_Shapefile]
   output_folder: ./output/output_det
   zoom_level: 16  # z, keep between 15 and 18  
 
@@ -17,10 +17,10 @@ generate_tilesets.py:
     aoi_tiles_geojson: ./output/output_det/tiles.geojson
     orthophotos_web_service:
       type: XYZ # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ
-      url: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/1999/3857/{z}/{x}/{y}.jpeg
+      url: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/[YEAR]/3857/{z}/{x}/{y}.jpeg
   output_folder: ./output/output_det
   tile_size: 256 # per side, in pixels
-  overwrite: True
+  overwrite: False
   n_jobs: 10
   COCO_metadata:
     year: 2021
@@ -55,10 +55,10 @@ make_detections.py:
 filter_detections.py:
   year: 2020
   input: ./output/output_det/oth_detections_at_0dot3_threshold.gpkg
-  labels_shapefile: ./input/input_det/[AOI_Shapefile]
+  labels_shapefile: ./input/input_det/AoI/[AoI_Shapefile]
   dem: ./input/input_det/DEM/switzerland_dem_EPSG2056.tif
   elevation: 1200.0 # m, altitude threshold
   score: 0.95 # detection score (from 0 to 1) provided by detectron2
   distance: 10 # m, distance use as a buffer to merge close polygons (likely to belong to the same object) together
   area: 5000.0 # m2, area threshold under which polygons are discarded
-  output: ./output/output_prd/oth_detections_at_0dot3_threshold_year-{year}_score-{score}_area-{area}_elevation-{elevation}_distance-{distance}.geojson
+  output: ./output/output_det/oth_detections_at_0dot3_threshold_year-{year}_score-{score}_area-{area}_elevation-{elevation}_distance-{distance}.geojson

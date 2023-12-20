@@ -7,22 +7,22 @@
 prepare_data.py: 
   srs: "EPSG:2056"  # Projection of the input file
   datasets:
-    labels_shapefile: ./input/input_det/swissimage_footprint_SWISSIMAGE_YEAR.shp
+    labels_shapefile: ./input/input_det/AoI/swissimage_footprint_SWISSIMAGE_YEAR.shp
   output_folder: ./output/output_det/SWISSIMAGE_YEAR
   zoom_level: 16  # z, keep between 15 and 18  
 
 # 2-Request tiles according to the provided AOI and tiles parameters
 generate_tilesets.py:
-  debug_mode: True
+  debug_mode: False
   datasets:
     aoi_tiles_geojson: ./output/output_det/SWISSIMAGE_YEAR/tiles.geojson
     orthophotos_web_service:
-      type: WMS # supported values: 1. MIL = Map Image Layer 2. WMS
-      url: https://wms.geo.admin.ch/service
-      layers: ch.swisstopo.swissimage
-      srs: "EPSG:2056"
-      # type: XYZ # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ
-      # url: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/2020/3857/{z}/{x}/{y}.jpeg
+      # type: WMS # supported values: 1. MIL = Map Image Layer 2. WMS
+      # url: https://wms.geo.admin.ch/service
+      # layers: ch.swisstopo.swissimage
+      # srs: "EPSG:2056"
+      type: XYZ # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ
+      url: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/2020/3857/{z}/{x}/{y}.jpeg
   output_folder: ./output/output_det/SWISSIMAGE_YEAR
   tile_size: 256 # per side, in pixels
   overwrite: True
@@ -60,10 +60,10 @@ make_detections.py:
 filter_detections.py:
   year: SWISSIMAGE_YEAR
   input: ./output/output_det/SWISSIMAGE_YEAR/oth_detections_at_0dot3_threshold.gpkg
-  labels_shapefile: ./input/input_det/swissimage_footprint_SWISSIMAGE_YEAR.shp
+  labels_shapefile: ./input/input_det/AoI/swissimage_footprint_SWISSIMAGE_YEAR.shp
   dem: ./input/input_det/DEM/switzerland_dem_EPSG2056.tif
   elevation: 1200.0 # m, altitude threshold
   score: 0.95 # detection score (from 0 to 1) provided by detectron2
   distance: 10 # m, distance use as a buffer to merge close polygons (likely to belong to the same object) together
   area: 5000.0 # m2, area threshold under which polygons are discarded
-  output: ./output/output_prd/SWISSIMAGE_YEAR/oth_detections_at_0dot3_threshold_year-{year}_score-{score}_area-{area}_elevation-{elevation}_distance-{distance}.geojson
+  output: ./output/output_det/SWISSIMAGE_YEAR/oth_detections_at_0dot3_threshold_year-{year}_score-{score}_area-{area}_elevation-{elevation}_distance-{distance}.geojson

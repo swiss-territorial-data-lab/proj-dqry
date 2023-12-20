@@ -46,7 +46,7 @@ The main potential limitation is the number of tiles to proceed with and the amo
 
 - OS: Ubuntu 20.04
 - The scripts have been developed with Python 3.8 using PyTorch version 1.10 and CUDA version 11.3. 
-- Compatible `object-detector` version 1.0.0 
+- Compatible [`object-detector`](https://github.com/swiss-territorial-data-lab/object-detector) version [1.0.0](https://github.com/swiss-territorial-data-lab/object-detector/releases/tag/v1.0.0) 
 - Python dependencies may be installed with either `pip` or `conda`, using the provided `requirements.txt` file. We advise using a [Python virtual environment](https://docs.python.org/3/library/venv.html).
 
 ### Installation

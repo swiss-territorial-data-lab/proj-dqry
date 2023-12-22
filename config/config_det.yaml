@@ -54,7 +54,7 @@ make_detections.py:
 # 4-Filtering and merging detection polygons to improve results
 filter_detections.py:
   year: [YEAR]
-  input: ./output/output_det/oth_detections_at_0dot3_threshold.gpkg
+  detections: ./output/output_det/oth_detections_at_0dot3_threshold.gpkg
   labels_shapefile: ./input/input_det/AoI/[AoI_Shapefile]
   dem: ./input/input_det/DEM/switzerland_dem_EPSG2056.tif
   elevation: 1200.0 # m, altitude threshold

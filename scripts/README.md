@@ -128,7 +128,7 @@ Input and output paths of the config file must be adapted if necessary. The scri
 The script can be run by executing the following command:
 
 ```bash
-$ python3  <dir_path>/scripts/detections_tracking.py <dir_path>/config/config_dt.yaml
+$ python  <dir_path>/scripts/detections_tracking.py <dir_path>/config/config_dt.yaml
 ```
 
 The outputs are a _geojson_ and _csv_ (**quarry_time**) files saving detections over the years with their characteristics (ID_object, ID_feature, year, score, area, geometry). 
@@ -152,7 +152,7 @@ Input or output paths must be adapted if necessary. The script takes as input a 
 The script can be run by executing the following command:
 
 ```bash
-$ python3  <dir_path>/scripts/filter_detections.py <dir_path>/config/config_dt.yaml
+$ python <dir_path>/scripts/filter_detections.py <dir_path>/config/config_dt.yaml
 ```
 
 Plot(s) will be produced in _png_ format

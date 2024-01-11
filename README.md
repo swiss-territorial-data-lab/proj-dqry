@@ -218,8 +218,7 @@ The `proj-dqry` repository contains scripts to prepare and post-process the data
 
 The description of each script can be found [here](./scripts/README.md). 
 
-Object detection is performed with tools present in the `object-detector` git repository. A description of the scripts used is presented [here](https://github.com/swiss-territorial-data-lab/object-detector).
-
+Object detection is performed with tools present in the [`object-detector`](https://github.com/swiss-territorial-data-lab/object-detector) git repository. 
 
  ## Workflow instructions
 
@@ -228,7 +227,7 @@ The workflow can be executed by running the following list of actions and comman
 **Training and evaluation**: 
 
 ```bash
-$ python3 scripts/prepare_data.py config/config_trne.yaml
+$ python scripts/prepare_data.py config/config_trne.yaml
 $ stdl-objdet generate_tilesets config/config_trne.yaml
 $ stdl-objdet train_model config/config_trne.yaml
 $ tensorboard --logdir output/output_trne/logs
@@ -244,11 +243,11 @@ $ stdl-objdet assess_detections config/config_trne.yaml
 **Detection**: copy the selected trained model to `input/input_det/logs` folder (create it if it does not exist).
 
 ```bash
-$ python3 scripts/prepare_data.py config/config_det.yaml
+$ python scripts/prepare_data.py config/config_det.yaml
 $ stdl-objdet generate_tilesets config/config_det.yaml
 $ stdl-objdet make_detections config/config_det.yaml
 $ scripts/get_dem.sh
-$ python3 scripts/filter_detections.py config/config_det.yaml
+$ python scripts/filter_detections.py config/config_det.yaml
 ```
 
 The **Detection** workflow has been automated and can be run for a batch of years by executing these commands:
@@ -262,8 +261,8 @@ $ scripts/batch_process.sh
 
 ```bash
 $ mkdir input_dt
-$ python3 scripts/detections_tracking.py config/config_dt.yaml
-$ python3 scripts/plots.py config/config_dt.yaml
+$ python scripts/detections_tracking.py config/config_dt.yaml
+$ python scripts/plots.py config/config_dt.yaml
 ```
 
 ## Contributors

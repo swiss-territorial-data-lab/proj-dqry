@@ -10,7 +10,7 @@ detections_tracking.py:
 
 # Plots
 plots.py:  
-  object_id: [ID_OBJECT1, ID_OBJECT2, ID_OBJECT3,...]      # Provide a list of id_object defined by detection_tracking.py
+  object_id: [ID_OBJECT1, ID_OBJECT2, ID_OBJECT3,...]      # Provide a list of id_object defined by detections_tracking.py
   plots: ['area-year'] 
   datasets:
     detection: ./output/output_dm/oth_detections_at_0dot3_threshold_score-0dot95_area-5000_elevation-1200_distance-10/quarry_times.geojson  # Object tracking file, produced by detection_monitoring.py

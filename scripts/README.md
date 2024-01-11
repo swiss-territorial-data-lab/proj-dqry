@@ -113,10 +113,10 @@ The script identifies the position of polygons between different years to identi
 <i>Schematic representation of the object tracking strategy.</i>
 </p>
 
-The `detection_tracking.py` section of the _yaml_ configuration file is expected as follow:
+The `detections_tracking.py` section of the _yaml_ configuration file is expected as follow:
 
 ```bash
-detection_tracking.py:  
+detections_tracking.py:  
 years: [YEAR1, YEAR2, YEAR3,...]       
 datasets:
     detection: ./input/input_dt/oth_detection_at_0dot*_threshold_year-{year}_score-[SCORE]_elevation-[elevation]_distance-[distance]_area-[area].geojson  
@@ -128,7 +128,7 @@ Input and output paths of the config file must be adapted if necessary. The scri
 The script can be run by executing the following command:
 
 ```bash
-$ python3  <dir_path>/scripts/detection_tracking.py <dir_path>/config/config_dt.yaml
+$ python3  <dir_path>/scripts/detections_tracking.py <dir_path>/config/config_dt.yaml
 ```
 
 The outputs are a _geojson_ and _csv_ (**quarry_time**) files saving detections over the years with their characteristics (ID_object, ID_feature, year, score, area, geometry). 

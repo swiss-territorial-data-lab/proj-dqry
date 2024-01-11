@@ -26,7 +26,7 @@ The procedure is defined in three distinct workflows:
 
 1. **Training and evaluation**: enables the detection model to be trained and evaluated using a customised dataset reviewed by domain experts and constituting the ground truth. The detector is first trained on the [_SWISSIMAGE 10 cm_](https://www.swisstopo.admin.ch/fr/geodata/images/ortho/swissimage10.html) mosaic of 2020, using manually vectorized MES of the [swissTLM3D](https://www.swisstopo.admin.ch/fr/geodata/landscape/tlm3d.html) product.
 2. **Detection**: permits the inference detection of MES in a given set of images ([_SWISSIMAGE Journey_](https://www.swisstopo.admin.ch/en/maps-data-online/maps-geodata-online/journey-through-time-images.html)) using the previously trained model.
-3. **Detection tracking**: identifies and tracks MES evolution over time.
+3. **Detections tracking**: identifies and tracks MES evolution over time.
 
 <p align="center">
 <img src="./images/dqry_workflow_graph.png?raw=true" width="100%">
@@ -86,7 +86,7 @@ The folders/files of the project `proj-dqry` (in combination with `object-detect
 <pre>.
 ├── config                                           # configurations files folder
 │   ├── config_det.template.yaml                     # template file for detection workflow over several years
-│   ├── config_dt.yaml                               # detection tracking workflow
+│   ├── config_dt.yaml                               # detections tracking workflow
 │   ├── config_det.yaml                              # detection workflow
 │   ├── config_trne.yaml                             # training and evaluation workflow
 │   ├── detectron2_config_dqry.yaml                  # detectron 2
@@ -113,7 +113,7 @@ The folders/files of the project `proj-dqry` (in combination with `object-detect
 │       ├── tlm-hr-trn-topo.shp                     # shapefile of the labels 
 │       └── tlm-hr-trn-topo.shx                     # shapefile indexes of the labels
 ├── output                                          # outputs folders
-│   ├── output_dt                                   # detection tracking outputs 
+│   ├── output_dt                                   # detections tracking outputs 
 │   │   └── oth_detections_at_0dot*_threshold_year-*_score-0dot*_area-*_elevation-*_distance-*   # final filtered detections file for a given year
 │   │       ├── plots                               # plots storage 
 │   │       │   └── quarry_area.png                 # quarry area vs year plot  
@@ -180,7 +180,7 @@ The folders/files of the project `proj-dqry` (in combination with `object-detect
 │       └── val_TP-FN-FP_vs_threshold.html          # plot validation dataset TP-FN-FP vs threshold values
 ├── scripts
 │   ├── batch_process.sh                            # batch script automatising the detection workflow
-│   ├── detection_tracking.py                       # script tracking detections in several years dataset 
+│   ├── detections_tracking.py                       # script tracking detections in mulitple years dataset 
 │   ├── filter_detection.py                         # script filtering detections according to threshold values
 │   ├── get_dem.sh                                  # batch script downloading the DEM of Switzerland
 │   ├── plots.py                                    # script plotting figures
@@ -211,7 +211,7 @@ The `proj-dqry` repository contains scripts to prepare and post-process the data
 
 1. `prepare_data.py` 
 2. `filter_detection.py` 
-3. `detection_tracking.py` 
+3. `detections_tracking.py` 
 4. `plots.py` 
 5. `get_DEM.sh` 
 6. `batch_process.sh` 
@@ -258,7 +258,7 @@ $ scripts/get_dem.sh
 $ scripts/batch_process.sh
 ```
 
-**Detection tracking**: copy the required input files (filtered detection files (`oth_detections_filter_year-{year}_[filters_list].geojson`)) to **input_dt** folder.
+**Detections tracking**: copy the required input files (filtered detection files (`oth_detections_filter_year-{year}_[filters_list].geojson`)) to **input_dt** folder.
 
 ```bash
 $ mkdir input_dt

@@ -176,11 +176,11 @@ The folders/files of the project `proj-dqry` (in combination with `object-detect
 │       ├── tst_detections_at_0dot*_threshold.gpkg  # detection results for test DS at a given score threshold
 │       ├── tst_TP-FN-FP_vs_threshold.html          # plot test dataset TP-FN-FP vs threshold values
 │       ├── val_metrics_vs_threshold.html           # plot metrics of validation dataset vs threshold values
-│       ├── val_detections_at_0dot*_threshold.gpkg # detection results for validation DS at a given score threshold
+│       ├── val_detections_at_0dot*_threshold.gpkg  # detection results for validation DS at a given score threshold
 │       └── val_TP-FN-FP_vs_threshold.html          # plot validation dataset TP-FN-FP vs threshold values
 ├── scripts
 │   ├── batch_process.sh                            # batch script automatising the detection workflow
-│   ├── detections_tracking.py                       # script tracking detections in mulitple years dataset 
+│   ├── detections_tracking.py                      # script tracking detections in mulitple years dataset 
 │   ├── filter_detection.py                         # script filtering detections according to threshold values
 │   ├── get_dem.sh                                  # batch script downloading the DEM of Switzerland
 │   ├── plots.py                                    # script plotting figures

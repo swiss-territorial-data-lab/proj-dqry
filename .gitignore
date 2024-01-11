@@ -1,10 +1,10 @@
-input/input_dm
 input/input_det/z*
 input/input_det/DEM
 input/input_det/logs
 input/input_det/SWISSIMAGE_footprints
 input/input-trne/*
 input/input-prd/*
+input/input_dt/*
 output/*
 tools/*
 pre-processing/*

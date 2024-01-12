@@ -92,12 +92,6 @@ The folders/files of the project `proj-dqry` (in combination with `object-detect
 │   ├── detectron2_config_dqry.yaml                  # detectron 2
 │   └── logging.conf                                 # logging configuration
 ├── images                                           # folder containing the images displayed in the README 
-│   ├── dqry_workflow_graph.png
-│   ├── detection_filter_after.png
-│   ├── detection_filter_before.png
-│   ├── quarries_area-year.png
-│   ├── quarry_tracking_strategy.png
-│   └── tiles_examples.png
 ├── input                                           # inputs folders
 │   ├── input_dt                                    # detections tracking input 
 │   │   ├── oth_detections_at_0dot*_threshold_year-*_score-0dot*_area-*_elevation-*_distance-*.geojson # final filtered detections file for a given year
@@ -115,8 +109,7 @@ The folders/files of the project `proj-dqry` (in combination with `object-detect
 ├── output                                          # outputs folders
 │   ├── output_dt                                   # detections tracking outputs 
 │   │   └── oth_detections_at_0dot*_threshold_year-*_score-0dot*_area-*_elevation-*_distance-*   # final filtered detections file for a given year
-│   │       ├── plots                               # plots storage 
-│   │       │   └── quarry_area.png                 # quarry area vs year plot  
+│   │       ├── plots                               # plot saving folder
 │   │       ├── quarry_tiles.csv                    # table containing detections (id, geometry, area, year...) for a list of given year
 │   │       └── quarry_times.geojson                # geometry file containing detections (id, geometry, area, year...) for a list of given year
 │   ├── output_det                                  # detection outputs 
@@ -142,8 +135,6 @@ The folders/files of the project `proj-dqry` (in combination with `object-detect
 │       │   ├── inference
 │       │   │   ├── coco_instances_results.json
 │       │   │   └── instances_detections.pth
-│       │   ├── events.out.tfevents.*.vm-gpu-02.*.0
-│       │   ├── last_checkpoint
 │       │   ├── metrics.json                        # computed metrics for the given interval and bin size
 │       │   ├── model_*.pth                         # saved trained model at a given iteration
 │       │   └── model_final.pth                     # last iteration saved model

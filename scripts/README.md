@@ -34,7 +34,7 @@ The labels (ground truth) polygons are used for the **Training and evaluation** 
     
 A region of Switzerland polygon is used for the **Detection** workflow:
 
-    [Label_Shapefile] = AoI_[YEAR].shp
+    [Label_Shapefile] = swissimage_footprint_[YEAR].shp
 
 The outputs are `tiles.geojson` corresponding to shapefiles of the tiles obtained for the given AoI and `labels.geojson` corresponding to shapefiles of the input labels. 
 
@@ -80,7 +80,7 @@ filter_detections.py:
 
 -**input**: indicates the path to the input file that needs to be filtered, _i.e._ `oth_detections_at_0dot*_threshold.gpkg`
 
--**labels_shapefile**: AoI of interest is used to remove polygons located partially outside the AoI. _SWISSIMAGE_ acquisition footprint for a given year (AoI_[YEAR].shp) were used for this project.
+-**labels_shapefile**: AoI of interest is used to remove polygons located partially outside the AoI. _SWISSIMAGE_ acquisition footprint for a given year (swissimage_footprint_[YEAR].shp) were used for this project.
 
 -**dem**: indicates the path to a DEM of Switzerland. Product derived from SRTM is used and can be downloaded and reprojected with the `get_DEM.sh` script. An elevation threshold is used to discard detections above the given value.
 

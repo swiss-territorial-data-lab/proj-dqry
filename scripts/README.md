@@ -5,7 +5,7 @@ Following, the scripts contained in `proj-dqry` are presented in detailed. They 
 **TOC**
 - [Prepare data](#prepare-data)
 - [Filter detections](#filter-detections)
-- [Detections tracking](#detections-tracking)
+- [Track detections](#track-detections)
 - [Plots](#plots)
 - [Get DEM](#get-dem)
 - [Automatisation](#automatisation)
@@ -101,7 +101,7 @@ The script can be run by executing the following command:
 $ python <dir_path>/scripts/filter_detections.py <dir_path>/config/config_det.yaml
 ```
 
-## Detections tracking
+## Track detections
 
 The script `detections_tracking.py` has been developed to identify and track an object between different year datasets. It works along with the config file `config_dt.yaml`.
 
@@ -113,22 +113,22 @@ The script identifies the position of polygons between different years to identi
 <i>Schematic representation of the object tracking strategy.</i>
 </p>
 
-The `detections_tracking.py` section of the _yaml_ configuration file is expected as follow:
+The `track_detections.py` section of the _yaml_ configuration file is expected as follow:
 
 ```bash
-detections_tracking.py:  
+track_detections.py:  
 years: [YEAR1, YEAR2, YEAR3,...]       
 datasets:
-    detection: ./input/input_dt/oth_detection_at_0dot*_threshold_year-{year}_score-[SCORE]_elevation-[elevation]_distance-[distance]_area-[area].geojson  
-output_folder: ./output/output_dt
+    detection: ./input/input_track/oth_detections_at_0dot*_threshold_year-{year}_score-[SCORE]_elevation-[elevation]_distance-[distance]_area-[area].geojson  
+output_folder: ./output/output_track
 ```
 
-Input and output paths of the config file must be adapted if necessary. The script takes as input a _geojson_ file. `oth_detection_at_0dot*_threshold_year-{year}_[filters_list].geojson` files of different years produced with the script `filter_detections.py` of the `object-detector` are used. The list of years _YEARx_ required for the object tracking must be specified.
+Input and output paths of the config file must be adapted if necessary. The script takes as input a _geojson_ file. `oth_detections_at_0dot*_threshold_year-{year}_[filters_list].geojson` files of different years produced with the script `filter_detections.py` of the `object-detector` are used. The list of years _YEARx_ required for the object tracking must be specified.
 
 The script can be run by executing the following command:
 
 ```bash
-$ python  <dir_path>/scripts/detections_tracking.py <dir_path>/config/config_dt.yaml
+$ python  <dir_path>/scripts/track_detections.py <dir_path>/config/config_track.yaml
 ```
 
 The outputs are a _geojson_ and _csv_ (**quarry_time**) files saving detections over the years with their characteristics (ID_object, ID_feature, year, score, area, geometry). 

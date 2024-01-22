@@ -248,7 +248,7 @@ $ scripts/get_dem.sh
 $ scripts/batch_process.sh
 ```
 
-**Detections tracking**: copy the required input files (filtered detection files (`oth_detections_filter_year-{year}_[filters_list].geojson`)) to **input_dt** folder.
+**Detections tracking**: copy the output file `oth_detections_filter_year-{year}_(filters_list).geojson` produced with the **Detection** workflow to the **input_dt** folder.
 
 ```bash
 $ mkdir input_dt

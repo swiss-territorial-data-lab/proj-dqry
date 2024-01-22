@@ -25,8 +25,8 @@ The project `proj-dqry` provides scripts to prepare and post-process data and re
 The procedure is defined in three distinct workflows:
 
 1. **Training and evaluation**: enables the detection model to be trained and evaluated using a customised dataset reviewed by domain experts and constituting the ground truth. The detector is first trained on the [_SWISSIMAGE 10 cm_](https://www.swisstopo.admin.ch/fr/geodata/images/ortho/swissimage10.html) mosaic of 2020, using manually vectorised MES of the [swissTLM3D](https://www.swisstopo.admin.ch/fr/geodata/landscape/tlm3d.html) product.
-2. **Detection**: permits the inference detection of MES in a given set of images ([_SWISSIMAGE Journey_](https://www.swisstopo.admin.ch/en/maps-data-online/maps-geodata-online/journey-through-time-images.html)) using the previously trained model.
-3. **Detections tracking**: identifies and tracks MES evolution over time.
+2. **Detection**: enables detection by inference of MES in a given set of images ([_SWISSIMAGE Journey_](https://www.swisstopo.admin.ch/en/maps-data-online/maps-geodata-online/journey-through-time-images.html)) using the previously trained model.
+3. **Detection tracking**: identifies and tracks MES evolution over time.
 
 <p align="center">
 <img src="./images/dqry_workflow_graph.png?raw=true" width="100%">
@@ -39,7 +39,7 @@ The procedure is defined in three distinct workflows:
 ### Hardware
 
 The project has been run on a 32 GiB RAM machine with a 16 GiB GPU (NVIDIA Tesla T4) compatible with [CUDA](https://detectron2.readthedocs.io/en/latest/tutorials/install.html). The library [detectron2](https://github.com/facebookresearch/detectron2), dedicated to object detection with deep learning algorithm, was used. <br>
-The main limitation is the number of tiles to be processed and the amount of detection, which can lead to RAM saturation. The provided requirements stand for a zoom level equal to or below 17 and an area of interest (AoI) corresponding to typical [SWISSIMAGE acquisition footprints](https://map.geo.admin.ch/?lang=fr&topic=ech&bgLayer=ch.swisstopo.pixelkarte-farbe&layers=ch.swisstopo.zeitreihen,ch.bfs.gebaeude_wohnungs_register,ch.bav.haltestellen-oev,ch.swisstopo.swisstlm3d-wanderwege,ch.astra.wanderland-sperrungen_umleitungen,ch.swisstopo.swissimage-product,ch.swisstopo.swissimage-product.metadata&layers_opacity=1,1,1,0.8,0.8,1,0.7&layers_visibility=false,false,false,false,false,true,true&layers_timestamp=18641231,,,,,2021,2021&time=2021) (no more than a third of Switzerland's surface area). 
+The main limitation is the number of tiles to be processed and the amount of detections, which can lead to RAM saturation. The provided requirements stand for a zoom level equal to or below 17 and an area of interest (AoI) corresponding to typical [SWISSIMAGE acquisition footprints](https://map.geo.admin.ch/?lang=fr&topic=ech&bgLayer=ch.swisstopo.pixelkarte-farbe&layers=ch.swisstopo.zeitreihen,ch.bfs.gebaeude_wohnungs_register,ch.bav.haltestellen-oev,ch.swisstopo.swisstlm3d-wanderwege,ch.astra.wanderland-sperrungen_umleitungen,ch.swisstopo.swissimage-product,ch.swisstopo.swissimage-product.metadata&layers_opacity=1,1,1,0.8,0.8,1,0.7&layers_visibility=false,false,false,false,false,true,true&layers_timestamp=18641231,,,,,2021,2021&time=2021) (no more than a third of Switzerland's surface area). 
 
 ### Software
 
@@ -86,14 +86,14 @@ The folders/files of the project `proj-dqry` (in combination with `object-detect
 <pre>.
 ├── config                                          # configurations files folder
 │   ├── config_det.template.yaml                    # template file for detection workflow over several years
-│   ├── config_dt.yaml                              # detections tracking workflow
+│   ├── config_track.yaml                           # detection tracking workflow
 │   ├── config_det.yaml                             # detection workflow
 │   ├── config_trne.yaml                            # training and evaluation workflow
 │   ├── detectron2_config_dqry.yaml                 # detectron 2
 │   └── logging.conf                                # logging configuration
 ├── images                                          # folder containing the images displayed in the README 
 ├── input                                           # inputs folders
-│   ├── input_dt                                    # detections tracking input 
+│   ├── input_track                                 # detection tracking input 
 │   │   ├── oth_detections_at_0dot*_threshold_year-*_score-0dot*_area-*_elevation-*_distance-*.geojson # final filtered detections file for a given year
 │   ├── input_det                                   # detection inputs
 │   │   ├── logs                                    # folder containing trained model 
@@ -107,7 +107,7 @@ The folders/files of the project `proj-dqry` (in combination with `object-detect
 │       ├── tlm-hr-trn-topo.shp                     # shapefile of the labels 
 │       └── tlm-hr-trn-topo.shx                     # shapefile indexes of the labels
 ├── output                                          # outputs folders
-│   ├── output_dt                                   # detections tracking outputs 
+│   ├── output_track                                # detection tracking outputs 
 │   │   └── oth_detections_at_0dot*_threshold_year-*_score-0dot*_area-*_elevation-*_distance-*   # final filtered detections file for a given year
 │   │       ├── plots                               # plot saving folder
 │   │       ├── quarry_tiles.csv                    # table containing detections (id, geometry, area, year...) for a list of given year
@@ -118,13 +118,13 @@ The folders/files of the project `proj-dqry` (in combination with `object-detect
 │   │   │   └── z_y_x.tif
 │   │   ├── oth-images                              # tagged images other dataset
 │   │   │   └── z_y_x.tif
-│   │   ├── sample_tagged_images                    # examples of annotated detection on images (XYZ values)
+│   │   ├── sample_tagged_images                    # examples of annotated detections on images (XYZ values)
 │   │   │   └── oth_pred_z_y_x.png
 │   │   ├── COCO_oth.json                           # COCO annotations on other dataset  
 │   │   ├── img_metadata.json                       # images info
 │   │   ├── labels.json                             # AoI contour 
 │   │   ├── oth_detections_at_0dot*_threshold_year-*_score-0dot*_area-*_elevation-*_distance-*.geojson
-│   │   ├── oth_detections_at_0dot*_threshold.gpkg  # detection results at a given score threshold
+│   │   ├── oth_detections_at_0dot*_threshold.gpkg  # detections obtained with a given score threshold
 │   │   ├── split_AoI_tiles.geojson                 # labels' shapes clipped to tiles' shapes 
 │   │   └── tiles.geojson                           # tiles geometries 
 │   └── output_trne                                 # training and evaluation outputs  
@@ -138,7 +138,7 @@ The folders/files of the project `proj-dqry` (in combination with `object-detect
 │       │   ├── metrics.json                        # computed metrics for the given interval and bin size
 │       │   ├── model_*.pth                         # saved trained model at a given iteration
 │       │   └── model_final.pth                     # last iteration saved model
-│       ├── sample_tagged_images                    # examples of annotated detection on images (XYZ values)
+│       ├── sample_tagged_images                    # examples of annotated detections on images (XYZ values)
 │       │   └── pred_z_y_x.png
 │       │   └── tagged_z_y_x.png
 │       │   └── trn_pred_z_y_x.png
@@ -161,18 +161,18 @@ The folders/files of the project `proj-dqry` (in combination with `object-detect
 │       ├── tagged_detections.gpkg                  # tagged detections (TP, FP, FN) 
 │       ├── tiles.json                              # tiles geometries
 │       ├── trn_metrics_vs_threshold.html           # plot metrics of train dataset vs threshold values
-│       ├── trn_detections_at_0dot*_threshold.gpkg  # detection results for train dataset at a given score threshold 
+│       ├── trn_detections_at_0dot*_threshold.gpkg  # detections obtained for the train dataset with a given score threshold 
 │       ├── trn_TP-FN-FP_vs_threshold.html          # plot train DS TP-FN-FP vs threshold values
 │       ├── tst_metrics_vs_threshold.html           # plot metrics of test dataset vs threshold values
-│       ├── tst_detections_at_0dot*_threshold.gpkg  # detection results for test DS at a given score threshold
+│       ├── tst_detections_at_0dot*_threshold.gpkg  # detections obtained for the test dataset with a given score threshold
 │       ├── tst_TP-FN-FP_vs_threshold.html          # plot test dataset TP-FN-FP vs threshold values
 │       ├── val_metrics_vs_threshold.html           # plot metrics of validation dataset vs threshold values
-│       ├── val_detections_at_0dot*_threshold.gpkg  # detection results for validation DS at a given score threshold
+│       ├── val_detections_at_0dot*_threshold.gpkg  # detections obtained for the validation dataset with a given score threshold
 │       └── val_TP-FN-FP_vs_threshold.html          # plot validation dataset TP-FN-FP vs threshold values
 ├── scripts
 │   ├── batch_process.sh                            # batch script automatising the detection workflow
-│   ├── detections_tracking.py                      # script tracking detections in multiple years dataset 
-│   ├── filter_detection.py                         # script filtering detections according to threshold values
+│   ├── track_detections.py                         # script tracking the detections in multiple years dataset 
+│   ├── filter_detections.py                        # script filtering the detections according to threshold values
 │   ├── get_dem.sh                                  # batch script downloading the DEM of Switzerland
 │   ├── plots.py                                    # script plotting figures
 │   ├── prepare_data.py                             # script preparing data to be processed by the object-detector scripts
@@ -201,8 +201,8 @@ Below, the description of input data (to be adapted as required) used for this p
 The `proj-dqry` repository contains scripts to prepare and post-process the data and results:
 
 1. `prepare_data.py` 
-2. `filter_detection.py` 
-3. `detections_tracking.py` 
+2. `filter_detections.py` 
+3. `track_detections.py` 
 4. `plots.py` 
 5. `get_DEM.sh` 
 6. `batch_process.sh` 
@@ -248,12 +248,12 @@ $ scripts/get_dem.sh
 $ scripts/batch_process.sh
 ```
 
-**Detections tracking**: copy the output file `oth_detections_filter_year-{year}_(filters_list).geojson` produced with the **Detection** workflow to the **input_dt** folder.
+**Detection tracking**: copy the output file `oth_detections_filter_year-{year}_(filters_list).geojson` produced with the **Detection** workflow to the **input_track** folder.
 
 ```bash
-$ mkdir input_dt
-$ python scripts/detections_tracking.py config/config_dt.yaml
-$ python scripts/plots.py config/config_dt.yaml
+$ mkdir input_track
+$ python scripts/track_detections.py config/config_track.yaml
+$ python scripts/plots.py config/config_track.yaml
 ```
 
 ## Contributors

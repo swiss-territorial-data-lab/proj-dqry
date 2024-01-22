@@ -36,7 +36,7 @@ if __name__ == "__main__":
     # Load input parameters
     YEAR = cfg['year']
     DETECTIONS = cfg['detections']
-    LABELS_SHPFILE = cfg['labels_shapefile']
+    SHPFILE = cfg['shapefile']
     DEM = cfg['dem']
     SCORE = cfg['score']
     AREA = cfg['area']
@@ -47,7 +47,7 @@ if __name__ == "__main__":
     written_files = [] 
 
     # Convert input detection to a geo dataframe 
-    aoi = gpd.read_file(LABELS_SHPFILE)
+    aoi = gpd.read_file(SHPFILE)
     aoi = aoi.to_crs(epsg=2056)
     
     detections = gpd.read_file(DETECTIONS)

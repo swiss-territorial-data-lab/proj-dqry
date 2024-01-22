@@ -50,7 +50,7 @@ if __name__ == "__main__":
 
     # Load input parameters
     OUTPUT_DIR = cfg['output_folder']
-    LABELS_SHPFILE = cfg['datasets']['labels_shapefile']
+    SHPFILE = cfg['datasets']['shapefile']
     ZOOM_LEVEL = cfg['zoom_level']
 
     # Create an output directory in case it doesn't exist
@@ -62,12 +62,12 @@ if __name__ == "__main__":
     # Prepare the tiles
 
     ## Convert datasets shapefiles into geojson format
-    logger.info('Convert labels shapefile into GeoJSON format (EPSG:4326)...')
-    labels = gpd.read_file(LABELS_SHPFILE)
+    logger.info('Convert label shapefile into GeoJSON format (EPSG:4326)...')
+    labels = gpd.read_file(SHPFILE)
     labels_4326 = labels.to_crs(epsg=4326)
 
     nb_labels = len(labels)
-    logger.info('There is/are ' + str(nb_labels) + ' polygon(s) in ' + LABELS_SHPFILE)
+    logger.info('There is/are ' + str(nb_labels) + ' polygon(s) in ' + SHPFILE)
 
     label_filename = 'labels.geojson'
     label_filepath = os.path.join(OUTPUT_DIR, label_filename)
@@ -86,7 +86,7 @@ if __name__ == "__main__":
 
     # Iterate on geometric coordinates to defined tiles for a given label at a given zoom level
     # A gpd is created for each label and are then concatenate into a single gpd 
-    logger.info('- Compute tiles for each label(s) geometry') 
+    logger.info('- Compute tiles for each label geometry') 
     tiles_4326_all = [] 
 
     for label_boundary in label_boundaries_df.itertuples():

@@ -26,7 +26,7 @@ if __name__ == "__main__":
     logger.info('Starting...')
 
     # Argument and parameter specification
-    parser = argparse.ArgumentParser(description="Time machine script (STDL.proj-dqry)")
+    parser = argparse.ArgumentParser(description="Track detections in muli-year dataset (STDL.proj-dqry)")
     parser.add_argument('config_file', type=str, help='Framework configuration file')
     args = parser.parse_args()
 
@@ -82,10 +82,11 @@ if __name__ == "__main__":
     logger.info(f"Save files")
     intersection.rename(columns={'index_right': 'id_object'}, inplace=True)
     gdf_final = intersection[['id_object', 'id_feature', 'year', 'score', 'area', 'centroid_x', 'centroid_y', 'geometry']]
-    feature_path = os.path.join(OUTPUT_DIR, 'quarry_times.geojson')
+    feature_path = os.path.join(OUTPUT_DIR, 'detections_years.geojson')
     gdf_final.to_file(feature_path, driver='GeoJSON') 
     written_files.append(feature_path) 
-    feature_path = os.path.join(OUTPUT_DIR, 'quarry_times.csv')
+
+    feature_path = os.path.join(OUTPUT_DIR, 'detections_years.csv')
     gdf_final.to_csv(feature_path, index=False)
     written_files.append(feature_path) 
 

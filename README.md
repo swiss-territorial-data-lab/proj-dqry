@@ -110,8 +110,8 @@ The folders/files of the project `proj-dqry` (in combination with `object-detect
 │   ├── output_track                                # detection tracking outputs 
 │   │   └── oth_detections_at_0dot*_threshold_year-*_score-0dot*_area-*_elevation-*_distance-*   # final filtered detections file for a given year
 │   │       ├── plots                               # plot saving folder
-│   │       ├── quarry_tiles.csv                    # table containing detections (id, geometry, area, year...) for a list of given year
-│   │       └── quarry_times.geojson                # geometry file containing detections (id, geometry, area, year...) for a list of given year
+│   │       ├── detections_years.csv                # table containing detections (id, geometry, area, year...) for a list of given year
+│   │       └── detections_years.geojson            # geometry file containing detections (id, geometry, area, year...) for a list of given year
 │   ├── output_det                                  # detection outputs 
 │   │   ├── all-images                              # images downloaded from wmts server (XYZ values)
 │   │   │   ├── z_y_x.json
@@ -232,9 +232,11 @@ $ stdl-objdet make_detections config/config_trne.yaml
 $ stdl-objdet assess_detections config/config_trne.yaml
 ```
 
-**Detection**: copy the selected trained model to `input/input_det/logs` folder (create it if it does not exist).
+**Detection**: copy the selected trained model to `input/input_det/logs` folder.
 
 ```bash
+$ mkdir -p input/input_det/logs
+$ cp output/output_trne/logs/<selected model pth> input/input_det/logs
 $ python scripts/prepare_data.py config/config_det.yaml
 $ stdl-objdet generate_tilesets config/config_det.yaml
 $ stdl-objdet make_detections config/config_det.yaml

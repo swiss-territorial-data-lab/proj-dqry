@@ -7,7 +7,7 @@
 prepare_data.py: 
   srs: "EPSG:2056"  # Projection of the input file
   datasets:
-    labels_shapefile: ./input/input_det/AoI/<AoI_YEAR_Shapefile>
+    shapefile: ./input/input_det/AoI/<AoI_YEAR_Shapefile>
   output_folder: ./output/output_det/<YEAR>
   zoom_level: 16  # z, keep between 15 and 18  
 

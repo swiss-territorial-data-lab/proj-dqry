@@ -1,6 +1,6 @@
 ## Overview
 
-Following, the scripts contained in `proj-dqry` are presented in detailed. They are used to pre- and post-process data and results as part of the automatic detection of mineral extraction sites (MES, also referred as quarry in this project) automatic detection.
+The following is a detailed description of the scripts contained in `proj-dqry`. They are used to process data and results as part of the automatic detection of mining extraction sites (MES, also known as quarries in this project) with the STDL's object detector.
 
 **TOC**
 - [Prepare data](#prepare-data)
@@ -13,28 +13,28 @@ Following, the scripts contained in `proj-dqry` are presented in detailed. They 
 
 ## Prepare data
 
-The `prepare_data.py` script allows the user to prepare the input dataset (images and labels) to be processed by the `object-detector` workflow. Tiles characteristics are defined by the script and will be used by the `generate_tileset.py` script.  _XYZ_ connector is used to fetch images with a Web Map Tiling Service _wmts_. _wmts_ service is used to request images for a given year and provides a tile of 256 px. The zoom level _z_ affects the pixel resolution (_z_ = 15: 3.2 m/px, _z_ = 16: 1.6 m/px, _z_ = 17: 0.8 m/px and _z_ = 18: 0.4 m/px for _SWISSMAGE 10 cm_). _x_ and _y_ coordinates of tiles on a grid are defined for a given AoI and zoom level. This script is used to prepare the tiles of the **Training and evaluation** workflow and the **Detection** workflow. 
+The `prepare_data.py` script allows the user to prepare the input dataset (images and labels) to be processed by the `object-detector` workflow. Tiles characteristics are defined by the script and will be used by the `generate_tileset.py` script.  _XYZ_ connector is used to fetch images with a Web Map Tiling Service _wmts_. _wmts_ service is used to request images for a given year and provides a tile of 256 px. The zoom level _z_ affects the pixel resolution (_z_ = 15: 3.2 m/px, _z_ = 16: 1.6 m/px, _z_ = 17: 0.8 m/px and _z_ = 18: 0.4 m/px for _SWISSIMAGE 10 cm_). _x_ and _y_ coordinates of tiles on a grid are defined for a given AoI and zoom level. This script is used to prepare the tiles of the **Training and evaluation** workflow and the **Detection** workflow. 
 
 It works along the config files `config_trne.yaml` and `config_det.yaml`. Input and output paths of the config files must be adapted if necessary. The `prepare_data.py` section of the _yaml_ configuration file is expected as follow:
 
-```bash
+```bashclip
 prepare_data.py:
-    srs: [crs] 
+    srs: <crs> 
     datasets:
-        labels_shapefile: ./input/[Label_Shapefile]
+        shapefile: ./input/<Label_Shapefile>
     output_folder: ./output/
-    zoom_level: [z]
+    zoom_level: <z>
 ```
 
-The **srs** key provides the geographic framework to ensure that all the input data are compatible. The **zoom_level** must be specified (recommended between 15 and 19). The **labels_shapefile** corresponds to the AoI to be tiled. 
+The **srs** key provides the geographic framework to ensure that all the input data are compatible. The **zoom_level** must be specified (recommended between 15 and 19). The **shapefile** corresponds to the AoI to be tiled. 
 
 The labels (ground truth) polygons are used for the **Training and evaluation** workflow: 
 
-    [Label_Shapefile] = tlm-hr-trn-topo.shp
+    <Label_Shapefile> = tlm-hr-trn-topo.shp
     
 A region of Switzerland polygon is used for the **Detection** workflow:
 
-    [Label_Shapefile] = swissimage_footprint_[YEAR].shp
+    <Label_Shapefile> = swissimage_footprint_<YEAR>.shp
 
 The outputs are `tiles.geojson` corresponding to shapefiles of the tiles obtained for the given AoI and `labels.geojson` corresponding to shapefiles of the input labels. 
 
@@ -47,9 +47,9 @@ The outputs are `tiles.geojson` corresponding to shapefiles of the tiles obtaine
 
 ## Filter detections
 
-The object detection output (`oth_detections_at_0dot*_threshold.gpkg`) obtained with the `object-detector` scripts needs to be filtered to discard false detections and improve the aesthetic of the polygons (merge polygons belonging to a single MES). The `filter_detections.py` script extracts the detection from the detection file _gpkg_ according to a series of threshold values. It works along with the config file `config_det.yaml`. 
+The object detection output (`oth_detections_at_0dot*_threshold.gpkg`) obtained with the `object-detector` scripts needs to be filtered to discard false detections and improve the aesthetic of the polygons (merge polygons belonging to a single MES). The `filter_detections.py` script extracts detections from _gpkg_ file according to a series of threshold values. It works along with the config file `config_det.yaml`. 
 
-First, elevation filtering is applied using a Digital Elevation Model ([DEM](#get-dem)) as input. Detections above the elevation threshold are discarded (detection at altitude 0 are also discarded because they are lie outside the DEM limits). Next, an algorithm ([KMeans] (https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html)) is applied to cluster polygons according to their centroids. A predefined number of clusters _k_ is set as _k_ = (number of detection / 3) (influence of this parameter can be explored by the user). Polygons are grouped according to their cluster value. Polygon attributes, such as confidence scores, are aggregated at the maximum value. This preserves the final integrity of the detection polygons by retaining detections with potentially low scores but belonging to a cluster with higher scores. This improves the final segmentation of the detected object. Be careful to keep the threshold score value relatively low while running `make_detections.py` to avoid removing too many polygons that could potentially be part of the object detection. Then, the detections are filtered based on the confidence score. The detection polygons are clip with the AoI polygon to remove odd-shaped polygons that extend outwards. Next, polygons that do not overlap but are close in position are merged. Based on the surface area of the polygons, values below the threshold are eliminated. Finally, an averaged predicted score is again computed, taking into account the score of the merged polygons. The results of the filtering/merging process are saved in a _geojson_ file.
+First, elevation filtering is applied using a Digital Elevation Model ([DEM](#get-dem)) as input. Detections above the elevation threshold are discarded. Detections at altitude 0 are also discarded because they are lie outside the DEM limits. Next, an algorithm ([KMeans] (https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html)) is applied to cluster polygons according to their centroids. A predefined number of clusters _k_ is set as _k_ = (number of detection / 3). Polygons are grouped according to their cluster value. Polygon attributes, such as confidence scores, are aggregated at the maximum value. This preserves the final integrity of the detection polygons by retaining detections with potentially low scores but belonging to a cluster with higher scores. This improves the final segmentation of the detected object. Be careful to keep the threshold score value relatively low while running `make_detections.py` to avoid removing too many polygons that could potentially be part of the object detection. Then, the detections are filtered based on the confidence score. The detection polygons are clipped with the AoI polygon to remove odd shaped polygons that extend outwards. Next, polygons that do not overlap but are close in position are merged. Based on the surface area of the polygons, values below the threshold are eliminated. Finally, an averaged predicted score is again computed, taking into account the score of the merged polygons. The results of the filtering/merging process are saved in a _geojson_ file.
 
 The following images illustrate the extraction process, showing the original and filtered detections:
 
@@ -58,31 +58,31 @@ The following images illustrate the extraction process, showing the original and
 &nbsp;
 <img src="../images/filter_detections_after.png?raw=true" width="40%">
 <br />
-<i>Left : Detector detections - Right : Threshold filtering results</i>
+<i>Left : Detections obtained with the object detector. Right : Threshold filtering results</i>
 </p>
 
-Input and output paths of the config file must be adapted if necessary. The script expects as input a detection file (`oth_detections_at_0dot*_threshold.gpkg` obtained with `make_detections.py` of `object-detector`). The `filter_detections.py` section of the configuration file is expected as follow:
+Input and output paths of the config file must be adapted if necessary. The script expects as input a detection file, `oth_detections_at_0dot*_threshold.gpkg`, obtained with the `make_detections.py` script of the `object-detector` framework. The `filter_detections.py` section of the configuration file is expected as follow:
 
 ```bash
 filter_detections.py:
-    year:[YEAR] 
+    year:<YEAR> 
     input: ./output/output_det_/oth_detections_at_0dot*_threshold.gpkg
-    labels_shapefile: ./input/input_det/[AoI_Shapefile] 
-    dem: ./input/input_det/[DEM_raster]  
-    elevation: [THRESHOLD VALUE]   
-    score: [THRESHOLD VALUE]
-    distance: [THRESHOLD VALUE] 
-    area: [THRESHOLD VALUE] 
-    output: ./output/output_det_/oth_detection_at_0dot*_threshold_year-[YEAR]_score-{score}_area-{area}_elevation-{elevation}_distance-{distance}.geojson
+    shapefile: ./input/input_det/<AoI_Shapefile> 
+    dem: ./input/input_det/<DEM_raster>  
+    elevation: <THRESHOLD VALUE>   
+    score: <THRESHOLD VALUE>
+    distance: <THRESHOLD VALUE> 
+    area: <THRESHOLD VALUE> 
+    output: ./output/output_det_/oth_detections_at_0dot*_threshold_year-{year}_score-{score}_area-{area}_elevation-{elevation}_distance-{distance}.geojson
 ```
 
--**year**: year of the dataset used as input for filtering
+-**year**: year of the dataset to be filtered used as input.
 
--**input**: indicates the path to the input file that needs to be filtered, _i.e._ `oth_detections_at_0dot*_threshold.gpkg`
+-**input**: path to the input file to be filtered, _i.e._ `oth_detections_at_0dot*_threshold.gpkg`.
 
--**labels_shapefile**: AoI of interest is used to remove polygons located partially outside the AoI. _SWISSIMAGE_ acquisition footprint for a given year (swissimage_footprint_[YEAR].shp) were used for this project.
+-**shapefile**: AoI of interest used to remove polygons located partially outside the AoI. _SWISSIMAGE_ acquisition footprint for a given year (swissimage_footprint_<YEAR>.shp) were used for this project.
 
--**dem**: indicates the path to a DEM of Switzerland. Product derived from SRTM is used and can be downloaded and reprojected with the `get_DEM.sh` script. An elevation threshold is used to discard detections above the given value.
+-**dem**: path to a DEM of Switzerland. Product derived from SRTM is used and can be downloaded and reprojected with the `get_DEM.sh` script. An elevation threshold is used to discard detections above the given value.
 
 -**elevation**: the altitude above which detections are discarded. Initial tests have shown that many false detections are due to snow cover (reflectance value close to bedrock reflectance) or to the exposure of the bedrock in the mountains, which are mainly observed at higher altitudes. By default, the threshold elevation has been set to 1200.0 m.
 
@@ -92,7 +92,7 @@ filter_detections.py:
 
 -**area**: small area polygons can be discarded by assuming that a MES has a minimum area. The default value is set to 5000 m<sup>2</sup>.
 
--**output**: provides the path to the shapefile of filtered polygons with the detection score preserved. The name of the output file is formatted as: `oth_detection_at_0dot*_threshold_year-{year}_score-{score}_elevation-{elevation}_distance-{distance}_area-{area}.geojson`.
+-**output**: path to the shapefile of filtered polygons with the detection score preserved. The name of the output file is formatted as: `oth_detections_at_0dot*_threshold_year-{year}_score-{score}_elevation-{elevation}_distance-{distance}_area-{area}.geojson`.
 
 
 The script can be run by executing the following command:
@@ -103,9 +103,9 @@ $ python <dir_path>/scripts/filter_detections.py <dir_path>/config/config_det.ya
 
 ## Track detections
 
-The script `detections_tracking.py` has been developed to identify and track an object between different year datasets. It works along with the config file `config_dt.yaml`.
+The script `track_detections.py` has been developed to identify and track an object over a multiple year datasets. It works along with the config file `config_track.yaml`.
 
-The script identifies the position of polygons between different years to identify a single object in multiple datasets. All detected shapes are added to a single data frame. A union function is applied to merge overlapping polygons. Those polygons (single and merged) are added to a new data frame with a unique ID attributed to each. This data frame is then spatially compared to the initial data frame containing all the polygons by year. The unique ID of the polygons in the second data frame is then attributed to the intersecting polygons in the first data frame. As a result, polygons that overlap from one year to the next are assumed to describe the same object and receive the same unique ID, allowing object tracking over time.
+The detection shapefiles for each year are merged. Overlapping groups of detections and non-overlapping individual detections are assigned a unique object identifier. The object identifier is then propagated to each year's detection polygons by intersection with the merged polygons. Polygons sharing the object identifier are assumed to describe the same object, allowing it to be tracked over time.
 
 <p align="center">
 <img src="../images/quarry_tracking_strategy.png" width="100%">
@@ -117,13 +117,13 @@ The `track_detections.py` section of the _yaml_ configuration file is expected a
 
 ```bash
 track_detections.py:  
-years: [YEAR1, YEAR2, YEAR3,...]       
+years: <[YEAR1, YEAR2, YEAR3,...]>      
 datasets:
-    detection: ./input/input_track/oth_detections_at_0dot*_threshold_year-{year}_score-[SCORE]_elevation-[elevation]_distance-[distance]_area-[area].geojson  
+    detection: ./input/input_track/oth_detections_at_0dot*_threshold_year-<YEAR>_score-<SCORE>_elevation-<ELEVATION>_distance-<DISTANCE>_area-<AREA>.geojson  
 output_folder: ./output/output_track
 ```
 
-Input and output paths of the config file must be adapted if necessary. The script takes as input a _geojson_ file. `oth_detections_at_0dot*_threshold_year-{year}_[filters_list].geojson` files of different years produced with the script `filter_detections.py` of the `object-detector` are used. The list of years _YEARx_ required for the object tracking must be specified.
+Input and output paths of the config file must be adapted if necessary. The script takes as input a _geojson_ file. `oth_detections_at_0dot*_threshold_year-<YEAR>_<filters_list>.geojson` files of different years produced with the script `filter_detections.py` of the `object-detector` are used. The list of years _YEARx_ required for the object tracking must be specified.
 
 The script can be run by executing the following command:
 
@@ -131,36 +131,34 @@ The script can be run by executing the following command:
 $ python  <dir_path>/scripts/track_detections.py <dir_path>/config/config_track.yaml
 ```
 
-The outputs are a _geojson_ and _csv_ (**quarry_time**) files saving detections over the years with their characteristics (ID_object, ID_feature, year, score, area, geometry). 
+The outputs are a _geojson_ and _csv_ (**detections_years**) files saving detections over the years with their characteristics (ID_object, ID_feature, year, score, area, geometry). 
 
 ## Plots
 
-Script for drawing basic plots is supplied with `plots.py` and works along with the config file `config_dt.yaml` 
+Script for drawing basic plots is supplied with `plots.py` and works along with the config file `config_track.yaml` 
 
 The `plots.py` section of the _yaml_ configuration file is expected as follows:
 
 ```bash
 plots.py:  
-    object_id: [ID_OBJECT1, ID_OBJECT2, ID_OBJECT3,...] 
+    object_id: <[ID_OBJECT1, ID_OBJECT2, ID_OBJECT3,...]>
     plots: ['area-year'] 
     datasets:
-        detection: ./output/output_dt/quarry_times.geojson
-    output_folder: ./output/output_dt/plots
+        detection: ./output/output_track/detections_years.geojson
+    output_folder: ./output/output_track/plots
 ```
-Input or output paths must be adapted if necessary. The script takes as input a **quarry_times.geojson** file produced with the script `detections_tracking.py`. The list of **object_id** _ID_OBJECTx_ must be specified as well as the plot type. So far only **area-year** plot is available. Additional plots can be added in the future.
+Input or output paths must be adapted if necessary. The script takes as input a **detections_years.geojson** file produced with the script `track_detections.py`. The list of **object_id** _ID_OBJECTx_ must be specified as well as the plot type. So far only **area-year** plot is available. Additional plots can be added in the future.
 
 The script can be run by executing the following command:
 
 ```bash
-$ python <dir_path>/scripts/filter_detections.py <dir_path>/config/config_dt.yaml
+$ python <dir_path>/scripts/filter_detections.py <dir_path>/config/config_track.yaml
 ```
-
-Plot(s) will be produced in _png_ format
 
 <p align="center">
 <img src="../images/quarry_area-year.png" width="100%">
 <br />
-<i>Quarries area vs time.</i>
+<i>Object area vs time.</i>
 </p>
 
 
@@ -185,10 +183,10 @@ By executing the command:
 $ ./scripts/batch_process.sh
 ```
 
-`config_det_[YEAR].yaml` will be generated for a given year, and the command list in `batch_process.sh` will be executed for the provided list of years:
+`config_det_{year}.yaml` will be generated for a given year, and the command list in `batch_process.sh` will be executed for the provided list of years:
  1. `prepare_data.py`
  2. `generate_tilesets.py` 
  3. `make_detections.py` 
  4. `filter_detections.py` 
 
-The paths and value of the _yaml_ configuration file template must be adapted, if necessary.
+The paths and values of the _yaml_ configuration file template must be adapted, if necessary.

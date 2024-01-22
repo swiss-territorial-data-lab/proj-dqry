@@ -1,11 +1,5 @@
-input/input_det/z*
-input/input_det/DEM
-input/input_det/logs
-input/input_det/SWISSIMAGE_footprints
-input/input-trne/*
-input/input-prd/*
-input/input_dt/*
+input/*
+!intput/input_det/AoI
+!input/input_trne/
 output/*
-tools/*
-pre-processing/*
 config/config_det_*

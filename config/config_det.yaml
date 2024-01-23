@@ -1,5 +1,5 @@
 ###################################
-####### Inference detection ####### 
+##### Detection by inference #####
 # Automatic detection of Quarries and Mineral Extraction Sites (MES) in images
 
 # 1-Produce tiles geometry according to the AoI extent and zoom level

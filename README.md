@@ -236,7 +236,7 @@ $ stdl-objdet assess_detections config/config_trne.yaml
 
 ```bash
 $ mkdir -p input/input_det/logs
-$ cp output/output_trne/logs/<selected model pth> input/input_det/logs
+$ cp output/output_trne/logs/<SELECTED MODEL PTH> input/input_det/logs
 $ python scripts/prepare_data.py config/config_det.yaml
 ```
 

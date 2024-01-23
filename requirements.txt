@@ -188,6 +188,9 @@ numpy==1.23.3
     #   rdp
     #   scikit-learn
     #   scipy
+    #   rdp
+    #   scikit-learn
+    #   scipy
     #   snuggs
     #   stdl-object-detector
     #   supermercado

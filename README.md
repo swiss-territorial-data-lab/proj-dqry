@@ -225,19 +225,27 @@ $ stdl-objdet train_model config/config_trne.yaml
 $ tensorboard --logdir output/output_trne/logs
 ```
 
-Open the following link with a web browser: `http://localhost:6006` and identify the iteration minimising the validation loss and select the model accordingly (**pth_file**) in `config_trne`. 
+Open the following link with a web browser: `http://localhost:6006` and identify the iteration minimising the validation loss and select the model accordingly (`model_*.pth`) in `config_trne`. For the provided parameters, `model_0002999.pth` is the default one.
 
 ```bash
 $ stdl-objdet make_detections config/config_trne.yaml
 $ stdl-objdet assess_detections config/config_trne.yaml
 ```
 
-**Detection**: copy the selected trained model to `input/input_det/logs` folder.
+**Detection**: 
 
 ```bash
 $ mkdir -p input/input_det/logs
 $ cp output/output_trne/logs/<selected model pth> input/input_det/logs
 $ python scripts/prepare_data.py config/config_det.yaml
+```
+
+Don't forget to assign the desired year to the url in `config_det.yaml` when you download tiles from the server with `generate_tilesets.py`.
+
+url: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/[YEAR]/3857/{z}/{x}/{y}.jpeg
+
+
+```bash
 $ stdl-objdet generate_tilesets config/config_det.yaml
 $ stdl-objdet make_detections config/config_det.yaml
 $ scripts/get_dem.sh
@@ -251,10 +259,14 @@ $ scripts/get_dem.sh
 $ scripts/batch_process.sh
 ```
 
-**Detection tracking**: copy the output file `oth_detections_filter_year-{year}_(filters_list).geojson` produced with the **Detection** workflow to the **input_track** folder.
+**Detection tracking**: 
+
+Copy the detections files `oth_detections_at_0dot3_threshold_year-{year}_{filters_list}.geojson` produced for different years with the **Detection** workflow to the **input_track** folder.
+
 
 ```bash
-$ mkdir input_track
+$ mkdir input/input_track
+$ cp output/output_det/<OTH_FILTERED_DETECTIONS_PATH> input/input_track
 $ python scripts/track_detections.py config/config_track.yaml
 $ python scripts/plots.py config/config_track.yaml
 ```

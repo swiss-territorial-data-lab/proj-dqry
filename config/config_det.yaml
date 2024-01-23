@@ -6,7 +6,7 @@
 prepare_data.py: 
   srs: "EPSG:2056"  # Projection of the input file
   datasets:
-    shapefile: ./input/input_det/AoI/<AoI_Shapefile>
+    shapefile: ./input/input_det/AoI/<AoI_SHAPEFILE>
   output_folder: ./output/output_det
   zoom_level: 16  # z, keep between 15 and 18  
 
@@ -17,7 +17,7 @@ generate_tilesets.py:
     aoi_tiles_geojson: ./output/output_det/tiles.geojson
     orthophotos_web_service:
       type: XYZ # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ
-      url: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/<YEAR>/3857/{z}/{x}/{y}.jpeg
+      url: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/<YEAR>/3857/{z}/{x}/{y}.jpeg # !!! Assign the desired year !!! 
   output_folder: ./output/output_det
   tile_size: 256 # per side, in pixels
   overwrite: False
@@ -44,7 +44,9 @@ make_detections.py:
     oth: COCO_oth.json
   detectron2_config_file: '../../config/detectron2_config_dqry.yaml' # path relative to the working_folder
   model_weights:
-    pth_file: '../../input/input_det/logs/model_0002999.pth' # trained model minimizing the validation loss curve, monitor the training process via tensorboard (tensorboard --logdir </logs>)
+    pth_file: '../../input/input_det/logs/model_0002999.pth' # trained model minimizing the validation loss curve, 
+                                                                # monitoring of the training process via tensorboard (tensorboard --logdir </logs>)
+                                                                # for the provided parameters model_0002999.pth is chosen 
   image_metadata_json: './output/output_det/img_metadata.json'
   rdp_simplification: # rdp = Ramer-Douglas-Peucker
     enabled: True
@@ -55,7 +57,7 @@ make_detections.py:
 filter_detections.py:
   year: <YEAR>
   detections: ./output/output_det/oth_detections_at_0dot3_threshold.gpkg
-  shapefile: ./input/input_det/AoI/<AoI_Shapefile>
+  shapefile: ./input/input_det/AoI/<AoI_SHAPEFILE>
   dem: ./input/input_det/DEM/switzerland_dem_EPSG2056.tif
   elevation: 1200.0 # m, altitude threshold
   score: 0.95 # detection score (from 0 to 1) provided by detectron2

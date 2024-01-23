@@ -3,9 +3,9 @@
 
 # Track object in different datasets over years
 track_detections.py:  
-  years: <[YEAR1, YEAR2, YEAR3,...]>                          # Provide a list of years used for detection
+  years: <[2000, 2001, 2002]>                          # Provide a list of years used for detection
   datasets:
-    detection: ./input/input_track/oth_detections_at_0dot3_threshold_year-<YEAR>_score-0dot95_area-5000_elevation-1200_distance-10.geojson  # Final detection file, produced by filter_detections.py
+    detection: ./input/input_track/oth_detections_at_0dot3_threshold_year-{year}_score-0dot95_area-5000_elevation-1200_distance-10.geojson  # Final detection file, produced by filter_detections.py
   output_folder: ./output/output_track/oth_detections_at_0dot3_threshold_score-0dot95_area-5000_elevation-1200_distance-10
 
 # Plots

@@ -17,12 +17,12 @@ The `prepare_data.py` script allows the user to prepare the input dataset (image
 
 It works along the config files `config_trne.yaml` and `config_det.yaml`. Input and output paths of the config files must be adapted if necessary. The `prepare_data.py` section of the _yaml_ configuration file is expected as follow:
 
-```bashclip
+```bash
 prepare_data.py:
     srs: <crs> 
     datasets:
-        shapefile: ./input/<Label_Shapefile>
-    output_folder: ./output/
+        shapefile: ./input/<SHAPEFILE>
+    output_folder: ./output/<DIR>
     zoom_level: <z>
 ```
 
@@ -30,11 +30,11 @@ The **srs** key provides the geographic framework to ensure that all the input d
 
 The labels (ground truth) polygons are used for the **Training and evaluation** workflow: 
 
-    <Label_Shapefile> = tlm-hr-trn-topo.shp
+    <SHAPEFILE> = tlm-hr-trn-topo.shp
     
 A region of Switzerland polygon is used for the **Detection** workflow:
 
-    <Label_Shapefile> = swissimage_footprint_<YEAR>.shp
+    <SHAPEFILE> = swissimage_footprint_<YEAR>.shp
 
 The outputs are `tiles.geojson` corresponding to shapefiles of the tiles obtained for the given AoI and `labels.geojson` corresponding to shapefiles of the input labels. 
 
@@ -49,7 +49,7 @@ The outputs are `tiles.geojson` corresponding to shapefiles of the tiles obtaine
 
 The object detection output (`oth_detections_at_0dot*_threshold.gpkg`) obtained with the `object-detector` scripts needs to be filtered to discard false detections and improve the aesthetic of the polygons (merge polygons belonging to a single MES). The `filter_detections.py` script extracts detections from _gpkg_ file according to a series of threshold values. It works along with the config file `config_det.yaml`. 
 
-First, elevation filtering is applied using a Digital Elevation Model ([DEM](#get-dem)) as input. Detections above the elevation threshold are discarded. Detections at altitude 0 are also discarded because they are lie outside the DEM limits. Next, an algorithm ([KMeans] (https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html)) is applied to cluster polygons according to their centroids. A predefined number of clusters _k_ is set as _k_ = (number of detection / 3). Polygons are grouped according to their cluster value. Polygon attributes, such as confidence scores, are aggregated at the maximum value. This preserves the final integrity of the detection polygons by retaining detections with potentially low scores but belonging to a cluster with higher scores. This improves the final segmentation of the detected object. Be careful to keep the threshold score value relatively low while running `make_detections.py` to avoid removing too many polygons that could potentially be part of the object detection. Then, the detections are filtered based on the confidence score. The detection polygons are clipped with the AoI polygon to remove odd shaped polygons that extend outwards. Next, polygons that do not overlap but are close in position are merged. Based on the surface area of the polygons, values below the threshold are eliminated. Finally, an averaged predicted score is again computed, taking into account the score of the merged polygons. The results of the filtering/merging process are saved in a _geojson_ file.
+First, elevation filtering is applied using a Digital Elevation Model ([DEM](#get-dem)) as input. Detections above the elevation threshold are discarded. Detections at altitude 0 are also discarded because they are lie outside the DEM limits. Next, an algorithm ([KMeans] (https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html)) is applied to cluster polygons according to their centroids. A predefined number of clusters _k_ is set as _k_ = (number of detection / 3). Polygons are grouped according to their cluster value. Polygon attributes, such as confidence scores, are aggregated at the maximum value. This preserves the final integrity of the detection polygons by retaining detections with potentially low scores but belonging to a cluster with higher scores. This improves the final segmentation of the detected object. Be careful to keep the threshold score value relatively low (chosen value = 0.3) while running `make_detections.py` to avoid removing too many polygons that could potentially be part of the object detection. Then, the detections are filtered based on the confidence score. The detection polygons are clipped with the AoI polygon to remove odd shaped polygons that extend outwards. Next, polygons that do not overlap but are close in position are merged. Based on the surface area of the polygons, values below the threshold are eliminated. Finally, an averaged predicted score is again computed, taking into account the score of the merged polygons. The results of the filtering/merging process are saved in a _geojson_ file.
 
 The following images illustrate the extraction process, showing the original and filtered detections:
 
@@ -65,40 +65,40 @@ Input and output paths of the config file must be adapted if necessary. The scri
 
 ```bash
 filter_detections.py:
-    year:<YEAR> 
-    input: ./output/output_det_/oth_detections_at_0dot*_threshold.gpkg
-    shapefile: ./input/input_det/<AoI_Shapefile> 
-    dem: ./input/input_det/<DEM_raster>  
+    year: <YEAR> 
+    input: ./output/output_det/oth_detections_at_<SCORE_LOWER_THRESHOLD_0dot*>_threshold.gpkg
+    shapefile: ./input/input_det/<SHAPEFILE> 
+    dem: ./input/input_det/<DEM_RASTER>  
     elevation: <THRESHOLD VALUE>   
     score: <THRESHOLD VALUE>
     distance: <THRESHOLD VALUE> 
     area: <THRESHOLD VALUE> 
-    output: ./output/output_det_/oth_detections_at_0dot*_threshold_year-{year}_score-{score}_area-{area}_elevation-{elevation}_distance-{distance}.geojson
+    output: ./output/output_det/oth_detections_at_0dot*_threshold_year-{year}_score-{score}_area-{area}_elevation-{elevation}_distance-{distance}.geojson
 ```
 
--**year**: year of the dataset to be filtered used as input.
+- **year**: year of the dataset to be filtered used as input.
 
--**input**: path to the input file to be filtered, _i.e._ `oth_detections_at_0dot*_threshold.gpkg`.
+- **input**: path to the input file to be filtered, _i.e._ `oth_detections_at_0dot*_threshold.gpkg`.
 
--**shapefile**: AoI of interest used to remove polygons located partially outside the AoI. _SWISSIMAGE_ acquisition footprint for a given year (swissimage_footprint_<YEAR>.shp) were used for this project.
+- **shapefile**: AoI of interest used to remove polygons located partially outside the AoI. _SWISSIMAGE_ acquisition footprint for a given year (swissimage_footprint_<YEAR>.shp) were used for this project.
 
--**dem**: path to a DEM of Switzerland. Product derived from SRTM is used and can be downloaded and reprojected with the `get_DEM.sh` script. An elevation threshold is used to discard detections above the given value.
+- **dem**: path to a DEM of Switzerland. Product derived from SRTM is used and can be downloaded and reprojected with the `get_DEM.sh` script. An elevation threshold is used to discard detections above the given value.
 
--**elevation**: the altitude above which detections are discarded. Initial tests have shown that many false detections are due to snow cover (reflectance value close to bedrock reflectance) or to the exposure of the bedrock in the mountains, which are mainly observed at higher altitudes. By default, the threshold elevation has been set to 1200.0 m.
+- **elevation**: the altitude above which detections are discarded. Initial tests have shown that many false detections are due to snow cover (reflectance value close to bedrock reflectance) or to the exposure of the bedrock in the mountains, which are mainly observed at higher altitudes. By default, the threshold elevation has been set to 1200 m.
 
--**score**: each polygon is given a confidence score by the detection algorithm. Polygons with a low scores can be discarded. By default, the value is set to 0.95.
+- **score**: each polygon is given a confidence score by the detection algorithm. Polygons with a low scores can be discarded. By default, the value is set to 0.95.
 
--**distance**: two polygons close to each other can be considered as belonging to the same MES. These polygons can be merged into a single polygon. By default, the buffer value is set to 10 m.
+- **distance**: two polygons close to each other can be considered as belonging to the same MES. These polygons can be merged into a single polygon. By default, the buffer value is set to 10 m.
 
--**area**: small area polygons can be discarded by assuming that a MES has a minimum area. The default value is set to 5000 m<sup>2</sup>.
+- **area**: small area polygons can be discarded by assuming that a MES has a minimum area. The default value is set to 5000 m<sup>2</sup>.
 
--**output**: path to the shapefile of filtered polygons with the detection score preserved. The name of the output file is formatted as: `oth_detections_at_0dot*_threshold_year-{year}_score-{score}_elevation-{elevation}_distance-{distance}_area-{area}.geojson`.
+- **output**: path to the shapefile of filtered polygons with the detection score preserved. The name of the output file is formatted as: `oth_detections_at_0dot*_threshold_year-{year}_score-{score}_elevation-{elevation}_distance-{distance}_area-{area}.geojson` with '0dot*' the value of the lower score threshold of the detection chosen as 0.3 for the project.
 
 
 The script can be run by executing the following command:
 
 ```bash
-$ python <dir_path>/scripts/filter_detections.py <dir_path>/config/config_det.yaml
+$ python <DIR_PATH>/scripts/filter_detections.py <DIR_PATH>/config/config_det.yaml
 ```
 
 ## Track detections
@@ -119,19 +119,19 @@ The `track_detections.py` section of the _yaml_ configuration file is expected a
 track_detections.py:  
 years: <[YEAR1, YEAR2, YEAR3,...]>      
 datasets:
-    detection: ./input/input_track/oth_detections_at_0dot*_threshold_year-<YEAR>_score-<SCORE>_elevation-<ELEVATION>_distance-<DISTANCE>_area-<AREA>.geojson  
+    detection: ./input/input_track/oth_detections_at_<SCORE_LOWER_THRESHOLD_0dot*>_threshold_year-<YEAR>_score-<SCORE>_elevation-<ELEVATION>_distance-<DISTANCE>_area-<AREA>.geojson  
 output_folder: ./output/output_track
 ```
 
-Input and output paths of the config file must be adapted if necessary. The script takes as input a _geojson_ file. `oth_detections_at_0dot*_threshold_year-<YEAR>_<filters_list>.geojson` files of different years produced with the script `filter_detections.py` of the `object-detector` are used. The list of years _YEARx_ required for the object tracking must be specified.
+Input and output paths of the config file must be adapted if necessary. The script takes as input the _geojson_ files `oth_detections_at_<SCORE_LOWER_THRESHOLD_0dot*>_threshold_year-<YEAR>_<filters_list>.geojson` of different years produced with the script `filter_detections.py` of the `object-detector`. The list of years _YEARx_ required for the object tracking must be specified.
 
 The script can be run by executing the following command:
 
 ```bash
-$ python  <dir_path>/scripts/track_detections.py <dir_path>/config/config_track.yaml
+$ python  <DIR_PATH>/scripts/track_detections.py <DIR_PATH>/config/config_track.yaml
 ```
 
-The outputs are a _geojson_ and _csv_ (**detections_years**) files saving detections over the years with their characteristics (ID_object, ID_feature, year, score, area, geometry). 
+The outputs are a _geojson_ and _csv_ (**detections_years**) files saving the detections over the years with their characteristics (ID_object, ID_feature, year, score, area, geometry). 
 
 ## Plots
 
@@ -152,7 +152,7 @@ Input or output paths must be adapted if necessary. The script takes as input a 
 The script can be run by executing the following command:
 
 ```bash
-$ python <dir_path>/scripts/filter_detections.py <dir_path>/config/config_track.yaml
+$ python <DIR_PATH>/scripts/filter_detections.py <DIR_PATH>/config/config_track.yaml
 ```
 
 <p align="center">

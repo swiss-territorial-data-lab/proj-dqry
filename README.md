@@ -1,6 +1,6 @@
 # Automatic detection and observation of mineral extraction sites in Switzerland
 
-The project aims to perform automatic detection of mineral extraction sites (MES, also referred as quarry in this project) on georeferenced raster images of Switzerland over several years. A deep learning approach is used to train a model achieving a **f1 score of about 80%** (validation dataset), enabling accurate detection of MES over time. Detailed documentation of the project and results can be found on the [STDL technical website](https://github.com/swiss-territorial-data-lab/stdl-tech-website/tree/master/docs/PROJ-DQRY). <br>
+The project aims to perform automatic detection of mineral extraction sites (MES, also referred as quarry in this project) on georeferenced raster images of Switzerland over several years. A deep learning approach is used to train a model achieving a **f1 score of about 80%** (validation dataset), enabling accurate detection of MES over time. Detailed documentation of the project and results can be found on the [STDL technical website](https://tech.stdl.ch/PROJ-DQRY-TM/). <br>
 
 **TOC**
 - [Overview](#overview)

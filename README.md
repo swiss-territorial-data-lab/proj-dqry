@@ -236,7 +236,7 @@ $ stdl-objdet assess_detections config/config_trne.yaml
 
 ```bash
 $ mkdir -p input/input_det/logs
-$ cp output/output_trne/logs/<SELECTED MODEL PTH> input/input_det/logs
+$ cp output/output_trne/logs/<selected_model_pth> input/input_det/logs
 $ python scripts/prepare_data.py config/config_det.yaml
 ```
 
@@ -266,7 +266,7 @@ Copy the detections files `oth_detections_at_0dot3_threshold_year-{year}_{filter
 
 ```bash
 $ mkdir input/input_track
-$ cp output/output_det/<OTH_FILTERED_DETECTIONS_PATH> input/input_track
+$ cp output/output_det/<oth_filtered_detections_path> input/input_track
 $ python scripts/track_detections.py config/config_track.yaml
 $ python scripts/plots.py config/config_track.yaml
 ```

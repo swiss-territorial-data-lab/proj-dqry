@@ -21,8 +21,8 @@ It works along the config files `config_trne.yaml` and `config_det.yaml`. Input 
 prepare_data.py:
     srs: <crs> 
     datasets:
-        shapefile: ./input/<SHAPEFILE>
-    output_folder: ./output/<DIR>
+        shapefile: ./input/<shapefile>
+    output_folder: ./output/<output_dir>
     zoom_level: <z>
 ```
 
@@ -30,11 +30,11 @@ The **srs** key provides the geographic framework to ensure that all the input d
 
 The labels (ground truth) polygons are used for the **Training and evaluation** workflow: 
 
-    <SHAPEFILE> = tlm-hr-trn-topo.shp
+    <shapefile> = tlm-hr-trn-topo.shp
     
 A region of Switzerland polygon is used for the **Detection** workflow:
 
-    <SHAPEFILE> = swissimage_footprint_<YEAR>.shp
+    <shapefile> = swissimage_footprint_<YEAR>.shp
 
 The outputs are `tiles.geojson` corresponding to shapefiles of the tiles obtained for the given AoI and `labels.geojson` corresponding to shapefiles of the input labels. 
 
@@ -67,12 +67,12 @@ Input and output paths of the config file must be adapted if necessary. The scri
 filter_detections.py:
     year: <YEAR> 
     input: ./output/output_det/oth_detections_at_<SCORE_LOWER_THRESHOLD_0dot*>_threshold.gpkg
-    shapefile: ./input/input_det/<SHAPEFILE> 
-    dem: ./input/input_det/<DEM_RASTER>  
-    elevation: <THRESHOLD VALUE>   
-    score: <THRESHOLD VALUE>
-    distance: <THRESHOLD VALUE> 
-    area: <THRESHOLD VALUE> 
+    shapefile: ./input/input_det/<shapefile> 
+    dem: ./input/input_det/<DEM_raster>  
+    elevation: <THRESHOLD_VALUE>   
+    score: <THRESHOLD_VALUE>
+    distance: <THRESHOLD_VALUE> 
+    area: <THRESHOLD_VALUE> 
     output: ./output/output_det/oth_detections_at_0dot*_threshold_year-{year}_score-{score}_area-{area}_elevation-{elevation}_distance-{distance}.geojson
 ```
 
@@ -98,7 +98,7 @@ filter_detections.py:
 The script can be run by executing the following command:
 
 ```bash
-$ python <DIR_PATH>/scripts/filter_detections.py <DIR_PATH>/config/config_det.yaml
+$ python <dir_path>/scripts/filter_detections.py <dir_path>/config/config_det.yaml
 ```
 
 ## Track detections
@@ -128,7 +128,7 @@ Input and output paths of the config file must be adapted if necessary. The scri
 The script can be run by executing the following command:
 
 ```bash
-$ python  <DIR_PATH>/scripts/track_detections.py <DIR_PATH>/config/config_track.yaml
+$ python  <dir_path>/scripts/track_detections.py <dir_path/config/config_track.yaml
 ```
 
 The outputs are a _geojson_ and _csv_ (**detections_years**) files saving the detections over the years with their characteristics (ID_object, ID_feature, year, score, area, geometry). 
@@ -152,7 +152,7 @@ Input or output paths must be adapted if necessary. The script takes as input a 
 The script can be run by executing the following command:
 
 ```bash
-$ python <DIR_PATH>/scripts/filter_detections.py <DIR_PATH>/config/config_track.yaml
+$ python <dir_path>/scripts/filter_detections.py <dir_path>/config/config_track.yaml
 ```
 
 <p align="center">

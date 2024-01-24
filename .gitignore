@@ -1,6 +1,5 @@
-input/input_det/*
-input/input_dm/*
-input/input-prd/logs/*
-input/input-prd/DEM/*
+input/*
+!intput/input_det/AoI
+!input/input_trne/
 output/*
-tools/*
+config/config_det_*

@@ -1,250 +1,286 @@
-# Automatic detection of mineral extraction sites in Switzerland
+# Automatic detection and observation of mineral extraction sites in Switzerland
+
+The project aims to perform automatic detection of mineral extraction sites (MES, also referred as quarry in this project) on georeferenced raster images of Switzerland over several years. A deep learning approach is used to train a model achieving a **f1 score of about 80%** (validation dataset), enabling accurate detection of MES over time. Detailed documentation of the project and results can be found on the [STDL technical website](https://tech.stdl.ch/PROJ-DQRY-TM/). <br>
+
+**TOC**
+- [Overview](#overview)
+- [Requirements](#requirements)
+    - [Hardware](#hardware)
+    - [Software](#software)
+    - [Installation](#installation)
+- [Getting started](#getting-started)
+    - [Files structure](#files-structure)
+    - [Data](#data)
+    - [Scripts](#scripts)
+    - [Workflow instructions](#workflow-instructions)
+- [Contributors](#contributors)
+- [Disclaimer](#disclaimer)
+- [Copyright and License](#copyright-and-license)
+
 
 ## Overview
 
-This set of scripts and configuration files are related to the _quarry/exploitation sites_ detection case. The detector is initially trained on _swissimage_ from _swisstopo_ using the _TLM_ data of _swisstopo_ for the labels.
+The project `proj-dqry` provides scripts to prepare and post-process data and results dedicated to MES automatic detection. Object detection is performed with the `object-detector` framework developed by the STDL, based on deep learning method. Documentation of this project can be found [here](https://tech.stdl.ch/TASK-IDET/).
 
-The workflow is defined in two distinct procedures:
-* the Training and Evaluation procedure allows for the training of the detection model on a given dataset and its evaluation with the ground truth dataset examined by domain experts.
-* the detections procedure performing detection of quarries in a given dataset thanks to the previously trained model.
+The procedure is defined in three distinct workflows:
 
-The quarry are detected with the tools developped in the `object-detector` developped by the STDL and located [here](https://github.com/swiss-territorial-data-lab/object-detector). Version 1.0.0 of `proj-dqry` works along with version 1.0.0 of `object-detector`. 
+1. **Training and evaluation**: enables the detection model to be trained and evaluated using a customised dataset reviewed by domain experts and constituting the ground truth. The detector is first trained on the [_SWISSIMAGE 10 cm_](https://www.swisstopo.admin.ch/fr/geodata/images/ortho/swissimage10.html) mosaic of 2020, using manually vectorised MES of the [swissTLM3D](https://www.swisstopo.admin.ch/fr/geodata/landscape/tlm3d.html) product.
+2. **Detection**: enables detection by inference of MES in a given set of images ([_SWISSIMAGE Journey_](https://www.swisstopo.admin.ch/en/maps-data-online/maps-geodata-online/journey-through-time-images.html)) using the previously trained model.
+3. **Detection tracking**: identifies and tracks MES evolution over time.
 
-Full documentation of the project can be found [here](https://tech.stdl.ch/PROJ-DQRY/).
+<p align="center">
+<img src="./images/dqry_workflow_graph.png?raw=true" width="100%">
+<br />
+<i>Workflow scheme.</i>
+</p>
 
-## Python virtual environment
+## Requirements
 
-Before starting to run scripts make sure to work with the required Python libraries that have been used during the code development. This can be ensured by working with a virtual environment that will preserve the package dependencies.
+### Hardware
 
-* if not done already, create a dedicated Python virtual environment:
-	    
-      python3 -m venv <path>/[name of the virtual environment]
+The project has been run on a 32 GiB RAM machine with a 16 GiB GPU (NVIDIA Tesla T4) compatible with [CUDA](https://detectron2.readthedocs.io/en/latest/tutorials/install.html). The library [detectron2](https://github.com/facebookresearch/detectron2), dedicated to object detection with deep learning algorithm, was used. <br>
+The main limitation is the number of tiles to be processed and the amount of detections, which can lead to RAM saturation. The provided requirements stand for a zoom level equal to or below 17 and an area of interest (AoI) corresponding to typical [SWISSIMAGE acquisition footprints](https://map.geo.admin.ch/?lang=fr&topic=ech&bgLayer=ch.swisstopo.pixelkarte-farbe&layers=ch.swisstopo.zeitreihen,ch.bfs.gebaeude_wohnungs_register,ch.bav.haltestellen-oev,ch.swisstopo.swisstlm3d-wanderwege,ch.astra.wanderland-sperrungen_umleitungen,ch.swisstopo.swissimage-product,ch.swisstopo.swissimage-product.metadata&layers_opacity=1,1,1,0.8,0.8,1,0.7&layers_visibility=false,false,false,false,false,true,true&layers_timestamp=18641231,,,,,2021,2021&time=2021) (no more than a third of Switzerland's surface area). 
 
-* activate the virtual environment:
+### Software
 
-      source <path>/[name of the virtual environment]/bin/activate
+- Ubuntu 20.04
+- Python version 3.8 
+- PyTorch version 1.10
+- CUDA version 11.3
+- `object-detector` version [1.0.0](https://github.com/swiss-territorial-data-lab/object-detector/releases/tag/v1.0.0) 
 
-* install the required Python packages into the virtual environment:
+### Installation
 
-      pip install -r requirements.txt
-
-The requirements.txt file used for the quarries detection can be found in the `proj-dqry` repository. 
-
-* deactivate the virtual environment if not used anymore
-
-      deactivate
-
-
-## Required input data
-
-The input data for the **Training and Evaluation** and **Detection** workflows for the quarry detection project can either be found in input folders and/or are stored on the STDL kDrive (https://kdrive.infomaniak.com/app/drive/548133/files) with the following access path: /STDL/Common Documents/Projets/En_cours/Quarries_TimeMachine/02_Data/, available on request.
-
-* DEM
-    - swiss-srtm.tif: DEM of Switzerland produced from SRTM instrument. The raster is used to filter the detection according to an elevation threshold. It is available on request.
-* Learning models
-    - logs: folder containing trained detection model at several learning iteration. They have been obtained during the model training phase. The optimum model minimizing the validation loss curve. The learning characteristics of the algorithm can be visualized using tensorboard (see below in Processing/Run scripts). The optimum model obtained during the **Training and Evaluation** phase is used to perform the **Detections** phase. The algorithm has been trained on [SWISSIMAGE 10 cm](https://www.swisstopo.admin.ch/fr/geodata/images/ortho/swissimage10.html) data with a 1 m/px resolution.
-* Shapefiles
-    - quarry_label_tlm_revised: `tlm-hr-trn-topo.shp` is a polygons shapefile of the quarries labels (TLM data) reviewed by the domain experts. This file has been used to train and assess the automatic detection algorithms = Ground Truth.
-    - swissimage_footprints_shape_year_per_year: original SWISSIMAGE footprints and processed polygons border shapefiles for every SWISSIMAGE acquisition year.
-    - switzerland_border: polygon shapefile of the Switzerland border. 
-    - tiles_prd: tiles shapefile (tiles_500_0_0_[number].shp) of the defined AoI. This file can be created with the pre-processing script `tile-generator.py` with `tiles_prediction0x.geojson` as input.   
-    - tiles_trne: tiles shapefile (tiles_500_0_0.shp) intersecting labeled quarries in `tlm-hr-trn-topo.shp` file. This file can be created with the pre-processing script `tile-generator.py`. It contains the tiles as simple _polygons_ providing the shape of each tile.
-*	SWISSIMAGE
-    - Explanation.txt: file explaining the main characteristics of SWISSIMAGE and the references links (written by R. Pott).
-
-
-## Workflow
-
-### Training and Evaluation
-
-- Pre-processing
-
-The pre-processing, performed with the script `tile-generator.py`, generates a shapefile with tiles of a given size for an AoI defined by an input shapefile.
+Install GDAL:
 
 ```bash
-$ python3 pre-processing/tile-generator.py 
-                                    --labels [polygon_shapefile] 
-                                    --size [tile_size]
-                                    --output [output_directory]
-                                    [--x-shift/--y-shift [grid origin shift]]
+sudo apt-get install -y python3-gdal gdal-bin libgdal-dev gcc g++ python3.8-dev
 ```
 
-For the quarries example:
+Python dependencies can be installed with `pip` or `conda` using the `requirements.txt` file (compiled from `requirements.in`) provided. We advise using a [Python virtual environment](https://docs.python.org/3/library/venv.html).
 
-    [polygon_shapefile] = input/input-trne/tlm-hr-trn-topo.shp
-    [tile_size] = 500 (m)
-    [output_directory]: input/input-trne/
+- Create a Python virtual environment
+```bash
+$ python3 -m venv <dir_path>/<name of the virtual environment>
+$ source <dir_path>/<name of the virtual environment>/bin/activate
+```
 
-- Processing
-
--Working directory and paths
-
-By default the working directory is: 
-
-    $ cd proj-dqry/config/
-
--Config and input data
-
-Two config files are provided in `proj-dqry`:
-
-    [yaml_config] = config-trne.yaml 
-    [logging_config] = logging.conf
-
-The logging format file can be used as provided. The configuration _YAML_ has been set for the object detector workflow by reading dedicated section. It has to be adapted in terms of input and output location and files.
-
-The `prepare_data.py` section of the _yaml_ configuration file is expected as follows :
+- Install dependencies
 
 ```bash
-prepare_data.py:
-    srs: "EPSG:2056"
-    tiling:
-        shapefile: ../input/input-trne/[Tile_Shapefile]
-    label:
-        shapefile: ../input/input-trne/[Label_Shapefile]
-    output_folder: ../output/output-trne
+$ pip install -r requirements.txt
 ```
 
-Set the path to the desired tiles shapefile (tiling) and to the AoI shapefile (label).
-
-For the quarries example:
-
-    [Tile_Shapefile] = tiles_500_0_0.shp   # Output of the script `tile-generator.py`  
-    [Label_Shapefile] = tlm-hr-trn-topo.shp
-
-In both case, the _srs_ key provides the working geographical frame in order for all the input data to work together.
-
--Run scripts
-
-The scripts can be executed as follow:
+- If needed (update dependencies or addition a new Python library), _requirements.in_ can be compiled to generate a new _requirements.txt_:
 
 ```bash
-$ python3 ../scripts/prepare_data.py --config config-trne.yaml --logger logging.conf
-$ python3 [object-detector_path]/scripts/generate_tilesets.py config-trne.yaml
-$ cd [output_directory]
-$ tar -cvf images-[image_size].tar COCO_{trn,val,tst}.json && \
-    tar -rvf images-[image_size].tar {trn,val,tst}-images-[image_size] && \
-    gzip < images-[image_size].tar > images-[image_size].tar.gz && \
-    rm all-images-[image_size].tar
-$ cd -
-$ cd [process_directory]
-$ python3 [object-detector_path]/scripts/train_model.py config-trne.yaml
-$ python3 [object-detector_path]/scripts/make_detections.py config-trne.yaml
-$ python3 [object-detector_path]/scripts/assess_detections.py config-trne.yaml
+$ pip-compile requirements.in
 ```
 
-In between the `train_model.py` and `make_detections.py` script execution, the output of the detection model training must be checked and the optimum model , i.e. the one minimizing the validation loss curve, must be chosen (obtained for a given iteration number) and set as input (model_weights: pth_file:./logs/[chosen model].pth) to make the detections. For the quarry example the optimum is obtained for a learning iteration around 2000-3000. The file model_final correspond to the last iteration recorded during the training procedure.
+## Getting started
 
-The validation loss curve can be visualized with `tensorboard` 
+### Files structure
 
-    tensorboard --logdir [logs folder]
+The folders/files of the project `proj-dqry` (in combination with `object-detector`) is organised as follows. Path names can be customised by the user, and * indicates numbers which may vary:
 
-And open the following link with a web browser: `http://localhost:6006`
+<pre>.
+├── config                                          # configurations files folder
+│   ├── config_det.template.yaml                    # template file for detection workflow over several years
+│   ├── config_track.yaml                           # detection tracking workflow
+│   ├── config_det.yaml                             # detection workflow
+│   ├── config_trne.yaml                            # training and evaluation workflow
+│   ├── detectron2_config_dqry.yaml                 # detectron 2
+│   └── logging.conf                                # logging configuration
+├── images                                          # folder containing the images displayed in the README 
+├── input                                           # inputs folders
+│   ├── input_track                                 # detection tracking input 
+│   │   ├── oth_detections_at_0dot*_threshold_year-*_score-0dot*_area-*_elevation-*_distance-*.geojson # final filtered detections file for a given year
+│   ├── input_det                                   # detection inputs
+│   │   ├── logs                                    # folder containing trained model 
+│   │   │   └── model_*.pth                         # selected model at iteration
+│   │   ├── AoI
+│   │   │   ├── swissimage_footprint_*.prj          # AoI shapefile projection for a given year
+│   │   │   ├── swissimage_footprint_*.shp          # AoI shapefile for a given year          
+│   │   │   └── swissimage_footprint_*.shx          # AoI shapefile indexes for a given year
+│   └── input_trne                                  # training and evaluation inputs
+│       ├── tlm-hr-trn-topo.prj                     # shapefile projection of the labels
+│       ├── tlm-hr-trn-topo.shp                     # shapefile of the labels 
+│       └── tlm-hr-trn-topo.shx                     # shapefile indexes of the labels
+├── output                                          # outputs folders
+│   ├── output_track                                # detection tracking outputs 
+│   │   └── oth_detections_at_0dot*_threshold_year-*_score-0dot*_area-*_elevation-*_distance-*   # final filtered detections file for a given year
+│   │       ├── plots                               # plot saving folder
+│   │       ├── detections_years.csv                # table containing detections (id, geometry, area, year...) for a list of given year
+│   │       └── detections_years.geojson            # geometry file containing detections (id, geometry, area, year...) for a list of given year
+│   ├── output_det                                  # detection outputs 
+│   │   ├── all-images                              # images downloaded from wmts server (XYZ values)
+│   │   │   ├── z_y_x.json
+│   │   │   └── z_y_x.tif
+│   │   ├── oth-images                              # tagged images other dataset
+│   │   │   └── z_y_x.tif
+│   │   ├── sample_tagged_images                    # examples of annotated detections on images (XYZ values)
+│   │   │   └── oth_pred_z_y_x.png
+│   │   ├── COCO_oth.json                           # COCO annotations on other dataset  
+│   │   ├── img_metadata.json                       # images info
+│   │   ├── labels.json                             # AoI contour 
+│   │   ├── oth_detections_at_0dot*_threshold_year-*_score-0dot*_area-*_elevation-*_distance-*.geojson
+│   │   ├── oth_detections_at_0dot*_threshold.gpkg  # detections obtained with a given score threshold
+│   │   ├── split_AoI_tiles.geojson                 # labels' shapes clipped to tiles' shapes 
+│   │   └── tiles.geojson                           # tiles geometries 
+│   └── output_trne                                 # training and evaluation outputs  
+│       ├── all-images                              # images downloaded from WMTS server (XYZ values)
+│       │   ├── z_y_x.json
+│       │   └── z_y_x.tif
+│       ├── logs                                    # folder containing trained model 
+│       │   ├── inference
+│       │   │   ├── coco_instances_results.json
+│       │   │   └── instances_detections.pth
+│       │   ├── metrics.json                        # computed metrics for the given interval and bin size
+│       │   ├── model_*.pth                         # saved trained model at a given iteration
+│       │   └── model_final.pth                     # last iteration saved model
+│       ├── sample_tagged_images                    # examples of annotated detections on images (XYZ values)
+│       │   └── pred_z_y_x.png
+│       │   └── tagged_z_y_x.png
+│       │   └── trn_pred_z_y_x.png
+│       │   └── tst_pred_z_y_x.png
+│       │   └── val_pred_z_y_x.png
+│       ├── trn-images                              # tagged images train dataset  
+│       │   └── z_y_x.tif
+│       ├── tst-images                              # tagged images test dataset
+│       │   └── z_y_x.tif
+│       ├── val-images                              # tagged images validation dataset
+│       │   └── z_y_x.tif
+│       ├── clipped_labels.geojson                  # labels shape clipped to tiles shape 
+│       ├── COCO_trn.json                           # COCO annotations on train dataset
+│       ├── COCO_tst.json                           # COCO annotations on test dataset
+│       ├── COCO_val.json                           # COCO annotations on validation dataset
+│       ├── img_metadata.json                       # images info
+│       ├── labels.json                             # labels geometries
+│       ├── precision_vs_recall.html                # plot precision vs recall
+│       ├── split_AoI_tiles.geojson                 # tagged dataset tiles 
+│       ├── tagged_detections.gpkg                  # tagged detections (TP, FP, FN) 
+│       ├── tiles.json                              # tiles geometries
+│       ├── trn_metrics_vs_threshold.html           # plot metrics of train dataset vs threshold values
+│       ├── trn_detections_at_0dot*_threshold.gpkg  # detections obtained for the train dataset with a given score threshold 
+│       ├── trn_TP-FN-FP_vs_threshold.html          # plot train DS TP-FN-FP vs threshold values
+│       ├── tst_metrics_vs_threshold.html           # plot metrics of test dataset vs threshold values
+│       ├── tst_detections_at_0dot*_threshold.gpkg  # detections obtained for the test dataset with a given score threshold
+│       ├── tst_TP-FN-FP_vs_threshold.html          # plot test dataset TP-FN-FP vs threshold values
+│       ├── val_metrics_vs_threshold.html           # plot metrics of validation dataset vs threshold values
+│       ├── val_detections_at_0dot*_threshold.gpkg  # detections obtained for the validation dataset with a given score threshold
+│       └── val_TP-FN-FP_vs_threshold.html          # plot validation dataset TP-FN-FP vs threshold values
+├── scripts
+│   ├── batch_process.sh                            # batch script automatising the detection workflow
+│   ├── track_detections.py                         # script tracking the detections in multiple years dataset 
+│   ├── filter_detections.py                        # script filtering the detections according to threshold values
+│   ├── get_dem.sh                                  # batch script downloading the DEM of Switzerland
+│   ├── plots.py                                    # script plotting figures
+│   ├── prepare_data.py                             # script preparing data to be processed by the object-detector scripts
+│   └── README.md                                   # detail description of each script 
+├── .gitignore                                      
+├── LICENSE
+├── README.md                                      
+├── requirements.in                                 # list of python libraries required for the project
+└── requirements.txt                                # python dependencies compiled from requirements.in file
+</pre>
 
 
-### Detection
+## Data
 
-- Pre-processing
+Below, the description of input data used for this project. 
 
-The pre-processing, performed with the script `tile-generator.py`, generates a shapefile with tiles of a given size for an AoI defined by an input shapefile.
+- images: [_SWISSIMAGE Journey_](https://www.swisstopo.admin.ch/en/maps-data-online/maps-geodata-online/journey-through-time-images.html) is an annual dataset of aerial images of Switzerland. Only RGB images are used, from 1999 to current. It includes [_SWISSIMAGE 10 cm_](https://www.swisstopo.admin.ch/fr/geodata/images/ortho/swissimage10.html), _SWISSIMAGE 25 cm_ and _SWISSIMAGE 50 cm_. The images are downloaded from the [geo.admin.ch](https://www.geo.admin.ch/fr) server using [XYZ](https://developers.planet.com/docs/planetschool/xyz-tiles-and-slippy-maps/) connector. 
+- ground truth: MES labels come from the [swissTLM3D](https://www.swisstopo.admin.ch/fr/geodata/landscape/tlm3d.html) product. The file _tlm-hr-trn-topo.shp_, used for training, has been reviewed and synchronised with the 2020 _SWISSIMAGE 10 cm_ mosaic.
+- AoI: image acquisition footprints by year (swissimage_footprint_<YEAR>.shp) can be found [here](https://map.geo.admin.ch/?lang=fr&topic=ech&bgLayer=ch.swisstopo.pixelkarte-farbe&layers=ch.swisstopo.zeitreihen,ch.bfs.gebaeude_wohnungs_register,ch.bav.haltestellen-oev,ch.swisstopo.swisstlm3d-wanderwege,ch.astra.wanderland-sperrungen_umleitungen,ch.swisstopo.swissimage-product,ch.swisstopo.swissimage-product.metadata&layers_opacity=1,1,1,0.8,0.8,1,0.7&layers_visibility=false,false,false,false,false,true,true&layers_timestamp=18641231,,,,,2021,2021&time=2021). The shapefiles of _SWISSIMAGE_ acquisition footprint from 2015 to 2020 are provided in this repository.
+- DEM: the DEM of Switzerland has been processed by Lukas Martinelli and can be downloaded [here](https://github.com/lukasmartinelli/swissdem).
+- trained model: the trained model used to produce the results presented in the [documentation](https://github.com/swiss-territorial-data-lab/stdl-tech-website/tree/master/docs/PROJ-DQRY) and achieving a f1 score of 82% is available on request.
+
+
+## Scripts
+
+The `proj-dqry` repository contains scripts to prepare and post-process the data and results:
+
+1. `prepare_data.py` 
+2. `filter_detections.py` 
+3. `track_detections.py` 
+4. `plots.py` 
+5. `get_DEM.sh` 
+6. `batch_process.sh` 
+
+The description of each script can be found [here](./scripts/README.md). 
+
+Object detection is performed with tools present in the [`object-detector`](https://github.com/swiss-territorial-data-lab/object-detector) git repository. 
+
+
+ ## Workflow instructions
+
+The workflow can be executed by running the following list of actions and commands. Adjust the paths and input values of the configuration files accordingly. The contents of the configuration files in angle brackets must be assigned. 
+
+**Training and evaluation**: 
 
 ```bash
-$ python3 pre-processing/tile-generator.py --labels [polygon_shapefile] 
-                                    --size [tile_size]
-                                    --output [output_directory]
-                                    [--x-shift/--y-shift [grid origin shift]]
+$ python scripts/prepare_data.py config/config_trne.yaml
+$ stdl-objdet generate_tilesets config/config_trne.yaml
+$ stdl-objdet train_model config/config_trne.yaml
+$ tensorboard --logdir output/output_trne/logs
 ```
 
-For the quarries example:
-
-    [polygon_shapefile] = input/input-prd/tiles_detections0x.geojson
-    [tile_size] = 500 (in px)
-    [output_directory]: input/input-prd/
-
-- Processing
-
--Working directory and paths
-
-By default the working directory is:
-
-    $ cd /proj-dqry/config/
-
--Config and input data
-
-Two config files are provided in `proj-dqry`:
-
-    [yaml_config] = config-prd.yaml 
-    [logging_config] = logging.conf
-
-Choose the relevant `model_*.pth` file, i.e. the one minimizing the validation loss curve (see above Training and Evaluation/Processing/Run scripts) and copy it to input/input-prd/logs/. 
-
-The `prepare_data.py` section of the _yaml_ configuration file is expected as follows :
+Open the following link with a web browser: `http://localhost:6006` and identify the iteration minimising the validation loss and select the model accordingly (`model_*.pth`) in `config_trne`. For the provided parameters, `model_0002999.pth` is the default one.
 
 ```bash
-prepare_data.py:
-    srs: "EPSG:2056"
-    tiling:
-        shapefile: ../input/input-trne/[Tile_Shapefile]
-    label:
-        shapefile: ../input/input-trne/[Label_Shapefile]
-    output_folder: ../output/output-trne
+$ stdl-objdet make_detections config/config_trne.yaml
+$ stdl-objdet assess_detections config/config_trne.yaml
 ```
 
-Set the path to the desired tiles shapefile (tiling) and to the AoI shapefile (label).
-
-For the quarries example:
-
-    [Tile_Shapefile] = tiles_500_0_0.shp
-    [Label_Shapefile] = tiles_500_0_0.shp
-
-In both case, the _srs_ key provides the working geographical frame in order for all the input data to work together.
-
--Run scripts
-
-The scripts can be executed as follow:
+**Detection**: 
 
 ```bash
-$ python3 ../scripts/prepare_data.py --config config-prd.yaml --logger logging.conf
-$ python3 [object-detector_path]/scripts/generate_tilesets.py config-prd.yaml
-$ cd [output_directory]
-$ tar -cvf images-[image_size].tar COCO_{trn,val,tst}.json && \
-    tar -rvf images-[image_size].tar {trn,val,tst}-images-[image_size] && \
-    gzip < images-[image_size].tar > images-[image_size].tar.gz && \
-    rm all-images-[image_size].tar
-$ cd -
-$ cd [process_directory]
-$ python3 [object-detector_path]/scripts/make_detections.py config-prd.yaml
+$ mkdir -p input/input_det/logs
+$ cp output/output_trne/logs/<selected_model_pth> input/input_det/logs
+$ python scripts/prepare_data.py config/config_det.yaml
 ```
 
-- Post-processing
+Don't forget to assign the desired year to the url in `config_det.yaml` when you download tiles from the server with `generate_tilesets.py`.
 
-The quarry detections output as a polygons shapefile needs a filtering procedure to discard false detections and improve the aesthetic of the polygons (merge polygons belonging to a single quarry). This is performed the script `prediction-filter.py`:
+url: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/[YEAR]/3857/{z}/{x}/{y}.jpeg
+
 
 ```bash
-$ python post-processing/prediction-filter.py --input [detections shapefile GeoJSON]
-				     	                --dem [digital elevation model GeoTiff]
-                          	            --score [threshold value]
-                                        --area [threshold value]
-                                        --distance [threshold value]
-                                        --output [Output GeoJSON]
+$ stdl-objdet generate_tilesets config/config_det.yaml
+$ stdl-objdet make_detections config/config_det.yaml
+$ scripts/get_dem.sh
+$ python scripts/filter_detections.py config/config_det.yaml
 ```
 
--input: indicate path to the input geojson file that needs to be filtered, i.e. oth_detections.geojson
+The **Detection** workflow has been automated and can be run for a batch of years by executing these commands:
 
--dem: indicate the path to the DEM of Switzerland. A SRTM derived product is used and can be found in the STDL kDrive. A threshold elevation is used to discard detection above the given value. Indeed 1st tests have shown numerous false detection were due to snow cover area (reflectance value close to bedrock reflectance) or mountain bedrock exposure. By default the threshold elevation has been set to 1155 m.
+```bash
+$ scripts/get_dem.sh
+$ scripts/batch_process.sh
+```
 
--score: each polygon comes with a confidence score given by the detections algorithm. Polygons with low scores can be discarded. By default the value is set to 0.96.
+**Detection tracking**: 
 
--area: small area polygons can be discarded assuming a quarry has a minimal area. The default value is set to 1728 m2.
+Copy the detections files `oth_detections_at_0dot3_threshold_year-{year}_{filters_list}.geojson` produced for different years with the **Detection** workflow to the **input_track** folder.
 
--distance: two polygons that are close to each other can be considered to belong to the same quarry. Those polygons can be merged into a single one. By default the value is set to 8 m.
 
--output: provide the path and name of the filtered polygons shapefile
+```bash
+$ mkdir input/input_track
+$ cp output/output_det/<oth_filtered_detections_path> input/input_track
+$ python scripts/track_detections.py config/config_track.yaml
+$ python scripts/plots.py config/config_track.yaml
+```
 
-## Copyright and License
+## Contributors
 
-The pre-processing and post-processing scripts originate from the git repository `detector-interface`
-  
-**detector-interface** - Nils Hamel, Adrian Meyer, Huriel Reichel, Alessandro Cerioni <br >
-Copyright (c) 2020-2022 Republic and Canton of Geneva
+`proj-dqry` was made possible with the help of several contributors (alphabetical):
 
-This program is licensed under the terms of the GNU GPLv3. Documentation and illustrations are licensed under the terms of the CC BY 4.0.
+Alessandro Cerioni, Nils Hamel, Clémence Herny, Shanci Li, Adrian Meyer, Huriel Reichel
+
+## Disclaimer
+
+Depending on the end purpose, we strongly recommend users not take for granted the detections obtained through this code. Indeed, results can exhibit false positives and false negatives, as is the case in all approaches based on machine learning.
+
+## License
+
+This project is licensed under the terms of the GNU GPLv3. Documentation and illustrations are licensed under the terms of the CC BY 4.0.

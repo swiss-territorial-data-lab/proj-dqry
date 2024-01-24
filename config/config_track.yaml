@@ -1,0 +1,17 @@
+################################################
+###  Identifying and tracking MES over time  ### 
+
+# Track object in different datasets over years
+track_detections.py:  
+  years: <[YEAR1, YEAR2, YEAR3,...]>                          # Provide a list of years used for detection
+  datasets:
+    detection: ./input/input_track/oth_detections_at_0dot3_threshold_year-{year}_score-0dot95_area-5000_elevation-1200_distance-10.geojson  # Final detection file, produced by filter_detections.py
+  output_folder: ./output/output_track/oth_detections_at_0dot3_threshold_score-0dot95_area-5000_elevation-1200_distance-10
+
+# Plots
+plots.py:  
+  object_id: <[ID_OBJECT1, ID_OBJECT2, ID_OBJECT3,...]>       # Provide a list of id_object defined by track_detections.py
+  plots: ['area-year'] 
+  datasets:
+    detection: ./output/output_track/oth_detections_at_0dot3_threshold_score-0dot95_area-5000_elevation-1200_distance-10/detections_years.geojson  # Object tracking file, produced by track_detections.py
+  output_folder: ./output/output_track/oth_detections_at_0dot3_threshold_score-0dot95_area-5000_elevation-1200_distance-10/plots

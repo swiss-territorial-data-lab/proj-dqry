@@ -1,5 +1,6 @@
 data/*
-!intput/input_det/AoI
-!input/input_trne/
+!data/AoI/
+!data/ground_truth/
+models/*
 output/*
 config/config_det_*

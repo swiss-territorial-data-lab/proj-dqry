@@ -1,4 +1,4 @@
-input/*
+data/*
 !intput/input_det/AoI
 !input/input_trne/
 output/*

@@ -1,54 +1,54 @@
 ###################################
 ##### Detection by inference #####
 #######      template      ####### 
-# Automatic detection of Quarries and Mineral Extraction Sites (MES) in images
+# Automatic detection of Mineral Extraction Sites (MES) in images
 
 # 1-Prepare the tiles geometry according to the AOI and zoom level
 prepare_data.py: 
-  srs: "EPSG:2056"  # Projection of the input file
+  srs: EPSG:2056  # Projection of the input file
   datasets:
-    shapefile: ./input/input_det/AoI/swissimage_footprint_SWISSIMAGE_YEAR.shp
-  output_folder: ./output/output_det/SWISSIMAGE_YEAR
+    shapefile: ./data/AoI/swissimage_footprint_SWISSIMAGE_YEAR.shp
+  output_folder: ./output/det/SWISSIMAGE_YEAR
   zoom_level: 16  # z, keep between 15 and 18  
 
 # 2-Request tiles according to the provided AOI and tiles parameters
 generate_tilesets.py:
   debug_mode: False
   datasets:
-    aoi_tiles_geojson: ./output/output_det/SWISSIMAGE_YEAR/tiles.geojson
+    aoi_tiles_geojson: ./output/det/SWISSIMAGE_YEAR/tiles.geojson
     orthophotos_web_service:
       type: XYZ # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ
       url: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/SWISSIMAGE_YEAR/3857/{z}/{x}/{y}.jpeg
-  output_folder: ./output/output_det/SWISSIMAGE_YEAR
+  output_folder: ./output/det/SWISSIMAGE_YEAR
   tile_size: 256 # per side, in pixels
   overwrite: True
   n_jobs: 10
   COCO_metadata:
     year: 2021
     version: 1.0
-    description: Swiss Image Hinterground w/ Quarries and Mineral Exploitation Sites detection
+    description: Swiss Image Hinterground w/ Mineral Exploitation Site detection
     contributor: swisstopo
     url: https://swisstopo.ch
     license:
       name: Unknown
       url:
     category:
-      name: "Quarry"
-      supercategory: "Land usage"
+      name: Mineral Exploitation Site
+      supercategory: Land usage
 
 # 3-Perform the object detection based on the optimized trained model
 make_detections.py:
-  working_folder: ./output/output_det/SWISSIMAGE_YEAR
+  working_folder: ./output/det/SWISSIMAGE_YEAR
   log_subfolder: logs
   sample_tagged_img_subfolder: sample_tagged_images
   COCO_files: # relative paths, w/ respect to the working_folder
     oth: COCO_oth.json
-  detectron2_config_file: '../../../config/detectron2_config_dqry.yaml' # path relative to the working_folder
+  detectron2_config_file: ../../../config/detectron2_config_dqry.yaml # path relative to the working_folder
   model_weights:
-    pth_file: '../../../input/input_det/logs/model_0002999.pth' # trained model minimizing the validation loss curve, 
+    pth_file: ../../../models/model_0002999.pth # trained model minimizing the validation loss curve, 
                                                                 # monitoring of the training process via tensorboard (tensorboard --logdir </logs>)
                                                                 # for the provided parameters model_0002999.pth is chosen 
-  image_metadata_json: './output/output_det/SWISSIMAGE_YEAR/img_metadata.json'
+  image_metadata_json: ./output/det/SWISSIMAGE_YEAR/img_metadata.json
   rdp_simplification: # rdp = Ramer-Douglas-Peucker
     enabled: True
     epsilon: 2.0 # cf. https://rdp.readthedocs.io/en/latest/
@@ -57,11 +57,11 @@ make_detections.py:
 # 4-Filtering and merging detection polygons to improve results
 filter_detections.py:
   year: SWISSIMAGE_YEAR
-  detections: ./output/output_det/SWISSIMAGE_YEAR/oth_detections_at_0dot3_threshold.gpkg
-  shapefile: ./input/input_det/AoI/swissimage_footprint_SWISSIMAGE_YEAR.shp
-  dem: ./input/input_det/DEM/switzerland_dem_EPSG2056.tif
+  detections: ./output/det/SWISSIMAGE_YEAR/oth_detections_at_0dot3_threshold.gpkg
+  shapefile: ./data/AoI/swissimage_footprint_SWISSIMAGE_YEAR.shp
+  dem: ./data/DEM/switzerland_dem_EPSG2056.tif
   elevation: 1200.0 # m, altitude threshold
   score: 0.95 # detection score (from 0 to 1) provided by detectron2
   distance: 10 # m, distance use as a buffer to merge close polygons (likely to belong to the same object) together
   area: 5000.0 # m2, area threshold under which polygons are discarded
-  output: ./output/output_det/SWISSIMAGE_YEAR/oth_detections_at_0dot3_threshold_year-{year}_score-{score}_area-{area}_elevation-{elevation}_distance-{distance}.geojson
+  output: ./output/det/SWISSIMAGE_YEAR/oth_detections_at_0dot3_threshold_year-{year}_score-{score}_area-{area}_elevation-{elevation}_distance-{distance}.geojson

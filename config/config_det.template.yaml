@@ -32,9 +32,6 @@ generate_tilesets.py:
     license:
       name: Unknown
       url:
-    category:
-      name: Mineral Exploitation Site
-      supercategory: Land usage
 
 # 3-Perform the object detection based on the optimized trained model
 make_detections.py:

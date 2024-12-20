@@ -1,6 +1,7 @@
 data/*
 !data/AoI/
 !data/ground_truth/
+data/AoI/swissimage_footprints_shape_per_year
 models/*
 output/*
 config/config_det_*

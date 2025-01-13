@@ -38,6 +38,7 @@ if __name__ == "__main__":
     # Load input parameters
     OUTPUT_DIR = cfg['output_folder']
     YEARS = sorted(cfg['years'])
+    DETECTION = cfg['datasets']['detection']
 
     # Create an output directory in case it doesn't exist
     if not os.path.exists(OUTPUT_DIR):
@@ -45,26 +46,9 @@ if __name__ == "__main__":
 
     written_files = []
 
-    # Concatenate all the dataframe obtained for a given year to a single dataframe
-    print()
-    logger.info(f"Concaneting different years dataframes:")
-    for YEAR in YEARS:      
-        if YEAR == YEARS[0]: 
-            DETECTION = cfg['datasets']['detection']
-            DETECTION = DETECTION.replace('{year}', str(YEAR)) 
-            gdf = gpd.read_file(DETECTION)
-            gdf['year'] = YEAR 
-            logger.info(f" Year: {YEAR} - {len(gdf)} detections")
-        else:
-            DETECTION = cfg['datasets']['detection']
-            DETECTION = DETECTION.replace('{year}', str(YEAR)) 
-            gdfn = gpd.read_file(DETECTION)
-            gdfn['year'] = YEAR 
-            logger.info(f" Year: {YEAR} - {len(gdfn)} detections")
-            gdf = pd.concat([gdf, gdfn])
+    gdf = gpd.read_file(DETECTION)
 
     # Create a dataframe with intersecting polygons merged together
-    print()
     logger.info(f"Merging overlapping polygons")
     gdf_all = gdf.geometry.unary_union
     gdf_all = gpd.GeoDataFrame(geometry=[gdf_all], crs='EPSG:2056')  
@@ -73,17 +57,15 @@ if __name__ == "__main__":
     labels = gdf_all.index
 
     # Spatially compare the global dataframe with all prediction by year and the merged dataframe. Allow to attribute a unique ID to each detection
-    print()
     logger.info(f"Compare single polygon dataframes detection to merge polygons dataframe")
     intersection = gpd.sjoin(gdf, gdf_all, how='inner')
 
     # Reorganized dataframe columns and save files 
-    print()
     logger.info(f"Save files")
     intersection.rename(columns={'index_right': 'id_object'}, inplace=True)
-    gdf_final = intersection[['id_object', 'id_feature', 'year', 'score', 'area', 'centroid_x', 'centroid_y', 'geometry']]
-    feature_path = os.path.join(OUTPUT_DIR, 'detections_years.geojson')
-    gdf_final.to_file(feature_path, driver='GeoJSON') 
+    gdf_final = intersection[['id_object', 'id_feature', 'year_det', 'score', 'area', 'centroid_x', 'centroid_y', 'geometry']]
+    feature_path = os.path.join(OUTPUT_DIR, 'detections_years.gpkg')
+    gdf_final.to_file(feature_path) 
     written_files.append(feature_path) 
 
     feature_path = os.path.join(OUTPUT_DIR, 'detections_years.csv')

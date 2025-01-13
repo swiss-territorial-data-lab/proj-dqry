@@ -6,7 +6,7 @@
 prepare_data.py: 
   datasets:
     shapefile: ./data/AoI/swissimage_footprint_SWISSIMAGE_YEAR.shp
-  output_folder: ./output/det/SWISSIMAGE_YEAR
+  output_folder: ./output/det/SWISSIMAGE_YEAR/
   zoom_level: 16  # z, keep between 15 and 18  
 
 # 2-Request tiles according to the provided AOI and tiles parameters
@@ -21,7 +21,7 @@ generate_tilesets.py:
       type: XYZ                             # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ 4. FOLDER
       year: SWISSIMAGE_YEAR                 # supported values: 1. multi-year (tiles of different year), 2. <year> (i.e. 2020)
       location: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/{year}/3857/{z}/{x}/{y}.jpeg
-  output_folder: ./output/det/SWISSIMAGE_YEAR
+  output_folder: ./output/det/SWISSIMAGE_YEAR/
   tile_size: 256 # per side, in pixels
   overwrite: True
   n_jobs: 10
@@ -38,7 +38,7 @@ generate_tilesets.py:
 
 # Object detection with the optimised trained model
 make_detections.py:
-  working_directory: ./output/det/SWISSIMAGE_YEAR
+  working_directory: ./output/det/SWISSIMAGE_YEAR/
   log_subfolder: logs
   sample_tagged_img_subfolder: sample_tagged_images
   COCO_files:           # relative paths, w/ respect to the working_folder
@@ -53,14 +53,25 @@ make_detections.py:
   score_lower_threshold: 0.3
   remove_det_overlap: False  # if several detections overlap (IoU > 0.5), only the one with the highest confidence score is retained
 
-# Filter and merge detection polygons to improve results
-filter_detections.py:
-  year: SWISSIMAGE_YEAR
-  detections: ./output/det/SWISSIMAGE_YEAR/oth_detections_at_0dot3_threshold.gpkg
-  shapefile: ./data/AoI/swissimage_footprint_SWISSIMAGE_YEAR.shp
-  dem: ./data/DEM/switzerland_dem_EPSG2056.tif
-  elevation: 1200.0 # m, altitude threshold
-  score: 0.95 # detection score (from 0 to 1) provided by detectron2
+# Assess the final results
+merge_detections.py:
+  working_directory: ./output/det/SWISSIMAGE_YEAR/
+  labels: labels.geojson
+  detections:
+    oth: oth_detections_at_0dot3_threshold.gpkg
   distance: 10 # m, distance use as a buffer to merge close polygons (likely to belong to the same object) together
-  area: 5000.0 # m2, area threshold under which polygons are discarded
-  output: ./output/det/SWISSIMAGE_YEAR/oth_detections_at_0dot3_threshold_year-{year}_score-{score}_area-{area}_elevation-{elevation}_distance-{distance}.geojson
+  iou_threshold: 0.1
+  score_threshold: 0.3 # choose a value
+  assess: 
+    enable: False
+    metrics_method: macro-average   # 1: macro-average ; 2: macro-weighted-average ; 3: micro-average
+
+# Filtering and merging detection polygons to improve final results
+filter_detections.py:
+  working_directory: ./data
+  detections: ../output/det/SWISSIMAGE_YEAR/merged_detections_at_0dot3_threshold.gpkg
+  aoi: ./AoI/swissimage_footprint_SWISSIMAGE_YEAR.shp
+  dem: ./DEM/switzerland_dem_EPSG2056.tif
+  elevation_threshold: 1200 # m, altitude threshold
+  score_threshold: 0.95 # detection score (from 0 to 1) provided by detectron2
+  area_threshold: 5000.0 # m2, area threshold under which polygons are discarded

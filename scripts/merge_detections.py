@@ -68,7 +68,6 @@ if __name__ == "__main__":
     detections_gdf = detections_gdf.to_crs(2056)
     detections_gdf['area'] = detections_gdf.area 
     detections_gdf['det_id'] = detections_gdf.index
-
     if 'year_det' in detections_gdf.keys(): 
         detections_gdf['year_det'] = detections_gdf.year_det.astype(int)
     logger.success(f"{DONE_MSG} {len(detections_gdf)} features were found.")
@@ -210,7 +209,7 @@ if __name__ == "__main__":
         feature = os.path.join(f'tagged_merged_detections_at_{SCORE_THD}_threshold.gpkg'.replace('0.', '0dot'))
         tagged_dets_gdf = tagged_dets_gdf.to_crs(2056)
         tagged_dets_gdf = tagged_dets_gdf.rename(columns={'CATEGORY': 'label_category'}, errors='raise')
-        if 'year_label'  in tagged_dets_gdf.keys() and 'year_det' in tagged_dets_gdf.keys():
+        if 'year_label' in tagged_dets_gdf.keys() and 'year_det' in tagged_dets_gdf.keys():
             tagged_dets_gdf[['geometry', 'det_id', 'score', 'tag', 'label_class', 'label_category', 'year_label', 'det_class', 'det_category', 'year_det']]\
                 .to_file(feature, driver='GPKG', index=False)
         else:

@@ -1,10 +1,6 @@
 #!/bin/python
 # -*- coding: utf-8 -*-
 
-# This source code is licensed under the license found in the
-# LICENSE file in the root directory of this source tree.
- 
-
 import os, sys
 import argparse
 import yaml
@@ -39,14 +35,13 @@ if __name__ == "__main__":
     OUTPUT_DIR = cfg['output_folder']
     PLOTS = cfg['plots']
 
-
     # Create an output directory in case it doesn't exist
     if not os.path.exists(OUTPUT_DIR):
         os.makedirs(OUTPUT_DIR)
 
     # Load prediction 
     gdf = gpd.read_file(DETECTION)
-    gdf = gdf.sort_values(by=['year'], ascending=False)
+    gdf = gdf.sort_values(by=['year_det'], ascending=False)
 
     for PLOT in PLOTS:
         
@@ -55,7 +50,7 @@ if __name__ == "__main__":
             logger.info(f"Plot {PLOT}")
             fig, ax = plt.subplots(figsize=(8,5))
             for QUARRY in QUARRIES:
-                x = gdf.loc[gdf["id_object"] == QUARRY,["year"]]
+                x = gdf.loc[gdf["id_object"] == QUARRY,["year_det"]]
                 y = gdf.loc[gdf["id_object"] == QUARRY,["area"]]
                 id = QUARRY
                 ax.scatter(x, y, label=id)

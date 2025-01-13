@@ -106,6 +106,7 @@ The folders/files of the project `proj-dqry` (in combination with `object-detect
 │   ├── batch_process.sh                            # script to execute several commands
 │   ├── filter_detections.py                        # script detections filtering 
 │   ├── get_dem.sh                                  # script downloading swiss DEM and converting it to EPSG:2056
+│   ├── merge_detections.py                         # script merging adjacent detections and attributing class
 │   ├── merge_years.py                              # script merging all year detections layers
 │   ├── plots.py                                    # script plotting detection tracking results
 │   ├── prepare_data.py                             # script preparing data to be processed by the object-detector scripts
@@ -134,12 +135,13 @@ Below, the description of input data used for this project.
 The `proj-dqry` repository contains scripts to prepare and post-process the data and results. Hereafter a short description of each script:
 
 1. `prepare_data.py`: format labels and produce tiles to be processed in the OD.
-2. `filter_detections.py`: filter detections by overlap with other vector layers. The overlapping portion of the detection can be removed or a new attribute column is created to indicate the overlapping ratio with the layer of interest. Other information such as score, elevation, slope are also displayed.
-3. `merge_years.py`: merge all the detection layers obtained during inference by year.
-4. `track_detections.py`: identify and track an detection of an object over a multiple year datasets. 
+2. `merge_detections.py`: merge adjacent detections cut by tiles into a single detection and attribute the class (the class of the maximum area).
+3. `filter_detections.py`: filter detections by overlap with other vector layers. The overlapping portion of the detection can be removed or a new attribute column is created to indicate the overlapping ratio with the layer of interest. Other information such as score, elevation, slope are also displayed.
+4. `merge_years.py`: merge all the detection layers obtained during inference by year.
+5. `track_detections.py`: identify and track an detection of an object over a multiple year datasets. 
 5. `plots.py`: plot some parameters of the detections to help understand the results (optional).
-6. `get_dem.sh`: download the DEM of Switzerland.
-7. `batch_process.sh`: batch script to perform the inference workflow over several years.
+7. `get_dem.sh`: download the DEM of Switzerland.
+8. `batch_process.sh`: batch script to perform the inference workflow over several years.
 
 
 Object detection is performed with tools present in the [`object-detector`](https://github.com/swiss-territorial-data-lab/object-detector) git repository. 
@@ -171,6 +173,11 @@ $ stdl-objdet make_detections config/config_trne.yaml
 $ stdl-objdet assess_detections config/config_trne.yaml
 ```
 
+Finally, the detection obtained by tiles can be merged when adjacent and a new assessment is performed:
+```bash
+$ python scripts/merge_detections.py config/config_trne.yaml
+```
+
 **Inference**: 
 
 Copy the selected trained model to the folder `models`:
@@ -184,6 +191,7 @@ Process images:
 $ python scripts/prepare_data.py config/config_det.yaml
 $ stdl-objdet generate_tilesets config/config_det.yaml
 $ stdl-objdet make_detections config/config_det.yaml
+$ python scripts/merge_detections.py config/config_det.yaml
 $ scripts/get_dem.sh
 $ python scripts/filter_detections.py config/config_det.yaml
 ```
@@ -195,7 +203,7 @@ $ scripts/batch_process.sh
 ```
 
 Finally, all the detection layers obtained for each year are merged into a single geopackage.
-```
+```bash
 $ python scripts/merge_years.py config/config_det.yaml
 ```
 

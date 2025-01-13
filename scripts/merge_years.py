@@ -4,7 +4,6 @@ import sys
 import time
 import yaml
 
-import fiona
 import geopandas as gpd
 import pandas as pd
 
@@ -55,18 +54,17 @@ if __name__ == "__main__":
             pass
 
     for year in YEARS: 
-        layer = LAYER.replace('{year}', str(year))
-        path = str(year) + '/' + layer
+        path = str(year) + '/' + LAYER
         if os.path.exists(path): 
             detections_gdf = gpd.read_file(path)
             if FILE=='layers':
-                detections_gdf.to_file(feature, layer=str(layer), driver='GPKG')
+                detections_gdf.to_file(feature, layer=str(str(year) + '_' + LAYER), driver='GPKG')
             elif FILE=='concatenate':
                 detections_final_gdf = pd.concat([detections_final_gdf, detections_gdf], ignore_index=True)
         else:
             logger.warning(f'The file {path} does not exist. Moving on to the next year.')
             pass
-
+    
     if FILE=='concatenate':
         detections_final_gdf.to_file(feature, driver='GPKG')
 

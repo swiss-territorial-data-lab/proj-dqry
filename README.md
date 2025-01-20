@@ -209,11 +209,7 @@ $ python scripts/merge_years.py config/config_det.yaml
 
 **Detection tracking**: 
 
-Copy the detections files `oth_detections_at_0dot3_threshold_year-{year}_{filters_list}.geojson` produced for different years with the **Inference** workflow to the **detections** folder.
-
 ```bash
-$ mkdir data/detections
-$ cp output/det/<filtered_detections_path> data/detections
 $ python scripts/track_detections.py config/config_track.yaml
 $ python scripts/plots.py config/config_track.yaml
 ```

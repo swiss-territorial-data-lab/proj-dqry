@@ -91,8 +91,7 @@ The folders/files of the project `proj-dqry` (in combination with `object-detect
 │   └── detectron2_config.yaml                      # detectron 2
 ├── data                                            # folder containing the input data
 │   ├── AoI                                         # available on request
-│   ├── ground_truth                                                             
-│   └── categories_ids.json                         # class dictionnary     
+│   └── ground_truth                                                             
 ├── functions
 │   ├── constants.py       
 │   ├── metrics.py                         

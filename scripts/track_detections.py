@@ -8,9 +8,8 @@
 import time
 import argparse
 import yaml
-import os, sys, inspect
+import os, sys
 import geopandas as gpd
-import pandas as pd
 from loguru import logger
 
 # the following allows us to import modules from within this file's parent folder
@@ -41,8 +40,7 @@ if __name__ == "__main__":
     DETECTION = cfg['datasets']['detection']
 
     # Create an output directory in case it doesn't exist
-    if not os.path.exists(OUTPUT_DIR):
-        os.makedirs(OUTPUT_DIR)
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     written_files = []
 

@@ -65,36 +65,34 @@ def aoi_tiling(gdf, tms='WebMercatorQuad'):
     return tiles_all_gdf
 
 
-def assert_year(gdf1, gdf2, ds, year):
+def assert_year(gdf1, gdf2, ds, year=None):
     """Assert if the year of the dataset is well supported
 
     Args:
         gdf1 (GeoDataFrame): label geodataframe
         gdf2 (GeoDataFrame): other geodataframe to compare columns
         ds (string): dataset type (FP, empty tiles,...)
-        year (string or numeric): attribution of year to tiles
+        year (string or numeric): attribution of year to empty tiles
     """
 
-    if ('year' not in gdf1.keys() and 'year' not in gdf2.keys()) or ('year' not in gdf1.keys() and year == None):
-        pass
-    elif ds == 'FP':
-        if ('year' in gdf1.keys() and 'year' in gdf2.keys()):
-            pass
-        else:
-            logger.error("One input label (GT or FP) shapefile contains a 'year' column while the other one no. Please, standardize the label shapefiles supplied as input data.")
+    labels_w_year = 'year' in gdf1.keys()
+    oth_tiles_w_year = 'year' in gdf2.keys()
+
+    if labels_w_year: 
+        if not oth_tiles_w_year:
+            if ds == 'empty_tiles' and year is None:
+                logger.error("Year provided for labels, but not for empty tiles.")
+                sys.exit(1)
+            elif ds == 'FP':
+                logger.error("Year provided for labels, but not for FP tiles.")
+                sys.exit(1)
+    else:
+        if oth_tiles_w_year:
+            logger.error(f"Year provided for the {ds.replace('_', ' ')} tiles, but not for the labels.")
             sys.exit(1)
-    elif ds == 'empty_tiles':
-        if ('year' in gdf1.keys() and 'year' in gdf2.keys()) or ('year' in gdf1.keys() and year != None):
-            pass        
-        elif 'year' in gdf1.keys() and 'year' not in gdf2.keys():
-            logger.error("A 'year' column is provided in the GT shapefile but not for the empty tiles. Please, standardize the label shapefiles supplied as input data.")
+        elif year != None: 
+            logger.error(f"A year is provided as parameter, but no year available in the label attributes.")
             sys.exit(1)
-        elif 'year' in gdf1.keys() and year == None:
-            logger.error("A 'year' column is provided in the GT shapefile but no year info for the empty tiles. Please, provide a value to 'empty_tiles_year' in the configuration file.")
-            sys.exit(1)
-        elif ('year' not in gdf1.keys() and 'year' not in gdf2.keys()) and ('year' not in gdf1.keys() and year != None):
-            logger.error("A year is provided for the empty tiles while no 'year' column is provided in the groud truth shapefile. Please, standardize the shapefiles or the year value in the configuration file.")
-            sys.exit(1)    
 
 
 def bbox(bounds):
@@ -156,39 +154,37 @@ if __name__ == "__main__":
     ZOOM_LEVEL = cfg['zoom_level']
 
     # Create an output directory in case it doesn't exist
-    if not os.path.exists(OUTPUT_DIR):
-        os.makedirs(OUTPUT_DIR)
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     written_files = []
     
     # Prepare the tiles
 
     ## Convert datasets shapefiles into geojson format
-    logger.info('Convert labels shapefile into GeoJSON format (EPSG:4326)...')
+    logger.info('Convert the label shapefiles into GeoJSON format (EPSG:4326)...')
     labels_gdf = gpd.read_file(SHPFILE)
     if 'year' in labels_gdf.keys():
         labels_gdf['year'] = labels_gdf.year.astype(int)
         labels_4326_gdf = labels_gdf.to_crs(epsg=4326).drop_duplicates(subset=['geometry', 'year'])
     else:
         labels_4326_gdf = labels_gdf.to_crs(epsg=4326).drop_duplicates(subset=['geometry'])
-    nb_labels = len(labels_gdf)
-    logger.info(f'There are {nb_labels} polygons in {SHPFILE}')
+    nb_gt_labels = len(labels_gdf)
+    logger.info(f'There are {nb_gt_labels} polygons in {SHPFILE}')
 
     labels_4326_gdf['CATEGORY'] = 'mineral extraction site'
     labels_4326_gdf['SUPERCATEGORY'] = 'land usage'
     
     gt_labels_4326_gdf = labels_4326_gdf.copy()
 
-    label_filename = 'labels.geojson'
-    label_filepath = os.path.join(OUTPUT_DIR, label_filename)
-    labels_4326_gdf.to_file(label_filepath, driver='GeoJSON')
-    written_files.append(label_filepath)  
-    logger.success(f"{DONE_MSG} A file was written: {label_filepath}")
+    labels_filepath = os.path.join(OUTPUT_DIR, 'labels.geojson')
+    labels_4326_gdf.to_file(labels_filepath, driver='GeoJSON')
+    written_files.append(labels_filepath)  
+    logger.success(f"{DONE_MSG} A file was written: {labels_filepath}")
 
     # Add FP labels if it exists
     if FP_SHPFILE:
         fp_labels_gdf = gpd.read_file(FP_SHPFILE)
-        assert_year(fp_labels_gdf, labels_gdf, 'FP', EPT_YEAR) 
+        assert_year(labels_4326_gdf, fp_labels_gdf, 'FP') 
         if 'year' in fp_labels_gdf.keys():
             fp_labels_gdf['year'] = fp_labels_gdf.year.astype(int)
             fp_labels_4326_gdf = fp_labels_gdf.to_crs(epsg=4326).drop_duplicates(subset=['geometry', 'year'])
@@ -200,8 +196,7 @@ if __name__ == "__main__":
         nb_fp_labels = len(fp_labels_gdf)
         logger.info(f"There are {nb_fp_labels} polygons in {FP_SHPFILE}")
 
-        filename = 'FP.geojson'
-        filepath = os.path.join(OUTPUT_DIR, filename)
+        filepath = os.path.join(OUTPUT_DIR, 'FP.geojson')
         fp_labels_4326_gdf.to_file(filepath, driver='GeoJSON')
         written_files.append(filepath)  
         logger.success(f"{DONE_MSG} A file was written: {filepath}")
@@ -257,7 +252,7 @@ if __name__ == "__main__":
     tiles_4326_all_gdf = tiles_4326_all_gdf.apply(add_tile_id, axis=1)
 
     # - Remove duplicated tiles
-    if nb_labels > 1:
+    if nb_gt_labels > 1:
         tiles_4326_all_gdf.drop_duplicates(['id'], inplace=True)
 
     nb_tiles = len(tiles_4326_all_gdf)
@@ -275,8 +270,7 @@ if __name__ == "__main__":
 
     # Save tile shapefile
     logger.info("Export tiles to GeoJSON (EPSG:4326)...")  
-    tile_filename = 'tiles.geojson'
-    tile_filepath = os.path.join(OUTPUT_DIR, tile_filename)
+    tile_filepath = os.path.join(OUTPUT_DIR, 'tiles.geojson')
     tiles_4326_all_gdf.to_file(tile_filepath, driver='GeoJSON')
     written_files.append(tile_filepath)  
     logger.success(f"{DONE_MSG} A file was written: {tile_filepath}")

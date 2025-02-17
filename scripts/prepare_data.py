@@ -129,7 +129,7 @@ def prepare_labels(SHPFILE, written_files, prefix=''):
     labels_4326_gdf['SUPERCATEGORY'] = 'land usage'
 
     nb_labels = len(labels_4326_gdf)
-    logger.info(f"There are {nb_labels} polygons in {FP_SHPFILE}")
+    logger.info(f"There are {nb_labels} polygons in {os.path.basename(SHPFILE)}")
 
     labels_filepath = os.path.join(OUTPUT_DIR, f'{prefix}labels.geojson')
     labels_4326_gdf.to_file(labels_filepath, driver='GeoJSON')
@@ -185,8 +185,8 @@ if __name__ == "__main__":
 
     ## Convert datasets shapefiles into geojson format
     logger.info('Convert the label shapefiles into GeoJSON format (EPSG:4326)...')
-    labels_4326_gdf, nb_gt_labels, written_files = prepare_labels(SHPFILE, written_files)
-    gt_labels_4326_gdf = labels_4326_gdf.copy()
+    labels_4326_gdf, nb_labels, written_files = prepare_labels(SHPFILE, written_files)
+    gt_labels_4326_gdf = labels_4326_gdf[['geometry', 'CATEGORY', 'SUPERCATEGORY']].copy()
 
     # Add FP labels if it exists
     if FP_SHPFILE:
@@ -241,8 +241,8 @@ if __name__ == "__main__":
     tiles_4326_all_gdf = tiles_4326_all_gdf.apply(add_tile_id, axis=1)
 
     # - Remove duplicated tiles
-    if nb_gt_labels > 1:
-        tiles_4326_all_gdf.drop_duplicates(['id'], inplace=True)
+    # if nb_labels > 1:
+    tiles_4326_all_gdf.drop_duplicates(['id'], inplace=True)
 
     nb_tiles = len(tiles_4326_all_gdf)
     logger.info(f"There were {nb_tiles} tiles created")

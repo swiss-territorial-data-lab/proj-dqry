@@ -5,11 +5,12 @@
 prepare_data.py:  
   srs: EPSG:2056
   datasets:
-    shapefile: ./data/ground_truth/tlm-hr-trn-topo.shp
-    # fp_shapefile: ./data/FP/<FP_SHPFILE>                # FP labels
-    # empty_tiles_aoi: ./data/AoI/<AOI_SHPFILE>           # AOI in which additional empty tiles can be selected. Only one 'empty_tiles' option can be selected  
-    # empty_tiles_year: <YEAR>                            # If "empty_tiles_aoi" selected then provide a year. Choice: (1) numeric (i.e. 2020), (2) [year1, year2] (random selection of a year within a given year range) 
-    # empty_tiles_shp: ./data/empty_tiles/<EMPTY_TILES_SHPFILE>    # Provided shapefile of selected empty tiles. Only one 'empty_tiles' option can be selected                     
+    shapefile: ./data/ground_truth/tlm-hr-trn-topo.shp  # GT labels. Optional: can contain a 'year' column
+    # fp_shapefile: ./data/FP/<FP_SHPFILE>                # FP labels. Optional: can contain a 'year' column
+    # empty_tiles:
+    #   type: shp                                         # supported values: 1. aoi (area in which tiles will be selected randomly) 2. shp (provided empty tiles). Adapt the following keys accordingly
+    #   shapefile: ./data/AoI/<EPT_SHPFILE>                # shapefile in which additional empty tiles can be selected. 
+    #   year: 2020                                        # if type = aoi selected, then provide a year, otherwise comment line. Supported value: (1) numeric (i.e. 2020), (2) [year1, year2] (random selection of a year within a given year range)                     
     # category: <CLASS_COL_NAME>                          # If it exists, indicate the attribute column name of the label class
   output_folder: ./output/trne/
   zoom_level: 16  # z, keep between 15 and 18  
@@ -29,7 +30,7 @@ generate_tilesets.py:
     image_source:
       # ############# 
       # type: FOLDER
-      # year: multi-year                 # Optional, supported values: 1. multi-year (tiles of different year), 2. <year> (i.e. 2020)
+      # year: multi-year                 # optional, supported values: 1. multi-year (tiles of different year), 2. <year> (i.e. 2020)
       # location: <IMG_FOLDER_PATH>
       # srs: "EPSG:3857"
       # ############# 
@@ -85,7 +86,7 @@ make_detections.py:
   detectron2_config_file: ../../config/detectron2_config.yaml # path relative to the working_folder
   model_weights:
     pth_file: ./logs/model_0002999.pth # trained model minimising the validation loss curve, monitor the training process via tensorboard (tensorboard --logdir </logs>)
-  image_metadata_json: img_metadata.json
+  # image_metadata_json: img_metadata.json
   rdp_simplification:   # rdp = Ramer-Douglas-Peucker
     enabled: True
     epsilon: 2.0        # cf. https://rdp.readthedocs.io/en/latest/

@@ -160,19 +160,14 @@ if __name__ == "__main__":
     SHPFILE = cfg['datasets']['shapefile']
     CATEGORY = cfg['datasets']['category'] if 'category' in cfg['datasets'].keys() else False
     FP_SHPFILE = cfg['datasets']['fp_shapefile'] if 'fp_shapefile' in cfg['datasets'].keys() else None
-    EPT_YEAR = cfg['datasets']['empty_tiles_year'] if 'empty_tiles_year' in cfg['datasets'].keys() else None
-    if 'empty_tiles_aoi' in cfg['datasets'].keys() and 'empty_tiles_shp' in cfg['datasets'].keys():
-        logger.error("Choose between supplying an AoI shapefile ('empty_tiles_aoi') in which empty tiles will be selected, or a shapefile with selected empty tiles ('empty_tiles_shp')")
-        sys.exit(1)    
-    elif 'empty_tiles_aoi' in cfg['datasets'].keys():
-        EPT_SHPFILE = cfg['datasets']['empty_tiles_aoi']
-        EPT = 'aoi'
-    elif 'empty_tiles_shp' in cfg['datasets'].keys():
-        EPT_SHPFILE = cfg['datasets']['empty_tiles_shp'] 
-        EPT = 'shp'
+    if 'empty_tiles' in cfg['datasets'].keys():
+        EPT_TYPE = cfg['datasets']['empty_tiles']['type']
+        EPT_SHPFILE = cfg['datasets']['empty_tiles']['shapefile']
+        EPT_YEAR = cfg['datasets']['empty_tiles']['year'] if 'year' in cfg['datasets']['empty_tiles'].keys() else None
     else:
         EPT_SHPFILE = None
-        EPT = None
+        EPT_TYPE = None
+        EPT_YEAR = None
     CATEGORY = cfg['datasets']['category'] if 'category' in cfg['datasets'].keys() else False
     ZOOM_LEVEL = cfg['zoom_level']
 
@@ -207,7 +202,7 @@ if __name__ == "__main__":
         EPT_aoi_4326_gdf = EPT_aoi_gdf.to_crs(epsg=4326)
         assert_year(labels_4326_gdf, EPT_aoi_4326_gdf, 'empty_tiles', EPT_YEAR)
         
-        if EPT == 'aoi':
+        if EPT_TYPE == 'aoi':
             logger.info("- Get AoI boundaries")  
             EPT_aoi_boundaries_df = EPT_aoi_4326_gdf.bounds
 
@@ -222,7 +217,7 @@ if __name__ == "__main__":
                     empty_tiles_4326_aoi_gdf['year'] = int(EPT_YEAR)
                 else:
                     empty_tiles_4326_aoi_gdf['year'] = np.random.randint(low=EPT_YEAR[0], high=EPT_YEAR[1], size=(len(empty_tiles_4326_aoi_gdf)))
-        elif EPT == 'shp':
+        elif EPT_TYPE == 'shp':
             if EPT_YEAR:
                 logger.warning("A shapefile of selected empty tiles are provided. The year set for the empty tiles in the configuration file will be ignored")
                 EPT_YEAR = None

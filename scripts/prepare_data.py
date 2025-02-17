@@ -116,6 +116,29 @@ def bbox(bounds):
                     [minx, maxy]])
 
 
+def prepare_labels(SHPFILE, written_files, prefix=''):
+
+    labels_gdf = gpd.read_file(SHPFILE)
+    if 'year' in labels_gdf.keys():
+        labels_gdf['year'] = labels_gdf.year.astype(int)
+        labels_4326_gdf = labels_gdf.to_crs(epsg=4326).drop_duplicates(subset=['geometry', 'year'])
+    else:
+        labels_4326_gdf = labels_gdf.to_crs(epsg=4326).drop_duplicates(subset=['geometry'])
+
+    labels_4326_gdf['CATEGORY'] = 'mineral extraction site'
+    labels_4326_gdf['SUPERCATEGORY'] = 'land usage'
+
+    nb_labels = len(labels_4326_gdf)
+    logger.info(f"There are {nb_labels} polygons in {FP_SHPFILE}")
+
+    labels_filepath = os.path.join(OUTPUT_DIR, f'{prefix}labels.geojson')
+    labels_4326_gdf.to_file(labels_filepath, driver='GeoJSON')
+    written_files.append(labels_filepath)  
+    logger.success(f"{DONE_MSG} A file was written: {labels_filepath}")
+
+    return labels_4326_gdf, nb_labels, written_files
+
+
 if __name__ == "__main__":
 
     # Start chronometer
@@ -162,44 +185,13 @@ if __name__ == "__main__":
 
     ## Convert datasets shapefiles into geojson format
     logger.info('Convert the label shapefiles into GeoJSON format (EPSG:4326)...')
-    labels_gdf = gpd.read_file(SHPFILE)
-    if 'year' in labels_gdf.keys():
-        labels_gdf['year'] = labels_gdf.year.astype(int)
-        labels_4326_gdf = labels_gdf.to_crs(epsg=4326).drop_duplicates(subset=['geometry', 'year'])
-    else:
-        labels_4326_gdf = labels_gdf.to_crs(epsg=4326).drop_duplicates(subset=['geometry'])
-    nb_gt_labels = len(labels_gdf)
-    logger.info(f'There are {nb_gt_labels} polygons in {SHPFILE}')
-
-    labels_4326_gdf['CATEGORY'] = 'mineral extraction site'
-    labels_4326_gdf['SUPERCATEGORY'] = 'land usage'
-    
+    labels_4326_gdf, nb_gt_labels, written_files = prepare_labels(SHPFILE, written_files)
     gt_labels_4326_gdf = labels_4326_gdf.copy()
-
-    labels_filepath = os.path.join(OUTPUT_DIR, 'labels.geojson')
-    labels_4326_gdf.to_file(labels_filepath, driver='GeoJSON')
-    written_files.append(labels_filepath)  
-    logger.success(f"{DONE_MSG} A file was written: {labels_filepath}")
 
     # Add FP labels if it exists
     if FP_SHPFILE:
-        fp_labels_gdf = gpd.read_file(FP_SHPFILE)
-        assert_year(labels_4326_gdf, fp_labels_gdf, 'FP') 
-        if 'year' in fp_labels_gdf.keys():
-            fp_labels_gdf['year'] = fp_labels_gdf.year.astype(int)
-            fp_labels_4326_gdf = fp_labels_gdf.to_crs(epsg=4326).drop_duplicates(subset=['geometry', 'year'])
-        else:
-            fp_labels_4326_gdf = fp_labels_gdf.to_crs(epsg=4326).drop_duplicates(subset=['geometry'])
-        fp_labels_4326_gdf['CATEGORY'] = 'mineral extraction site'
-        fp_labels_4326_gdf['SUPERCATEGORY'] =  'land usage'
-
-        nb_fp_labels = len(fp_labels_gdf)
-        logger.info(f"There are {nb_fp_labels} polygons in {FP_SHPFILE}")
-
-        filepath = os.path.join(OUTPUT_DIR, 'FP.geojson')
-        fp_labels_4326_gdf.to_file(filepath, driver='GeoJSON')
-        written_files.append(filepath)  
-        logger.success(f"{DONE_MSG} A file was written: {filepath}")
+        logger.info('Convert the FP label shapefiles into GeoJSON format (EPSG:4326)...')
+        fp_labels_4326_gdf, nb_fp_labels, written_files = prepare_labels(FP_SHPFILE, written_files, prefix='FP_')
         labels_4326_gdf = pd.concat([labels_4326_gdf, fp_labels_4326_gdf], ignore_index=True)
 
     # Tiling of the AoI
@@ -230,8 +222,6 @@ if __name__ == "__main__":
                     empty_tiles_4326_aoi_gdf['year'] = int(EPT_YEAR)
                 else:
                     empty_tiles_4326_aoi_gdf['year'] = np.random.randint(low=EPT_YEAR[0], high=EPT_YEAR[1], size=(len(empty_tiles_4326_aoi_gdf)))
-            elif EPT_SHPFILE and EPT_YEAR: 
-                logger.warning("No year column in the label shapefile. The provided empty tile year will be ignored.")
         elif EPT == 'shp':
             if EPT_YEAR:
                 logger.warning("A shapefile of selected empty tiles are provided. The year set for the empty tiles in the configuration file will be ignored")
@@ -239,7 +229,6 @@ if __name__ == "__main__":
             empty_tiles_4326_aoi_gdf = EPT_aoi_4326_gdf.copy()
 
     # Get all the tiles in one gdf 
-    if EPT_SHPFILE:
         logger.info("- Concatenate label tiles and empty AoI tiles") 
         tiles_4326_all_gdf = pd.concat([tiles_4326_labels_gdf, empty_tiles_4326_aoi_gdf])
     else: 

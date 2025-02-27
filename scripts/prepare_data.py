@@ -236,7 +236,6 @@ if __name__ == "__main__":
     tiles_4326_all_gdf = tiles_4326_all_gdf.apply(add_tile_id, axis=1)
 
     # - Remove duplicated tiles
-    # if nb_labels > 1:
     tiles_4326_all_gdf.drop_duplicates(['id'], inplace=True)
 
     nb_tiles = len(tiles_4326_all_gdf)

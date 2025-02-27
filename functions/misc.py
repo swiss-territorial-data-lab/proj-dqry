@@ -1,5 +1,5 @@
-import os
 import sys
+import geopandas as gpd
 from loguru import logger
 from shapely.validation import make_valid
 
@@ -54,3 +54,22 @@ def format_logger(logger):
             level="ERROR")
     
     return logger
+
+
+def merge_polygons(gdf, id_name='id'):
+    '''
+    Merge overlapping polygons in a GeoDataFrame.
+
+    - gdf: GeoDataFrame with polygon geometries
+    - id_name (string): name of the index column
+
+    return: a GeoDataFrame with polygons
+    '''
+
+    merge_gdf = gdf.copy()
+    merge_gdf = merge_gdf.geometry.unary_union
+    merge_gdf = gpd.GeoDataFrame(geometry=[merge_gdf], crs=gdf.crs) 
+    merge_gdf = merge_gdf.explode(ignore_index=True)
+    merge_gdf[id_name] = merge_gdf.index 
+
+    return merge_gdf

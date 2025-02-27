@@ -36,8 +36,7 @@ if __name__ == "__main__":
     PLOTS = cfg['plots']
 
     # Create an output directory in case it doesn't exist
-    if not os.path.exists(OUTPUT_DIR):
-        os.makedirs(OUTPUT_DIR)
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     # Load prediction 
     gdf = gpd.read_file(DETECTION)

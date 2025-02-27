@@ -28,21 +28,9 @@ generate_tilesets.py:
     #   fp_shp: output_trne/FP.geojson 
     #   frac_trn: 0.7        # fraction of fp tiles to add to the trn dataset, then the remaining tiles will be split in 2 and added to tst and val datasets                          
     image_source:
-      # ############# 
-      # type: FOLDER
-      # year: multi-year                 # optional, supported values: 1. multi-year (tiles of different year), 2. <year> (i.e. 2020)
-      # location: <IMG_FOLDER_PATH>
-      # srs: "EPSG:3857"
-      # ############# 
-      # type: WMS                               # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ 4. FOLDER
-      # location: https://wms.geo.admin.ch/service
-      # layers: ch.swisstopo.swissimage
-      # srs: "EPSG:2056"
-      # ############ 
       type: XYZ                             # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ 4. FOLDER
       year: 2020                   # supported values: 1. multi-year (tiles of different year), 2. <year> (i.e. 2020)
       location: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/{year}/3857/{z}/{x}/{y}.jpeg
-      # ############ 
   # empty_tiles:            # add empty tiles to datasets
   #   tiles_frac: 0.5       # fraction (relative to the number of tiles intersecting labels) of empty tiles to add
   #   frac_trn: 0.7         # fraction of empty tiles to add to the trn dataset, then the remaining tiles will be split in 2 and added to tst and val datasets
@@ -86,7 +74,7 @@ make_detections.py:
   detectron2_config_file: ../../config/detectron2_config.yaml # path relative to the working_folder
   model_weights:
     pth_file: ./logs/model_0002999.pth # trained model minimising the validation loss curve, monitor the training process via tensorboard (tensorboard --logdir </logs>)
-  # image_metadata_json: img_metadata.json
+  image_metadata_json: img_metadata.json
   rdp_simplification:   # rdp = Ramer-Douglas-Peucker
     enabled: True
     epsilon: 2.0        # cf. https://rdp.readthedocs.io/en/latest/
@@ -116,7 +104,7 @@ merge_detections.py:
     trn: trn_detections_at_0dot05_threshold.gpkg
     val: val_detections_at_0dot05_threshold.gpkg
     tst: tst_detections_at_0dot05_threshold.gpkg
-  distance: 10 # m, distance use as a buffer to merge close polygons (likely to belong to the same object) together
+  distance: 5 # m, distance use as a buffer to merge close polygons (likely to belong to the same object) together
   iou_threshold: 0.1
   score_threshold: 0.05 # choose a value
   assess: 

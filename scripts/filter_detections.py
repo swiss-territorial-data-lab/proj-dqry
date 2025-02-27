@@ -41,7 +41,7 @@ if __name__ == "__main__":
     logger.info('Starting...')
 
     # Argument and parameter specification
-    parser = argparse.ArgumentParser(description="The script post-process the detections obtained with the object-detector")
+    parser = argparse.ArgumentParser(description="The script post-processes the detections obtained with the object-detector")
     parser.add_argument('config_file', type=str, help='input geojson path')
     args = parser.parse_args()
 
@@ -87,7 +87,6 @@ if __name__ == "__main__":
     detections_gdf['elevation'] = elevation 
     detections_gdf['centroid_x'] = detections_gdf.centroid.x
     detections_gdf['centroid_y'] = detections_gdf.centroid.y
-
     check_gdf_len(detections_gdf)
     detections_gdf = detections_gdf[(detections_gdf.elevation != 0) & (detections_gdf.elevation < ELEVATION_THD)]
     tdem = len(detections_gdf)
@@ -103,18 +102,16 @@ if __name__ == "__main__":
 
     # Discard polygons with area under a given threshold 
     check_gdf_len(detections_score_gdf)
-    detections_area_gdf = detections_score_gdf.explode(ignore_index=True)
-    detections_area_gdf['area'] = detections_area_gdf.area
+    detections_area_gdf = detections_score_gdf.copy()
+    detections_area_gdf['area'] = detections_score_gdf.area
     tsjoin = len(detections_area_gdf)
     detections_area_gdf = detections_area_gdf[detections_area_gdf.area > AREA_THD]
     ta = len(detections_area_gdf)
     logger.info(f"{tsjoin - ta} detections were removed by area filtering (area threshold = {AREA_THD} m2)")
-
     check_gdf_len(detections_area_gdf)
 
     # Final gdf
-    detections_gdf = detections_area_gdf.copy()
-    detections_gdf['id_feature'] = detections_gdf.index
+    detections_gdf = detections_area_gdf.copy().reset_index(drop=True)
     logger.info(f"{len(detections_gdf)} detections remaining after filtering")
 
     # Formatting the output name of the filtered detection  

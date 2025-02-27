@@ -124,6 +124,8 @@ if __name__ == "__main__":
 
 
         # Spatially join merged detection with raw ones to retrieve relevant information (score, area,...)
+        # Select the class of the largest polygon -> To Do: compute a parameter dependant of the area and the score
+        # Score averaged over all the detection polygon (even if the class is different from the selected one)
         detections_join_gdf = gpd.sjoin(detections_merge_gdf, detections_by_year_gdf, how='inner', predicate='intersects')
 
         det_class_all = []

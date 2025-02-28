@@ -63,7 +63,6 @@ if __name__ == "__main__":
                 detections_final_gdf = pd.concat([detections_final_gdf, detections_gdf], ignore_index=True)
         else:
             logger.warning(f'The file {path} does not exist. Moving on to the next year.')
-            pass
     
     if FILE=='concatenate':
         detections_final_gdf.to_file(feature, driver='GPKG')

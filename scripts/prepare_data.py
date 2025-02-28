@@ -116,9 +116,9 @@ def bbox(bounds):
                     [minx, maxy]])
 
 
-def prepare_labels(SHPFILE, written_files, prefix=''):
+def prepare_labels(shpfile, written_files, prefix=''):
 
-    labels_gdf = gpd.read_file(SHPFILE)
+    labels_gdf = gpd.read_file(shpfile)
     if 'year' in labels_gdf.keys():
         labels_gdf['year'] = labels_gdf.year.astype(int)
         labels_4326_gdf = labels_gdf.to_crs(epsg=4326).drop_duplicates(subset=['geometry', 'year'])

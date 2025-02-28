@@ -103,8 +103,8 @@ The folders/files of the project `proj-dqry` (in combination with `object-detect
 │   └── trne
 ├── scripts
 │   ├── batch_process.sh                            # script to execute several commands
-│   ├── filter_detections.py                        # script detections filtering 
-│   ├── get_dem.sh                                  # script downloading swiss DEM and converting it to EPSG:2056
+│   ├── filter_detections.py                        # script to filter detections
+│   ├── get_dem.sh                                  # script downloading the swiss DEM and converting it to EPSG:2056
 │   ├── merge_detections.py                         # script merging adjacent detections and attributing class
 │   ├── merge_years.py                              # script merging all year detections layers
 │   ├── plots.py                                    # script plotting detection tracking results
@@ -131,10 +131,10 @@ Below, the description of input data used for this project.
 
 ## Scripts
 
-The `proj-dqry` repository contains scripts to prepare and post-process the data and results. Hereafter a short description of each script:
+The `proj-dqry` repository contains scripts to prepare the data and post-process the results. Hereafter a short description of each script:
 
 1. `prepare_data.py`: format labels and produce tiles to be processed in the OD.
-2. `merge_detections.py`: merge adjacent detections cut by tiles into a single detection and attribute the class (the class of the maximum area).
+2. `merge_detections.py`: merge adjacent detections cut by tiles into a single detection and assign a class more than one is defined (the class of the maximum area).
 3. `filter_detections.py`: filter detections by overlap with other vector layers. The overlapping portion of the detection can be removed or a new attribute column is created to indicate the overlapping ratio with the layer of interest. Other information such as score, elevation, slope are also displayed.
 4. `merge_years.py`: merge all the detection layers obtained during inference by year.
 5. `track_detections.py`: identify and track an detection of an object over a multiple year datasets. 
@@ -172,7 +172,7 @@ $ stdl-objdet make_detections config/config_trne.yaml
 $ stdl-objdet assess_detections config/config_trne.yaml
 ```
 
-Finally, the detection obtained by tiles can be merged when adjacent and a new assessment is performed:
+Finally, the detections obtained by tiles can be merged when adjacent and a new assessment is performed:
 ```bash
 $ python scripts/merge_detections.py config/config_trne.yaml
 ```

@@ -64,8 +64,7 @@ def merge_polygons(gdf, id_name='id'):
     '''
 
     merge_gdf = gdf.copy()
-    merge_gdf = merge_gdf.geometry.unary_union
-    merge_gdf = gpd.GeoDataFrame(geometry=[merge_gdf], crs=gdf.crs) 
+    merge_gdf = gpd.GeoDataFrame(geometry=[merge_gdf.geometry.unary_union], crs=gdf.crs) 
     merge_gdf = merge_gdf.explode(ignore_index=True)
     merge_gdf[id_name] = merge_gdf.index 
 

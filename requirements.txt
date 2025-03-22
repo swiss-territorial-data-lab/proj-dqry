@@ -87,6 +87,10 @@ cycler==0.12.1
     #   stdl-object-detector
 detectron2 @ https://dl.fbaipublicfiles.com/detectron2/wheels/cu113/torch1.10/detectron2-0.6%2Bcu113-cp38-cp38-linux_x86_64.whl
     # via stdl-object-detector
+et-xmlfile==2.0.0
+    # via
+    #   openpyxl
+    #   stdl-object-detector
 fiona==1.9.6
     # via
     #   geopandas
@@ -207,6 +211,8 @@ omegaconf==2.3.0
     #   hydra-core
     #   stdl-object-detector
 opencv-python==4.10.0.84
+    # via stdl-object-detector
+openpyxl==3.1.5
     # via stdl-object-detector
 packaging==24.2
     # via
@@ -337,7 +343,7 @@ snuggs==1.4.7
     # via
     #   rasterio
     #   stdl-object-detector
-stdl-object-detector @ git+https://github.com/swiss-territorial-data-lab/object-detector.git@v.2.3.3
+stdl-object-detector @ git+https://github.com/swiss-territorial-data-lab/object-detector.git@v.2.3.4
     # via -r requirements.in
 supermercado==0.2.0
     # via stdl-object-detector

@@ -119,17 +119,18 @@ def bbox(bounds):
 def prepare_labels(shpfile, written_files, prefix=''):
 
     labels_gdf = gpd.read_file(shpfile)
+    labels_gdf = misc.check_validity(labels_gdf, correct=True)
     if 'year' in labels_gdf.keys():
         labels_gdf['year'] = labels_gdf.year.astype(int)
         labels_4326_gdf = labels_gdf.to_crs(epsg=4326).drop_duplicates(subset=['geometry', 'year'])
     else:
         labels_4326_gdf = labels_gdf.to_crs(epsg=4326).drop_duplicates(subset=['geometry'])
 
+    nb_labels = len(labels_4326_gdf)
+    logger.info(f"There are {nb_labels} polygons in {os.path.basename(shpfile)}")
+
     labels_4326_gdf['CATEGORY'] = 'mineral extraction site'
     labels_4326_gdf['SUPERCATEGORY'] = 'land usage'
-
-    nb_labels = len(labels_4326_gdf)
-    logger.info(f"There are {nb_labels} polygons in {os.path.basename(SHPFILE)}")
 
     labels_filepath = os.path.join(OUTPUT_DIR, f'{prefix}labels.geojson')
     labels_4326_gdf.to_file(labels_filepath, driver='GeoJSON')
@@ -158,7 +159,6 @@ if __name__ == "__main__":
     # Load input parameters
     OUTPUT_DIR = cfg['output_folder']
     SHPFILE = cfg['datasets']['shapefile']
-    CATEGORY = cfg['datasets']['category'] if 'category' in cfg['datasets'].keys() else False
     FP_SHPFILE = cfg['datasets']['fp_shapefile'] if 'fp_shapefile' in cfg['datasets'].keys() else None
     if 'empty_tiles' in cfg['datasets'].keys():
         EPT_TYPE = cfg['datasets']['empty_tiles']['type']

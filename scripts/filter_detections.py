@@ -22,9 +22,7 @@ def check_gdf_len(gdf):
         gdf (GeoDataFrame): detection polygons
     """
 
-    try:
-        assert len(gdf) > 0
-    except AssertionError:
+    if len(gdf) == 0:
         logger.error("No detections left in the dataframe. Exit script.")
         sys.exit(1)
 
@@ -111,7 +109,7 @@ if __name__ == "__main__":
     check_gdf_len(detections_area_gdf)
 
     # Final gdf
-    detections_gdf = detections_area_gdf.copy().reset_index(drop=True)
+    detections_gdf = detections_area_gdf.reset_index(drop=True)
     logger.info(f"{len(detections_gdf)} detections remaining after filtering")
 
     # Formatting the output name of the filtered detection  

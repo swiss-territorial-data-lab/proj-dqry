@@ -163,7 +163,7 @@ if __name__ == "__main__":
     detections_merge_gdf = detections_year.drop_duplicates(subset=['geometry', 'year_det'])
     
     td = len(detections_merge_gdf)
-    logger.info(f"... {td} clustered detections remains after shape union")
+    logger.info(f"... {td} detections remaining after union of the shapes.")
     
     # Filter dataframe by score value
     detections_merge_gdf = detections_merge_gdf[detections_merge_gdf.score > SCORE_THD]

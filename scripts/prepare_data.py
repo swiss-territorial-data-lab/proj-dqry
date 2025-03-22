@@ -136,7 +136,7 @@ def prepare_labels(shpfile, written_files, prefix=''):
     written_files.append(labels_filepath)  
     logger.success(f"{DONE_MSG} A file was written: {labels_filepath}")
 
-    return labels_4326_gdf, nb_labels, written_files
+    return labels_4326_gdf, written_files
 
 
 if __name__ == "__main__":
@@ -180,13 +180,13 @@ if __name__ == "__main__":
 
     ## Convert datasets shapefiles into geojson format
     logger.info('Convert the label shapefiles into GeoJSON format (EPSG:4326)...')
-    labels_4326_gdf, nb_labels, written_files = prepare_labels(SHPFILE, written_files)
+    labels_4326_gdf, written_files = prepare_labels(SHPFILE, written_files)
     gt_labels_4326_gdf = labels_4326_gdf[['geometry', 'CATEGORY', 'SUPERCATEGORY']].copy()
 
     # Add FP labels if it exists
     if FP_SHPFILE:
         logger.info('Convert the FP label shapefiles into GeoJSON format (EPSG:4326)...')
-        fp_labels_4326_gdf, nb_fp_labels, written_files = prepare_labels(FP_SHPFILE, written_files, prefix='FP_')
+        fp_labels_4326_gdf, written_files = prepare_labels(FP_SHPFILE, written_files, prefix='FP_')
         labels_4326_gdf = pd.concat([labels_4326_gdf, fp_labels_4326_gdf], ignore_index=True)
 
     # Tiling of the AoI

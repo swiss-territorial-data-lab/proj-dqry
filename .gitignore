@@ -1,5 +1,7 @@
-input/*
-!intput/input_det/AoI
-!input/input_trne/
+data/*
+!data/AoI/
+!data/ground_truth/
+data/AoI/swissimage_footprints_shape_per_year
+models/*
 output/*
 config/config_det_*

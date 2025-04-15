@@ -1,12 +1,16 @@
 ##### Detection by inference #####
-# Automatic detection of Mineral Extraction Sites (MES) in images
+# Automatic detection of Mineral Extraction Sites (MES) in satellite images from Data Cubes
 
 # Produce tiles geometry according to the AoI extent and zoom level
 prepare_data.py: 
+  srs: "EPSG:2056" 
   datasets:
-    shapefile: ./data/AoI/<AOI_SHPFILE>
+    #SwissDataCube EPSG:2056
+    shapefile: ./data/AoI/swissimage_footprint_2020.shp
+    #BrazilDataCube EPSG:4326
+    #shapefile: ./data/AoI/aoi_brazil_4326.shp
   output_folder: ./output/det
-  zoom_level: 16  # z, keep between 15 and 18  
+  zoom_level: 14  # z, MAX 14 fro LANDSAT and SENTINEL images  
 
 # Fetch of tiles (online server) and split into 3 datasets: train, test, validation
 generate_tilesets.py:
@@ -17,20 +21,34 @@ generate_tilesets.py:
   datasets:
     aoi_tiles: ./output/det/tiles.geojson
     image_source:
-      type: XYZ                             # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ 4. FOLDER
-      year: 2020                            # supported values: 1. multi-year (tiles of different year), 2. <year> (i.e. 2020)
-      location: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/{year}/3857/{z}/{x}/{y}.jpeg
+      type: WMS                             # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ 4. FOLDER
+      srs: EPSG:3857
+      
+      # SwissDataCube  Template/https://ows.swissdatacube.org/?service=WMS&request=GetMap&version=1.3.0&layers=[LAYER_NAME]&styles=[STYLE]&crs=[EPSG]&bbox=[BBOX_AOI]]&width=[TILE_SIZE]&height=[TILE_SIZE]&format=[FORMAT]&time=[YEAR-MONTH-DAY]
+      location: https://ows.swissdatacube.org/?service=WMS&request=GetMap&version=1.3.0&layers=landsat_ot_c2_l2&styles=simple_rgb&crs=EPSG:3857&bbox=5.82094745,45.69217318,10.58912293,47.81708853&width=256&height=256&format=image/png&time=2020-08-11     
+      layers: landsat_ot_c2_l2
+
+      # BrazilianDataCube Template/https://data.inpe.br/bdc/geoserver/mosaics/ows?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=[LAYER]&STYLES=raster&CRS=EPSG:[EPSG]&TIME=[YEAR-MONTH-DAYT00:00:00.000]Z&WIDTH=[SIZE]&HEIGHT=[SIZE]&BBOX=[BBOX_AOI]&FORMAT=[FORMAT]
+      #location: https://data.inpe.br/bdc/geoserver/mosaics/ows?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=mosaic-landsat-brazil-6m&STYLES=raster&CRS=EPSG:3857&TIME=2017-07-01T00:00:00.000Z/2018-01-01T00:00:00.000Z&WIDTH=256&HEIGHT=256&BBOX=-8210729.32210553,-3743686.60247694,-3204262.47299497,585552.62310988&FORMAT=image/png      #BBox of Brazil
+      #layers: mosaic-landsat-brazil-6m
+      #location: https://data.inpe.br/bdc/geoserver/mosaics/ows?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=mosaic-landsat-amazon-3m&STYLES=raster&CRS=EPSG:3857&TIME=2016-07-01T00:00:00.000Z&WIDTH=256&HEIGHT=256&BBOX=-8210729.32210553,-3743686.60247694,-3204262.47299497,585552.62310988&FORMAT=image/png 
+      #layers: mosaic-landsat-amazon-3m
+      #location: https://data.inpe.br/bdc/geoserver/mosaics/ows?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=mosaic-s2-amazon-3m&STYLES=raster&CRS=EPSG:3857&TIME=2022-06-01T00:00:00.000Z/2022-08-01T00:00:00.000Z&WIDTH=256&HEIGHT=256&BBOX=-8210729.32210553,-3743686.60247694,-3204262.47299497,585552.62310988&FORMAT=image/png
+      #layers: mosaic-s2-amazon-3m
+
+      #settings in brackets are to be selected according to preferred parameters and server capabilities (check #getcapabilities from DataCube or Server)
+
   output_folder: ./output/det/
   tile_size: 256      # per side, in pixels
   overwrite: True
   n_jobs: 10
   seed: 2
   COCO_metadata:
-    year: 2021
+    year: 2020
     version: 1.0
-    description: Swiss Image Hinterground w/ Mineral Exploitation Site detection
-    contributor: swisstopo
-    url: https://swisstopo.ch
+    description: Landsat8 Hinterground w/ Quarries and Mineral Exploitation Sites detection
+    contributor: SwissDataCube
+    url: https://explorer.swissdatacube.org/product
     license:
       name: unknown
       url: unknown
@@ -45,7 +63,7 @@ make_detections.py:
     oth: COCO_oth.json
   detectron2_config_file: ../../config/detectron2_config.yaml # path relative to the working_folder
   model_weights:
-    pth_file: ../../models/model_0002999.pth # trained model minimising the validation loss curve, monitor the training process via tensorboard (tensorboard --logdir </logs>)
+    pth_file: ../../models/model_0001199.pth # trained model minimising the validation loss curve, monitor the training process via tensorboard (tensorboard --logdir </logs>)
   image_metadata_json: img_metadata.json
   rdp_simplification:   # rdp = Ramer-Douglas-Peucker
     enabled: True
@@ -70,9 +88,12 @@ merge_detections.py:
 filter_detections.py:
   working_directory: ./data
   detections: ../output/det/merged_detections_at_0dot3_threshold.gpkg
-  aoi: ./AoI/<AoI_shapefile>
+  aoi: ./data/AoI/swissimage_footprint_2020.shp
   dem: ./DEM/switzerland_dem_EPSG2056.tif
   elevation_threshold: 1200 # m, altitude threshold
+  slope: ./data/slope/switzerland_slope_EPSG2056.tif
+  min_slope: 1.0 # °, min slope threshold
+  max_slope: 48.0 # °, max slope threshold
   score_threshold: 0.95 # detection score (from 0 to 1) provided by detectron2
   area_threshold: 50.0 # m2, area threshold under which polygons are discarded
 

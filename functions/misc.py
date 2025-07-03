@@ -69,3 +69,8 @@ def merge_polygons(gdf, id_name='id'):
     merge_gdf[id_name] = merge_gdf.index 
 
     return merge_gdf
+
+
+def none_if_undefined(cfg, key):
+    
+    return cfg[key] if key in cfg.keys() else None

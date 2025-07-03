@@ -168,7 +168,7 @@ if __name__ == "__main__":
         EPT_SHPFILE = None
         EPT_TYPE = None
         EPT_YEAR = None
-    CATEGORY = cfg['datasets']['category'] if 'category' in cfg['datasets'].keys() else False
+    CATEGORY = cfg['datasets']['category'] if 'category' in cfg['datasets'].keys() else None
     ZOOM_LEVEL = cfg['zoom_level']
 
     # Create an output directory in case it doesn't exist
@@ -223,7 +223,7 @@ if __name__ == "__main__":
                 EPT_YEAR = None
             empty_tiles_4326_aoi_gdf = EPT_aoi_4326_gdf.copy()
 
-    # Get all the tiles in one gdf 
+        # Get all the tiles in one gdf 
         logger.info("- Concatenate label tiles and empty AoI tiles") 
         tiles_4326_all_gdf = pd.concat([tiles_4326_labels_gdf, empty_tiles_4326_aoi_gdf])
     else: 

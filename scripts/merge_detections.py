@@ -36,12 +36,12 @@ if __name__ == "__main__":
 
     # Load input parameters
     WORKING_DIR = cfg['working_directory']
-    LABELS = cfg['labels'] if 'labels' in cfg.keys() else None
+    LABELS = misc.none_if_undefined(cfg, 'labels')
     DETECTION_FILES = cfg['detections']
     DISTANCE = cfg['distance']
     SCORE_THD = cfg['score_threshold']
-    IOU_THD = cfg['iou_threshold']
-    AREA_THD = cfg['area_threshold'] if 'area_threshold' in cfg.keys() else None
+    IOU_THD = misc.none_if_undefined(cfg, 'iou_threshold')
+    AREA_THD = misc.none_if_undefined(cfg, 'area_threshold')
     ASSESS = cfg['assess']['enable']
     METHOD = cfg['assess']['metrics_method']
 
@@ -68,8 +68,9 @@ if __name__ == "__main__":
     detections_gdf = detections_gdf.to_crs(2056)
     detections_gdf['area'] = detections_gdf.area 
     detections_gdf['det_id'] = detections_gdf.index
-    if 'year_det' in detections_gdf.keys(): 
-        detections_gdf['year_det'] = detections_gdf.year_det.astype(int)
+    if 'year_det' in detections_gdf:
+        if not detections_gdf['year_det'].all(): 
+            detections_gdf['year_det'] = detections_gdf.year_det.astype(int)
     logger.success(f"{DONE_MSG} {len(detections_gdf)} features were found.")
 
     # get classe ids
@@ -162,13 +163,13 @@ if __name__ == "__main__":
     # Remove duplicate detection for a given year
     detections_merge_gdf = detections_year.drop_duplicates(subset=['geometry', 'year_det'])
     
-    td = len(detections_merge_gdf)
-    logger.info(f"... {td} detections remaining after union of the shapes.")
+    nb_detections = len(detections_merge_gdf)
+    logger.info(f"... {nb_detections} detections remaining after union of the shapes.")
     
     # Filter dataframe by score value
     detections_merge_gdf = detections_merge_gdf[detections_merge_gdf.score > SCORE_THD]
-    sc = len(detections_merge_gdf)
-    logger.info(f"{td - sc} detections were removed by score filtering (score threshold = {SCORE_THD})")
+    nb_score = len(detections_merge_gdf)
+    logger.info(f"{nb_detections - nb_score} detections were removed by score filtering (score threshold = {SCORE_THD})")
 
     if ASSESS:
         logger.info("Loading labels as a GeoPandas DataFrame...")

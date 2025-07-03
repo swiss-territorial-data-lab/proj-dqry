@@ -3,7 +3,7 @@
 
 # Produce tiles geometry according to the AoI extent and zoom level
 prepare_data.py: 
-  srs: "EPSG:2056"    # SwissDataCube EPSG:2056 ; BrazilDataCube EPSG:4326
+  srs: EPSG:2056    # SwissDataCube EPSG:2056 ; BrazilDataCube EPSG:4326
   datasets:   
     shapefile: ./data/AoI/swissimage_footprint_2020.shp
     # shapefile: ./data/AoI/aoi_brazil_4326.shp
@@ -44,7 +44,7 @@ generate_tilesets.py:
   COCO_metadata:
     year: 2020
     version: 1.0
-    description: Landsat8 background with Mineral Exploitation Sites labels
+    description: Landsat-8/Sentinel-2 background with Mineral Exploitation Sites labels
     contributor: SwissDataCube and BrazilDataCube
     url: https://explorer.swissdatacube.org/product
     license:

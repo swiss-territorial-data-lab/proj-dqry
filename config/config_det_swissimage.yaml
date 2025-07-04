@@ -78,7 +78,7 @@ filter_detections.py:
 
 merge_years.py:
   working_directory: ./output/det/
-  years: [<YEAR1>, <YEAR2>, <YEAR3>]          # choose year
+  years: [[YEAR1], [YEAR2], [YEAR3]]          # choose year
   layer: merged_detections_at_0dot3_threshold_threshold_score-0dot95_area-50_elevation-1200.gpkg 
   overwrite: True
   file: layers   # supported values: 1. layers, 2. concatenate

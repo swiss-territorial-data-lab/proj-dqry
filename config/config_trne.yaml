@@ -1,0 +1,120 @@
+####### Model training and evaluation ####### 
+# Training of automatic detection of Mineral Extraction Sites (MES) in images with a provided ground truth
+
+# Produce tile geometries based on the AoI extent and zoom level
+prepare_data.py:  
+  srs: EPSG:2056   # Swiss EPSG:2056 ; Brazil EPSG:4326
+  datasets:
+    shapefile: ./data/ground_truth/[GT_SHPFILE]           # GT labels. Optional: can contain a 'year' column
+    # fp_shapefile: ./data/FP/[FP_SHPFILE]                # FP labels. Optional: can contain a 'year' column
+    # empty_tiles:
+    #   type: shp                                         # supported values: 1. aoi (area in which tiles will be selected randomly) 2. shp (provided empty tiles). Adapt the following keys accordingly
+    #   shapefile: ./data/AoI/[EPT_SHPFILE]               # shapefile in which additional empty tiles can be selected. 
+    #   year: 2020                                        # if type = aoi selected, then provide a year, otherwise comment line. Supported value: (1) numeric (i.e. 2020), (2) [year1, year2] (random selection of a year within a given year range)                     
+    # category: [CLASS_COL_NAME]                          # If it exists, indicate the attribute column name of the label class
+  output_folder: ./output/trne/
+  zoom_level: [ZOOM_LEVEL]  # z 
+
+# Fetch of tiles (online server) and split into 3 datasets: train, test, validation
+generate_tilesets.py:
+  debug_mode: 
+    enable: False  # sample of tiles
+    nb_tiles_max: 2000
+  working_directory: .
+  datasets:
+    aoi_tiles: output/trne/tiles.geojson
+    ground_truth_labels: output/trne/labels.geojson
+    # fp_labels:
+    #   fp_shp: output_trne/FP.geojson 
+    #   frac_trn: 0.7        # fraction of fp tiles to add to the trn dataset, then the remaining tiles will be split in 2 and added to tst and val datasets                          
+    image_source:
+      ## SWISSIMAGE via WMTS  
+      type: XYZ                             # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ 4. FOLDER
+      year: [YEAR]                          # supported values: 1. multi-year (tiles of different year), 2. integer (i.e. 2020)
+      location: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/{year}/3857/{z}/{x}/{y}.jpeg
+      ## Satelites images via WMS from ODC
+      type: WMS                             # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ 4. FOLDER  
+      ### SwissDataCube
+      # location: https://ows.swissdatacube.org/?service=WMS&request=GetMap&version=1.3.0&layers=[LAYER_NAME]&styles=[STYLE]&crs=[EPSG]&bbox=[BBOX_AOI]]&width=[TILE_SIZE]&height=[TILE_SIZE]&format=[FORMAT]&time=[YEAR-MONTH-DAY]  
+      ### BrazilianDataCube 
+      # location: https://data.inpe.br/bdc/geoserver/mosaics/ows?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=[LAYER]&STYLES=raster&CRS=EPSG:[EPSG]&TIME=[YEAR-MONTH-DAYT00:00:00.000]Z&WIDTH=[SIZE]&HEIGHT=[SIZE]&BBOX=[BBOX_AOI]&FORMAT=[FORMAT] 
+  # empty_tiles:            # add empty tiles to datasets
+  #   tiles_frac: 0.5       # fraction (relative to the number of tiles intersecting labels) of empty tiles to add
+  #   frac_trn: 0.7         # fraction of empty tiles to add to the trn dataset, then the remaining tiles will be split in 2 and added to tst and val datasets
+  #   keep_oth_tiles: False # keep tiles in oth dataset not intersecting oth labels
+  output_folder: output/trne
+  tile_size: 256 # per side, in pixels
+  overwrite: True
+  n_jobs: 10
+  # seed: 42  # optional 
+  COCO_metadata:
+    year: [YEAR]
+    version: 1.0
+    description: Image background with Mineral Exploitation Sites labels
+    contributor: unknown
+    url: unknown
+    license:
+      name: unknown
+      url: unknown
+
+# Train the model with the detectron2 algorithm 
+train_model.py:
+  working_directory: ./output/trne/
+  log_subfolder: logs
+  sample_tagged_img_subfolder: sample_tagged_images
+  COCO_files: # relative paths, w/ respect to the working_folder
+    trn: COCO_trn.json
+    val: COCO_val.json
+    tst: COCO_tst.json
+  detectron2_config_file: ../../config/detectron2_config.yaml # path relative to the working_folder
+  model_weights:
+    model_zoo_checkpoint_url: COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_1x.yaml
+
+# Object detection with the optimised trained model
+make_detections.py:
+  working_directory: ./output/trne/
+  log_subfolder: logs
+  sample_tagged_img_subfolder: sample_tagged_images
+  COCO_files:           # relative paths, w/ respect to the working_folder
+    trn: COCO_trn.json
+    val: COCO_val.json
+    tst: COCO_tst.json
+  detectron2_config_file: ../../config/detectron2_config.yaml # path relative to the working_folder
+  model_weights:
+    pth_file: ./logs/model_[ITERATION].pth # trained model minimising the validation loss curve, monitor the training process via tensorboard (tensorboard --logdir [/logs])
+  image_metadata_json: img_metadata.json
+  rdp_simplification:   # rdp = Ramer-Douglas-Peucker
+    enabled: True
+    epsilon: 2.0        # cf. https://rdp.readthedocs.io/en/latest/
+  score_lower_threshold: [SCORE_THD] 
+  remove_det_overlap: False  # if several detections overlap (IoU > 0.5), only the one with the highest confidence score is retained. Not recommended for use with a single class.
+    
+# Evaluate the detection quality for the different datasets by calculating metrics
+assess_detections.py:
+  working_directory: ./output/trne/
+  datasets:
+    ground_truth_labels: labels.geojson
+    split_aoi_tiles: split_aoi_tiles.geojson # aoi = Area of Interest
+    categories: category_ids.json
+    detections:
+      trn: trn_detections_at_0dot05_threshold.gpkg
+      val: val_detections_at_0dot05_threshold.gpkg
+      tst: tst_detections_at_0dot05_threshold.gpkg
+  output_folder: .
+  iou_threshold: 0.1
+  metrics_method: macro-average   # 1: macro-average ; 2: macro-weighted-average ; 3: micro-average
+
+# Assess the final results
+merge_detections.py:
+  working_directory: ./output/trne/
+  labels: labels.geojson
+  detections:
+    trn: trn_detections_at_0dot05_threshold.gpkg
+    val: val_detections_at_0dot05_threshold.gpkg
+    tst: tst_detections_at_0dot05_threshold.gpkg
+  distance: [DISTANCE] # m, distance use as a buffer to merge close polygons (likely to belong to the same object) together
+  iou_threshold: [IOU_THD]
+  score_threshold: [SCORE_THD]  # choose a value
+  assess: 
+    enable: True
+    metrics_method: macro-average   # 1: macro-average ; 2: macro-weighted-average ; 3: micro-average

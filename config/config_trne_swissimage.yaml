@@ -5,8 +5,8 @@
 prepare_data.py:  
   srs: EPSG:2056
   datasets:
-    shapefile: ./data/ground_truth/tlm-hr-trn-topo.shp    # GT labels. Optional: can contain a 'year' column
-    # fp_shapefile: ./data/FP/[FP_SHPFILE ]               # FP labels. Optional: can contain a 'year' column
+    shapefile: ./data/ground_truth/mes_swisstlm3d_swissimage2020.shp    # GT labels. Optional: can contain a 'year' column
+    # fp_shapefile: ./data/FP/[FP_SHPFILE]                # FP labels. Optional: can contain a 'year' column
     # empty_tiles:
     #   type: shp                                         # supported values: 1. aoi (area in which tiles will be selected randomly) 2. shp (provided empty tiles). Adapt the following keys accordingly
     #   shapefile: ./data/AoI/ [EPT_SHPFILE]              # shapefile in which additional empty tiles can be selected. 

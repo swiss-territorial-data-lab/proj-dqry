@@ -11,7 +11,7 @@ prepare_data.py:
     #   type: shp                                         # supported values: 1. aoi (area in which tiles will be selected randomly) 2. shp (provided empty tiles). Adapt the following keys accordingly
     #   shapefile: ./data/AoI/[EPT_SHPFILE]               # shapefile in which additional empty tiles can be selected. 
     #   year: 2020                                        # if type = aoi selected, then provide a year, otherwise comment line. Supported value: (1) numeric (i.e. 2020), (2) [year1, year2] (random selection of a year within a given year range)                     
-    # category: [CLASS_COL_NAME]                          # If it exists, indicate the attribute column name of the label class
+    # category: [CLASS_COL_NAME]                          # if it exists, indicate the attribute column name of the label class
   output_folder: ./output/trne/
   zoom_level: [ZOOM_LEVEL]  # z 
 
@@ -34,6 +34,7 @@ generate_tilesets.py:
       location: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/{year}/3857/{z}/{x}/{y}.jpeg
       ## Satelites images via WMS from ODC
       type: WMS                             # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ 4. FOLDER  
+      layers: [LAYER] 
       ### SwissDataCube
       # location: https://ows.swissdatacube.org/?service=WMS&request=GetMap&version=1.3.0&layers=[LAYER_NAME]&styles=[STYLE]&crs=[EPSG]&bbox=[BBOX_AOI]]&width=[TILE_SIZE]&height=[TILE_SIZE]&format=[FORMAT]&time=[YEAR-MONTH-DAY]  
       ### BrazilianDataCube 
@@ -42,7 +43,7 @@ generate_tilesets.py:
   #   tiles_frac: 0.5       # fraction (relative to the number of tiles intersecting labels) of empty tiles to add
   #   frac_trn: 0.7         # fraction of empty tiles to add to the trn dataset, then the remaining tiles will be split in 2 and added to tst and val datasets
   #   keep_oth_tiles: False # keep tiles in oth dataset not intersecting oth labels
-  output_folder: output/trne
+  output_folder: output/trne/
   tile_size: 256 # per side, in pixels
   overwrite: True
   n_jobs: 10
@@ -62,7 +63,7 @@ train_model.py:
   working_directory: ./output/trne/
   log_subfolder: logs
   sample_tagged_img_subfolder: sample_tagged_images
-  COCO_files: # relative paths, w/ respect to the working_folder
+  COCO_files: # relative paths, with respect to the working_folder
     trn: COCO_trn.json
     val: COCO_val.json
     tst: COCO_tst.json
@@ -75,7 +76,7 @@ make_detections.py:
   working_directory: ./output/trne/
   log_subfolder: logs
   sample_tagged_img_subfolder: sample_tagged_images
-  COCO_files:           # relative paths, w/ respect to the working_folder
+  COCO_files:           # relative paths, with respect to the working_folder
     trn: COCO_trn.json
     val: COCO_val.json
     tst: COCO_tst.json
@@ -91,6 +92,7 @@ make_detections.py:
     
 # Evaluate the detection quality for the different datasets by calculating metrics
 assess_detections.py:
+  # crs_out: EPSG:2056  # Default value. Enable only if EPSG != 2056 
   working_directory: ./output/trne/
   datasets:
     ground_truth_labels: labels.geojson

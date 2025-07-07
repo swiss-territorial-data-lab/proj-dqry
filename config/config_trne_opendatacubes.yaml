@@ -1,27 +1,23 @@
 ####### Model training and evaluation ####### 
-# Training of automatic detection of Mineral Extraction Sites (MES) in satellite images with a provided ground truth
+# Training of automatic detection of Mineral Extraction Sites (MES) in satellite images from Open Data Cubes with a provided ground truth
 
 # Produce tile geometries based on the AoI extent and zoom level, Labels must have a "Feature ID" field
 prepare_data.py:  
-  srs: EPSG:2056    # SwissDataCube EPSG:2056 ; BrazilDataCube EPSG:4326
   datasets:
-    ## GTs for the SwissDataCube EPSG:2056 
+    ## GTs for the SwissDataCube (EPSG:2056) 
     # shapefile: ./data/ground_truth/clip_labels_landsat.shp # GT for the landsat_ot_c2_l2 layer from 2020-08-11
-
-    ## GTs for the BrazilianDataCube EPSG:4326
-    # GT dataset from Tang, L., Werner, T.T. (https://doi.org/10.1038/s43247-023-00805-6), focusing on the principal MES of Brazil with few labels
-    # shapefile: ./data/ground_truth/labels_mosaic_landsat_brazil_6m_4326.shp # GT for the mosaic-landsat-brazil-6m layer in false colour
-    # shapefile: ./data/ground_truth/amazon_biome_quarries_4326.shp # GT for the mosaic-landsat-amazon-3m layer in True colour and the mosaic-s2-amazon-3m layer in False colour  
-    # GT dataset from Earth Genome (https://github.com/earthrise-media/mining-detector), which studies the MES of illegal gold in Amazonia and contains an important number of labels
-    shapefile: ./data/ground_truth/illegal_quarries_2022.shp # GT for the mosaic-s2-amazon-3m False colour layer 
-    # shapefile: ./data/ground_truth/illegal_quarries_2018.shp # GT for the mosaic-landsat-brazil-6m False colour layer
-
-    # fp_shapefile: ./data/FP/<SHPFILE>                            # FP labels
-    # empty_tiles_aoi: ./data/AoI/<SHPFILE>                        # AOI in which additional empty tiles can be selected. Only one 'empty_tiles' option can be selected  
-    # empty_tiles_year: 2020                                       # If "empty_tiles_aoi" selected then provide a year. Choice: (1) numeric (i.e. 2020), (2) [year1, year2] (random selection of a year within a given year range) 
-    # empty_tiles_shp: .data/empty_tiles/<SHPFILE>                 # Provided shapefile of selected empty tiles. Only one 'empty_tiles' option can be selected 
-
-  output_folder: ./output/trne/
+    ## GTs for the BrazilianDataCube (EPSG:4326)
+    # shapefile: ./data/ground_truth/labels_mosaic_landsat_brazil_6m_4326.shp # GT, Tang and Werner (2023), for the mosaic-landsat-brazil-6m layer in false colour
+    # shapefile: ./data/ground_truth/amazon_biome_quarries_4326.shp # GT, Tang and Werner (2023), for the mosaic-landsat-amazon-3m layer in True colour and the mosaic-s2-amazon-3m layer in False colour  
+    shapefile: ./data/ground_truth/illegal_quarries_2022.shp # GT, Earth Genome, for the mosaic-s2-amazon-3m False colour layer 
+    # shapefile: ./data/ground_truth/illegal_quarries_2018.shp # GT; Earth Genome, for the mosaic-landsat-brazil-6m False colour layer
+    # fp_shapefile: ./data/FP/[FP_SHPFILE]                # FP labels. Optional: can contain a 'year' column
+    # empty_tiles:
+    #   type: shp                                         # supported values: 1. aoi (area in which tiles will be selected randomly) 2. shp (provided empty tiles). Adapt the following keys accordingly
+    #   shapefile: ./data/AoI/[EPT_SHPFILE]               # shapefile in which additional empty tiles can be selected. 
+    #   year: 2020                                        # if type = aoi selected, then provide a year, otherwise comment line. Supported value: (1) numeric (i.e. 2020), (2) [year1, year2] (random selection of a year within a given year range)                     
+    # category: [CLASS_COL_NAME]                          # if it exists, indicate the attribute column name of the label class
+  output_folder: ./output/trne/[SATELLITE IMAGE NAME] 
   zoom_level: 14  # z, max 14 for LANDSAT and SENTINEL images   
 
 # Fetch of tiles (online server) and split into 3 datasets: train, test, validation
@@ -31,38 +27,39 @@ generate_tilesets.py:
     nb_tiles_max: 2000
   working_directory: .
   datasets:
-    aoi_tiles: output/trne/tiles.geojson
-    ground_truth_labels: output/trne/labels.geojson
+    aoi_tiles: output/trne/[SATELLITE IMAGE NAME]/tiles.geojson
+    ground_truth_labels: output/trne/[SATELLITE IMAGE NAME]/labels.geojson
     # fp_labels:
-    #   fp_shp: output_trne/FP.geojson 
+    #   fp_shp: output_trne/[SATELLITE IMAGE NAME]/FP.geojson 
     #   frac_trn: 0.7        # fraction of fp tiles to add to the trn dataset, then the remaining tiles will be split in 2 and added to tst and val datasets                          
     image_source:
       type: WMS                             # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ 4. FOLDER
       srs: EPSG:3857
-      #settings in brackets are to be selected according to preferred parameters and server capabilities (check #getcapabilities from DataCube or Server)
-      # SwissDataCube  Template/https://ows.swissdatacube.org/?service=WMS&request=GetMap&version=1.3.0&layers=[LAYER_NAME]&styles=[STYLE]&crs=[EPSG]&bbox=[BBOX_AOI]]&width=[TILE_SIZE]&height=[TILE_SIZE]&format=[FORMAT]&time=[YEAR-MONTH-DAY]
-      # location: https://ows.swissdatacube.org/?service=WMS&request=GetMap&version=1.3.0&layers=landsat_ot_c2_l2&styles=simple_rgb&crs=EPSG:3857&bbox=5.82094745,45.69217318,10.58912293,47.81708853&width=256&height=256&format=image/png&time=2020-08-11     
+      ## Settings in brackets are to be selected according to preferred parameters and server capabilities (check #getcapabilities from DataCube or Server)
+      ## SwissDataCube
       # layers: landsat_ot_c2_l2
-      # BrazilianDataCube Template/https://data.inpe.br/bdc/geoserver/mosaics/ows?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=[LAYER]&STYLES=raster&CRS=EPSG:[EPSG]&TIME=[YEAR-MONTH-DAYT00:00:00.000]Z&WIDTH=[SIZE]&HEIGHT=[SIZE]&BBOX=[BBOX_AOI]&FORMAT=[FORMAT]
-      # location: https://data.inpe.br/bdc/geoserver/mosaics/ows?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=mosaic-landsat-brazil-6m&STYLES=raster&CRS=EPSG:3857&TIME=2017-07-01T00:00:00.000Z/2018-01-01T00:00:00.000Z&WIDTH=256&HEIGHT=256&BBOX=-8210729.32210553,-3743686.60247694,-3204262.47299497,585552.62310988&FORMAT=image/png      #BBox of Brazil
+      # location: https://ows.swissdatacube.org/?service=WMS&request=GetMap&version=1.3.0&layers=landsat_ot_c2_l2&styles=simple_rgb&crs=EPSG:3857&bbox=5.82094745,45.69217318,10.58912293,47.81708853&width=256&height=256&format=image/png&time=2020-08-11     
+      ## BrazilianDataCube
       # layers: mosaic-landsat-brazil-6m
-      # location: https://data.inpe.br/bdc/geoserver/mosaics/ows?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=mosaic-landsat-amazon-3m&STYLES=raster&CRS=EPSG:3857&TIME=2016-07-01T00:00:00.000Z&WIDTH=256&HEIGHT=256&BBOX=-8210729.32210553,-3743686.60247694,-3204262.47299497,585552.62310988&FORMAT=image/png 
+      # location: https://data.inpe.br/bdc/geoserver/mosaics/ows?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=mosaic-landsat-brazil-6m&STYLES=raster&CRS=EPSG:3857&TIME=2017-07-01T00:00:00.000Z/2018-01-01T00:00:00.000Z&WIDTH=256&HEIGHT=256&BBOX=-8210729.32210553,-3743686.60247694,-3204262.47299497,585552.62310988&FORMAT=image/png      #BBox of Brazil
       # layers: mosaic-landsat-amazon-3m
-      location: https://data.inpe.br/bdc/geoserver/mosaics/ows?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=mosaic-s2-amazon-3m&STYLES=raster&CRS=EPSG:3857&TIME=2022-06-01T00:00:00.000Z/2022-08-01T00:00:00.000Z&WIDTH=256&HEIGHT=256&BBOX=-8210729.32210553,-3743686.60247694,-3204262.47299497,585552.62310988&FORMAT=image/png
+      # location: https://data.inpe.br/bdc/geoserver/mosaics/ows?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=mosaic-landsat-amazon-3m&STYLES=raster&CRS=EPSG:3857&TIME=2016-07-01T00:00:00.000Z&WIDTH=256&HEIGHT=256&BBOX=-8210729.32210553,-3743686.60247694,-3204262.47299497,585552.62310988&FORMAT=image/png 
       layers: mosaic-s2-amazon-3m
+      location: https://data.inpe.br/bdc/geoserver/mosaics/ows?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=mosaic-s2-amazon-3m&STYLES=raster&CRS=EPSG:3857&TIME=2022-06-01T00:00:00.000Z/2022-08-01T00:00:00.000Z&WIDTH=256&HEIGHT=256&BBOX=-8210729.32210553,-3743686.60247694,-3204262.47299497,585552.62310988&FORMAT=image/png
   # empty_tiles:            # add empty tiles to datasets
   #   tiles_frac: 0.5       # fraction (relative to the number of tiles intersecting labels) of empty tiles to add
   #   frac_trn: 0.7         # fraction of empty tiles to add to the trn dataset, then the remaining tiles will be split in 2 and added to tst and val datasets
   #   keep_oth_tiles: False # keep tiles in oth dataset not intersecting oth labels
-  output_folder: output/trne
+  output_folder: output/trne/[SATELLITE IMAGE NAME]/
   tile_size: 256 # per side, in pixels
   overwrite: True
   n_jobs: 10
+  # seed: 42  # optional 
   COCO_metadata:
     year: 2020
     version: 1.0
     description: Landsat-8/Sentinel-2 background with Mineral Exploitation Sites labels
-    contributor: swissDataCube
+    contributor: SwissDataCube or BrazilDataCube
     url: https://explorer.swissdatacube.org/products
     license:
       name: unknown
@@ -70,27 +67,27 @@ generate_tilesets.py:
 
 # Train the model with the detectron2 algorithm 
 train_model.py:
-  working_directory: ./output/trne/
+  working_directory: ./output/trne/[SATELLITE IMAGE NAME]/
   log_subfolder: logs
   sample_tagged_img_subfolder: sample_tagged_images
-  COCO_files: # relative paths, w/ respect to the working_folder
+  COCO_files: # relative paths, with respect to the working_folder
     trn: COCO_trn.json
     val: COCO_val.json
     tst: COCO_tst.json
-  detectron2_config_file: ../../config/detectron2_config.yaml # path relative to the working_folder
+  detectron2_config_file: ../../../config/detectron2_config_opendatacube.yaml # path relative to the working_folder
   model_weights:
     model_zoo_checkpoint_url: COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_1x.yaml
 
 # Object detection with the optimised trained model
 make_detections.py:
-  working_directory: ./output/trne/
+  working_directory: ./output/trne/[SATELLITE IMAGE NAME]/
   log_subfolder: logs
   sample_tagged_img_subfolder: sample_tagged_images
-  COCO_files:           # relative paths, w/ respect to the working_folder
+  COCO_files:           # relative paths, with respect to the working_folder
     trn: COCO_trn.json
     val: COCO_val.json
     tst: COCO_tst.json
-  detectron2_config_file: ../../config/detectron2_config.yaml # path relative to the working_folder
+  detectron2_config_file: ../../../config/detectron2_config.yaml # path relative to the working_folder
   model_weights:
     pth_file: ./logs/model_0003999.pth # trained model minimising the validation loss curve, monitor the training process via tensorboard (tensorboard --logdir </logs>)
   image_metadata_json: img_metadata.json
@@ -103,7 +100,7 @@ make_detections.py:
 # Evaluate the detection quality for the different datasets by calculating metrics
 assess_detections.py:
   crs_out: EPSG:3857
-  working_directory: ./output/trne/
+  working_directory: ./output/trne/[SATELLITE IMAGE NAME]/
   datasets:
     ground_truth_labels: labels.geojson
     split_aoi_tiles: split_aoi_tiles.geojson # aoi = Area of Interest
@@ -118,7 +115,7 @@ assess_detections.py:
 
 # Assess the final results
 merge_detections.py:
-  working_directory: ./output/trne/
+  working_directory: ./output/trne/[SATELLITE IMAGE NAME]/
   labels: labels.geojson
   detections:
     trn: trn_detections_at_0dot05_threshold.gpkg

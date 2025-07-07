@@ -1,5 +1,5 @@
 ##### Detection by inference #####
-# Automatic detection of Mineral Extraction Sites (MES) in aerial images
+# Automatic detection of Mineral Extraction Sites (MES) in raster images
 
 # Produce tiles geometry according to the AoI extent and zoom level
 prepare_data.py: 
@@ -23,6 +23,7 @@ generate_tilesets.py:
       location: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/{year}/[EPSG]/{z}/{x}/{y}.jpeg
       ## Satelites images via WMS from ODC
       type: WMS                             # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ 4. FOLDER  
+      layers: [LAYER] 
       ### SwissDataCube
       # location: https://ows.swissdatacube.org/?service=WMS&request=GetMap&version=1.3.0&layers=[LAYER_NAME]&styles=[STYLE]&crs=[EPSG]&bbox=[BBOX_AOI]]&width=[TILE_SIZE]&height=[TILE_SIZE]&format=[FORMAT]&time=[YEAR-MONTH-DAY]  
       ### BrazilianDataCube 
@@ -78,13 +79,13 @@ filter_detections.py:
   working_directory: ./data
   detections: ../output/det/merged_detections_at_0dot[SCORE_THD]_threshold.gpkg
   aoi: ./AoI/[AOI_SHPFILE] 
-  dem: ./DEM/[DEM_EPSG2056_TIF] 
-  slope: ./DEM/[SLOPE_EPSG2056_TIF] 
-  elevation_threshold: [ELEVATION_THD]  # m, altitude threshold
-  min_slope_threshold: [MIN_SLOPE_THD]  # °, min slope threshold
-  max_slope_threshold: [MAX_SLOPE_THD]  # °, max slope threshold
-  score_threshold: [SCORE_THD]  # detection score (from 0 to 1) provided by detectron2
-  area_threshold: [AREA_THD]  # m2, area threshold under which polygons are discarded
+  dem: ./DEM/[DEM_EPSG2056_TIF] # optional
+  slope: ./DEM/[SLOPE_EPSG2056_TIF] # optional
+  elevation_threshold: [ELEVATION_THD]  # m, altitude threshold, optional
+  min_slope_threshold: [MIN_SLOPE_THD]  # °, min slope threshold, optional
+  max_slope_threshold: [MAX_SLOPE_THD]  # °, max slope threshold, optional
+  score_threshold: [SCORE_THD]  # detection score (from 0 to 1) provided by detectron2, optional
+  area_threshold: [AREA_THD]  # m2, area threshold under which polygons are discarded, optional
 
 merge_years.py:
   working_directory: ./output/det/

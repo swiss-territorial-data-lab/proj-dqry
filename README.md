@@ -127,23 +127,23 @@ The folders/files of the project `proj-dqry` (in combination with `object-detect
 
 ## Data
 
-Below, the description of input data used for this project. 
+Below is a description of the input data used for this project.
 
 ### Images
-  - [_SWISSIMAGE Journey_](https://map.geo.admin.ch/#/map?lang=fr&center=2660000,1190000&z=1&bgLayer=ch.swisstopo.pixelkarte-farbe&topic=ech&layers=ch.swisstopo.swissimage-product@year=2024;ch.swisstopo.swissimage-product.metadata@year=2024) is an annual dataset of aerial images of Switzerland from 1946 to today. Only RGB images are used, from 1999 to current. It includes [_SWISSIMAGE 10 cm_](https://www.swisstopo.admin.ch/fr/geodata/images/ortho/swissimage10.html), _SWISSIMAGE 25 cm_ and _SWISSIMAGE 50 cm_. The images are downloaded from the [geo.admin.ch](https://www.geo.admin.ch/fr) server using [XYZ](https://api3.geo.admin.ch/services/sdiservices.html#xyz) connector.
-  - [_Landsat 8_](https://landsat.gsfc.nasa.gov/satellites/landsat-8/) products were used:
-    - True colour images, collection 2, level 2 and a 30 m spatial resolution were used for Switzerland via the [SDC](https://explorer.swissdatacube.org/products/landsat_ot_c2_l2).
-    - True and false colour image mosaics, with 30 m spatial resolution covering the Brazilian Amazon, were used for Brazil via the [BDC](https://data.inpe.br/bdc/web/en/home-page-2/).
-  - [_Sentinel-2_](https://www.esa.int/Applications/Observing_the_Earth/Copernicus/Sentinel-2) (s2) image mosaics in false colour and 10 m spatial resolution were used for Brazil via the [BDC](https://data.inpe.br/bdc/web/en/home-page-2/).
+  - [_SWISSIMAGE Journey_](https://map.geo.admin.ch/#/map?lang=fr&center=2660000,1190000&z=1&bgLayer=ch.swisstopo.pixelkarte-farbe&topic=ech&layers=ch.swisstopo.swissimage-product@year=2024;ch.swisstopo.swissimage-product.metadata@year=2024) is an annual dataset of aerial images of Switzerland from 1946 to today. For this project, only RGB images from 1999 to the present are used. They include [_SWISSIMAGE 10 cm_](https://www.swisstopo.admin.ch/fr/geodata/images/ortho/swissimage10.html), _SWISSIMAGE 25 cm_ and _SWISSIMAGE 50 cm_. The images are downloaded from the geo.admin.ch server using the [XYZ](https://api3.geo.admin.ch/services/sdiservices.html#xyz) connector.
+  - [_Landsat 8_](https://landsat.gsfc.nasa.gov/satellites/landsat-8/) products are used:
+    - True colour images, collection 2, level 2 and a 30 m spatial resolution are used for Switzerland via the [SDC](https://explorer.swissdatacube.org/products/landsat_ot_c2_l2).
+    - True and false colour image mosaics, with 30 m spatial resolution covering the Brazilian Amazon, are used for Brazil via the [BDC](https://data.inpe.br/bdc/web/en/home-page-2/).
+  - [_Sentinel-2_](https://www.esa.int/Applications/Observing_the_Earth/Copernicus/Sentinel-2) (s2) image mosaics in false colour and 10 m spatial resolution are used for Brazil via the [BDC](https://data.inpe.br/bdc/web/en/home-page-2/).
 
 ### Ground truth
-  - The MES labels of Switzerland come from the [_swissTLM3D_](https://www.swisstopo.admin.ch/fr/geodata/landscape/tlm3d.html) product. The file _mes_swisstlm3d_swissimage2020.shp_, used for training, has been reviewed and synchronised with the 2020 _SWISSIMAGE 10 cm_ mosaic. The file _mes_swisstlm3d_swissimage2020_landsat-fp-2020-08-11.shp_ has been adapted to the footprint of a Landsat image covering Switzerland on 11-08-2020.
-  - A global dataset of mining areas in the world has been compiled by [Maus et al. (2020)](https://www.nature.com/articles/s41597-020-00624-w) and can be downloaded [here](https://doi.pangaea.de/10.1594/PANGAEA.910894). The dataset has been adapted to our needs by synchronizing them with image data and AoI (_mes_Maus2020_landsat-brazil-6m_2017-07_epsg4326.shp_ and _mes_Maus2020_s2-amazon-biome-3m_epsg4326.shp_).
-  _GT dataset from Tang, L., Werner, T.T. (https://doi.org/10.1038/s43247-023-00805-6), focusing on the principal MES of Brazil with few labels_
-  - A dataset of artisanal gold mines detected in the Amazon, established by [Earth Genome](https://github.com/earthrise-media) since 2018, is available [here](https://github.com/earthrise-media/mining-detector). For the study we selected data fro year 2018 (_artisanal-mes_Earth-Genome_detections-2018.shp_) and 2022 (_artisanal-mes_Earth-Genome_detections-2022.shp_).
+  - The MES labels of Switzerland come from the [_swissTLM3D_](https://www.swisstopo.admin.ch/fr/geodata/landscape/tlm3d.html) product. The file _mes_swisstlm3d_swissimage2020.shp_, used for training, has been reviewed and synchronised with the 2020 _SWISSIMAGE 10 cm_ mosaic. The file _mes_swisstlm3d_swissimage2020_landsat-fp-2020-08-11.shp_ has been adapted to the footprint of the Landsat image covering Switzerland on 11-08-2020.
+  - A global dataset of mining areas in the world has been compiled by [Maus et al. (2020)](https://www.nature.com/articles/s41597-020-00624-w) and can be downloaded [here](https://doi.pangaea.de/10.1594/PANGAEA.910894). The dataset has been adapted to our needs by synchronising them with image data and AoI (_mes_Maus2020_landsat-brazil-6m_2017-07_epsg4326.shp_ and _mes_Maus2020_s2-amazon-biome-3m_epsg4326.shp_).
+  **GT dataset from Tang, L., Werner, T.T. (https://doi.org/10.1038/s43247-023-00805-6), focusing on the principal MES of Brazil with few labels**
+  - A dataset of artisanal gold mines detected in the Amazon, established by [Earth Genome](https://github.com/earthrise-media) since 2018, is available [here](https://github.com/earthrise-media/mining-detector). For the study we selected data from 2018 (_artisanal-mes_Earth-Genome_detections-2018.shp_) and 2022 (_artisanal-mes_Earth-Genome_detections-2022.shp_).
 
 ### AoI
-  - The footprints of _SWISSIMAGE_ acquisition by year (swissimage_footprint_*.shp) can be found [here](https://map.geo.admin.ch/?lang=fr&topic=ech&bgLayer=ch.swisstopo.pixelkarte-farbe&layers=ch.swisstopo.zeitreihen,ch.bfs.gebaeude_wohnungs_register,ch.bav.haltestellen-oev,ch.swisstopo.swisstlm3d-wanderwege,ch.astra.wanderland-sperrungen_umleitungen,ch.swisstopo.swissimage-product,ch.swisstopo.swissimage-product.metadata&layers_opacity=1,1,1,0.8,0.8,1,0.7&layers_visibility=false,false,false,false,false,true,true&layers_timestamp=18641231,,,,,2021,2021&time=2021). The shapefiles of _SWISSIMAGE_ acquisition footprint from 2015 to 2020 are provided in this repository.
+  - The footprints of _SWISSIMAGE_ acquisition by year (_swissimage_footprint__*_.shp_) can be found [here](https://map.geo.admin.ch/?lang=fr&topic=ech&bgLayer=ch.swisstopo.pixelkarte-farbe&layers=ch.swisstopo.zeitreihen,ch.bfs.gebaeude_wohnungs_register,ch.bav.haltestellen-oev,ch.swisstopo.swisstlm3d-wanderwege,ch.astra.wanderland-sperrungen_umleitungen,ch.swisstopo.swissimage-product,ch.swisstopo.swissimage-product.metadata&layers_opacity=1,1,1,0.8,0.8,1,0.7&layers_visibility=false,false,false,false,false,true,true&layers_timestamp=18641231,,,,,2021,2021&time=2021). The shapefiles of _SWISSIMAGE_ acquisition footprint from 2015 to 2020 are provided in this repository.
   - The polygon for the study area in the Brazilian Amazon is provided in this repository.
 
 ### DEM and slope
@@ -174,9 +174,9 @@ Object detection is performed with tools present in the [`object-detector`](http
 
  ## Workflow instructions
 
-The workflow can be executed by running the following list of actions and commands. A generic workflow is provided, along with two example use cases: the first using SWISSIMAGE data to reproduce the results presented [here](https://tech.stdl.ch/PROJ-DQRY-TM/); the second using satellite images via Open Data Cubes to reproduce the results presented [here](https://tech.stdl.ch/PROJ-DQRY-TM/).
+The workflow can be executed by running the following list of actions and commands. A generic workflow is provided, along with two use cases: the first using SWISSIMAGE data to reproduce the results presented [here](https://tech.stdl.ch/PROJ-DQRY-TM/) ; the second using satellite images via ODC to reproduce the results presented [here](https://tech.stdl.ch/PROJ-DQRY-TM/).
 
-Adjust the paths and input values/data of the configuration files accordingly. The contents of the configuration files in angle brackets must be assigned. Uncomment/comment the lines corresponding to the requirements accordingly.
+Adjust the paths and input values/data of the configuration files accordingly. The contents of the configuration files in squared brackets must be assigned. Uncomment/comment the lines corresponding to the requirements accordingly.
 
 <details>
   <summary>Generic</summary> 
@@ -369,12 +369,13 @@ $ python scripts/plots.py config/config_track_swissimage.yaml
   $ stdl-objdet make_detections config/config_det_opendatacubes.yaml
   $ python scripts/merge_detections.py config/config_det_opendatacubes.yaml
   ```
-  Optinal:
+  Optional:
   ```bash
   $ scripts/get_dem.sh
   $ scripts/get_slope.sh
   ```
 
+ - Filter images:
   ```bash
   $ python scripts/filter_detections.py config/config_det_opendatacubes.yaml
   ```
@@ -385,7 +386,7 @@ $ python scripts/plots.py config/config_track_swissimage.yaml
 
 `proj-dqry` was made possible with the help of several contributors (alphabetical):
 
-Alessandro Cerioni, Nils Hamel, Clémence Herny, Shanci Li, Adrian Meyer, Roxane Pott, Huriel Reichel, Gwenaëlle Salamin, Pierre Sledz
+Alessandro Cerioni, Nils Hamel, Clémence Herny, Shanci Li, Adrian Meyer, Roxane Pott, Huriel Reichel, Gwenaëlle Salamin, Pierre Sledz.
 
 ## Disclaimer
 

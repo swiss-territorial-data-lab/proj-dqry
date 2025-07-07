@@ -5,12 +5,12 @@
 prepare_data.py:  
   datasets:
     ## GTs for the SwissDataCube (EPSG:2056) 
-    # shapefile: ./data/ground_truth/clip_labels_landsat.shp # GT for the landsat_ot_c2_l2 layer from 2020-08-11
+    # shapefile: ./data/ground_truth/mes_swisstlm3d_swissimage2020_landsat-fp-2020-08-11.shp # GT for the footprint of the landsat_ot_c2_l2 layer from 2020-08-11
     ## GTs for the BrazilianDataCube (EPSG:4326)
-    # shapefile: ./data/ground_truth/labels_mosaic_landsat_brazil_6m_4326.shp # GT, Tang and Werner (2023), for the mosaic-landsat-brazil-6m layer in false colour
-    # shapefile: ./data/ground_truth/amazon_biome_quarries_4326.shp # GT, Tang and Werner (2023), for the mosaic-landsat-amazon-3m layer in True colour and the mosaic-s2-amazon-3m layer in False colour  
-    shapefile: ./data/ground_truth/illegal_quarries_2022.shp # GT, Earth Genome, for the mosaic-s2-amazon-3m False colour layer 
-    # shapefile: ./data/ground_truth/illegal_quarries_2018.shp # GT; Earth Genome, for the mosaic-landsat-brazil-6m False colour layer
+    # shapefile: ./data/ground_truth/mes_Maus2020_landsat-brazil-6m_epsg4326.shp # GT, Maus et al. (2020), for the mosaic-landsat-brazil-6m layer in false colour
+    # shapefile: ./data/ground_truth/mes_Maus2020_s2-amazon-biome-3m_epsg4326.shp # GT, Maus et al. (2020), for the mosaic-landsat-amazon-3m layer in True colour and the mosaic-s2-amazon-3m layer in False colour  
+    shapefile: ./data/ground_truth/artisanal-mes_Earth-Genome_detections-2022.shp # GT, Earth Genome (https://github.com/earthrise-media/mining-detector), for the mosaic-s2-amazon-3m False colour layer 
+    # shapefile: ./data/ground_truth/artisanal-mes_Earth-Genome_detections-2018.shp # GT; Earth Genome (https://github.com/earthrise-media/mining-detector), for the mosaic-landsat-brazil-6m False colour layer
     # fp_shapefile: ./data/FP/[FP_SHPFILE]                # FP labels. Optional: can contain a 'year' column
     # empty_tiles:
     #   type: shp                                         # supported values: 1. aoi (area in which tiles will be selected randomly) 2. shp (provided empty tiles). Adapt the following keys accordingly

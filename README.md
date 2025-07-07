@@ -86,15 +86,15 @@ The folders/files of the project `proj-dqry` (in combination with `object-detect
 ├── config                                          # configurations files folder
 │   ├── config_det.template.yaml                    # detection workflow template
 │   ├── config_det.yaml                             # generic: detection workflow
-│   ├── config_det_opendatacube.yaml                # example 2: detection workflow
-│   ├── config_det_swissimage.yaml                  # example 1: detection workflow
+│   ├── config_det_opendatacube.yaml                # example 2: detection workflow with ODC
+│   ├── config_det_swissimage.yaml                  # example 1: detection workflow with swissimage
 │   ├── config_track.yaml                           # detection tracking workflow
 │   ├── config_trne.yaml                            # training and evaluation workflow
-│   ├── config_trne_opendatacube.yaml               # example 2: training and evaluation workflow
-│   ├── config_trne_swissimage.yaml                 # example 1: training and evaluation workflow
+│   ├── config_trne_opendatacube.yaml               # example 2: training and evaluation workflow with ODC
+│   ├── config_trne_swissimage.yaml                 # example 1: training and evaluation workflow with swissimage
 │   ├── detectron2_config.yaml                      # generic: detectron 2
-│   ├── detectron2_config_opendatacube.yaml         # example 2: detectron 2
-│   └── detectron2_config_swissimage.yaml           # example 1: detectron 2
+│   ├── detectron2_config_opendatacube.yaml         # example 2: detectron 2 with ODC
+│   └── detectron2_config_swissimage.yaml           # example 1: detectron 2 with swissimage
 ├── data                                            # folder containing the input data
 │   ├── AoI                                         # available on request
 │   └── ground_truth                                                             
@@ -134,19 +134,20 @@ Below, the description of input data used for this project.
   - [_Landsat 8_](https://landsat.gsfc.nasa.gov/satellites/landsat-8/) products were used:
     - True colour images, collection 2, level 2 and a 30 m spatial resolution were used for Switzerland via the [SDC](https://explorer.swissdatacube.org/products/landsat_ot_c2_l2).
     - True and false colour image mosaics, with 30 m spatial resolution covering the Brazilian Amazon, were used for Brazil via the [BDC](https://data.inpe.br/bdc/web/en/home-page-2/).
-  - [_Sentinel-2_](https://www.esa.int/Applications/Observing_the_Earth/Copernicus/Sentinel-2) image mosaics in false colour and 10 m spatial resolution were used for Brazil via the [BDC](https://data.inpe.br/bdc/web/en/home-page-2/).
+  - [_Sentinel-2_](https://www.esa.int/Applications/Observing_the_Earth/Copernicus/Sentinel-2) (s2) image mosaics in false colour and 10 m spatial resolution were used for Brazil via the [BDC](https://data.inpe.br/bdc/web/en/home-page-2/).
 
 ### Ground truth
-  - The MES labels of Switzerland come from the [_swissTLM3D_](https://www.swisstopo.admin.ch/fr/geodata/landscape/tlm3d.html) product. The file _tlm-hr-trn-topo.shp_, used for training, has been reviewed and synchronised with the 2020 _SWISSIMAGE 10 cm_ mosaic.
-  - A global dataset of mining areas in the world has been compiled by [Maus et al. (2020)](https://www.nature.com/articles/s41597-020-00624-w) and can be downloaded [here](https://doi.pangaea.de/10.1594/PANGAEA.910894).
-  - A dataset of gold mines detected in the Amazon, established by [earthrise-media](https://github.com/earthrise-media), in the scope of the [Amazon Mining Watch](https://amazonminingwatch.org/en) project, is available [here](https://github.com/earthrise-media/mining-detector).
+  - The MES labels of Switzerland come from the [_swissTLM3D_](https://www.swisstopo.admin.ch/fr/geodata/landscape/tlm3d.html) product. The file _mes_swisstlm3d_swissimage2020.shp_, used for training, has been reviewed and synchronised with the 2020 _SWISSIMAGE 10 cm_ mosaic. The file _mes_swisstlm3d_swissimage2020_landsat-fp-2020-08-11.shp_ has been adapted to the footprint of a Landsat image covering Switzerland on 11-08-2020.
+  - A global dataset of mining areas in the world has been compiled by [Maus et al. (2020)](https://www.nature.com/articles/s41597-020-00624-w) and can be downloaded [here](https://doi.pangaea.de/10.1594/PANGAEA.910894). The dataset has been adapted to our needs by synchronizing them with image data and AoI (_mes_Maus2020_landsat-brazil-6m_2017-07_epsg4326.shp_ and _mes_Maus2020_s2-amazon-biome-3m_epsg4326.shp_).
+  _GT dataset from Tang, L., Werner, T.T. (https://doi.org/10.1038/s43247-023-00805-6), focusing on the principal MES of Brazil with few labels_
+  - A dataset of artisanal gold mines detected in the Amazon, established by [Earth Genome](https://github.com/earthrise-media) since 2018, is available [here](https://github.com/earthrise-media/mining-detector). For the study we selected data fro year 2018 (_artisanal-mes_Earth-Genome_detections-2018.shp_) and 2022 (_artisanal-mes_Earth-Genome_detections-2022.shp_).
 
 ### AoI
   - The footprints of _SWISSIMAGE_ acquisition by year (swissimage_footprint_*.shp) can be found [here](https://map.geo.admin.ch/?lang=fr&topic=ech&bgLayer=ch.swisstopo.pixelkarte-farbe&layers=ch.swisstopo.zeitreihen,ch.bfs.gebaeude_wohnungs_register,ch.bav.haltestellen-oev,ch.swisstopo.swisstlm3d-wanderwege,ch.astra.wanderland-sperrungen_umleitungen,ch.swisstopo.swissimage-product,ch.swisstopo.swissimage-product.metadata&layers_opacity=1,1,1,0.8,0.8,1,0.7&layers_visibility=false,false,false,false,false,true,true&layers_timestamp=18641231,,,,,2021,2021&time=2021). The shapefiles of _SWISSIMAGE_ acquisition footprint from 2015 to 2020 are provided in this repository.
   - The polygon for the study area in the Brazilian Amazon is provided in this repository.
 
-### DEM
-  The DEM of Switzerland used in this project has been processed by Lukas Martinelli and can be downloaded [here](https://github.com/lukasmartinelli/swissdem).
+### DEM and slope
+  The DEM and slope of Switzerland used in this project have been processed by Lukas Martinelli and can be downloaded [here](https://github.com/lukasmartinelli/swissdem).
 
 ### Trained models
   - The trained model used to produce the results with _SWISSIMAGE_ presented in the [documentation](https://github.com/swiss-territorial-data-lab/stdl-tech-website/tree/master/docs/PROJ-DQRY) and achieving a f1 score of 82% is available on request.

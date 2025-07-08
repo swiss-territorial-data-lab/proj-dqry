@@ -283,8 +283,8 @@ $ python scripts/plots.py config/config_track.yaml
 
   - Copy the selected trained model to the folder `models`:
   ```bash
-  $ mkdir models/swissimage
-  $ cp output/trne/swissimage/logs/<selected_model_pth> models
+  $ mkdir -p models/swissimage
+  $ cp output/trne/swissimage/logs/<selected_model_pth> models/swissimage
   ```
 
   - Process images:
@@ -358,7 +358,7 @@ $ python scripts/plots.py config/config_track_swissimage.yaml
 
   - Copy the selected trained model to the folder `models`:
   ```bash
-  $ mkdir models
+  $ mkdir -p models/<image_name>
   $ cp output/trne/<image_name>/logs/<selected_model_pth> models
   ```
 

@@ -84,17 +84,20 @@ The folders/files of the project `proj-dqry` (in combination with `object-detect
 
 <pre>.
 ├── config                                          # configurations files folder
+│   ├── config_det_opendatacube.yaml                # example 2: detection workflow with ODC
+│   ├── config_det_swissimage.template.yaml         # example 1: detection workflow template with swissimage
+│   ├── config_det_swissimage.yaml                  # example 1: detection workflow with swissimage
 │   ├── config_det.template.yaml                    # detection workflow template
 │   ├── config_det.yaml                             # generic: detection workflow
-│   ├── config_det_opendatacube.yaml                # example 2: detection workflow with ODC
-│   ├── config_det_swissimage.yaml                  # example 1: detection workflow with swissimage
+│   ├── config_track_swissimage.yaml                # example 1: detection tracking workflow with swissimage
 │   ├── config_track.yaml                           # detection tracking workflow
-│   ├── config_trne.yaml                            # training and evaluation workflow
 │   ├── config_trne_opendatacube.yaml               # example 2: training and evaluation workflow with ODC
 │   ├── config_trne_swissimage.yaml                 # example 1: training and evaluation workflow with swissimage
+│   ├── config_trne.yaml                            # training and evaluation workflow
 │   ├── detectron2_config.yaml                      # generic: detectron 2
 │   ├── detectron2_config_opendatacube.yaml         # example 2: detectron 2 with ODC
-│   └── detectron2_config_swissimage.yaml           # example 1: detectron 2 with swissimage
+│   ├── detectron2_config_swissimage.yaml           # example 1: detectron 2 with swissimage
+│   └── detectron2_config.yaml                      # detectron 2 with swissimage
 ├── data                                            # folder containing the input data
 │   ├── AoI                                         # available on request
 │   └── ground_truth                                                             
@@ -108,6 +111,7 @@ The folders/files of the project `proj-dqry` (in combination with `object-detect
 │   ├── det                            
 │   └── trne
 ├── scripts
+│   ├── batch_process_swissimage.sh                 # script to execute several commands for example 1 workflow
 │   ├── batch_process.sh                            # script to execute several commands
 │   ├── filter_detections.py                        # script to filter detections
 │   ├── get_dem.sh                                  # script downloading the swiss DEM and converting it to EPSG:2056
@@ -302,7 +306,7 @@ $ python scripts/plots.py config/config_track.yaml
   ```bash
   $ scripts/get_dem.sh
   $ scripts/get_slope.sh
-  $ scripts/batch_process.sh
+  $ scripts/batch_process_swissimage.sh
   ```
 
   - Finally, all the detection layers obtained for each year are merged into a single geopackage.

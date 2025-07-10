@@ -151,7 +151,7 @@ if __name__ == "__main__":
     logger.info(f"{len(detections_gdf)} detections remaining after filtering")
 
     # Formatting the output name of the filtered detection  
-    feature = f'{DETECTIONS[:-5]}_threshold_score-{SCORE_THD}_area-{int(AREA_THD)}_elevation-{int(ELEVATION_THD)}_slope-{int(MIN_SLOPE_THD)}-{int(MAX_SLOPE_THD)}'.replace('0.', '0dot') + '.gpkg'
+    feature = f'{DETECTIONS[:-5]}_score-{SCORE_THD}_area-{str(AREA_THD)}_elevation-{str(ELEVATION_THD)}_slope-{str(MIN_SLOPE_THD)}-{str(MAX_SLOPE_THD)}'.replace('0.', '0dot') + '.gpkg'
     detections_gdf.to_file(feature)
 
     written_files.append(feature)

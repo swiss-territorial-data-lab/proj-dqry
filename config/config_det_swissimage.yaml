@@ -22,7 +22,7 @@ generate_tilesets.py:
       location: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/{year}/3857/{z}/{x}/{y}.jpeg
   output_folder: ./output/det/swissimage/
   tile_size: 256      # per side, in pixels
-  overwrite: True
+  overwrite: False
   n_jobs: 10
   # seed: 42  # optional
   COCO_metadata:
@@ -45,7 +45,7 @@ make_detections.py:
     oth: COCO_oth.json
   detectron2_config_file: ../../../config/detectron2_config_swissimage.yaml # path relative to the working_folder
   model_weights:
-    pth_file: ../../../models/swssimage/model_0002999.pth # trained model minimising the validation loss curve, monitor the training process via tensorboard (tensorboard --logdir </logs>)
+    pth_file: ../../../models/swissimage/model_0002999.pth # trained model minimising the validation loss curve, monitor the training process via tensorboard (tensorboard --logdir </logs>)
   image_metadata_json: img_metadata.json
   rdp_simplification:   # rdp = Ramer-Douglas-Peucker
     enabled: True
@@ -74,11 +74,11 @@ filter_detections.py:
   dem: ./DEM/switzerland_dem_EPSG2056.tif # optional 
   elevation_threshold: 1200 # m, altitude threshold, optional 
   score_threshold: 0.95 # detection score (from 0 to 1) provided by detectron2, optional
-  area_threshold: 50.0 # m2, area threshold under which polygons are discarded, optional
+  area_threshold: 50 # m2, area threshold under which polygons are discarded, optional
 
 merge_years.py:
   working_directory: ./output/det/swissimage/
-  years: [[YEAR1], [YEAR2], [YEAR3]]          # choose year
-  layer: merged_detections_at_0dot3_threshold_threshold_score-0dot95_area-50_elevation-1200.gpkg 
+  years: [[YEAR1], [YEAR2], [YEAR3]]            # choose year
+  layer: merged_detections_at_0dot3_threshold_score-0dot95_area-50_elevation-1200_slope-None-None.gpkg
   overwrite: True
   file: layers   # supported values: 1. layers, 2. concatenate

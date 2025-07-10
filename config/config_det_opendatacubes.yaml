@@ -53,7 +53,7 @@ make_detections.py:
   sample_tagged_img_subfolder: sample_tagged_images
   COCO_files:           # relative paths, w/ respect to the working_folder
     oth: COCO_oth.json
-  detectron2_config_file: ../../../config/detectron2_config.yaml # path relative to the working_folder
+  detectron2_config_file: ../../../config/detectron2_config_opendatacubes.yaml # path relative to the working_folder
   model_weights:
     pth_file: ../../../models/[IMAGE_NAME]/model_0003999.pth # trained model minimising the validation loss curve, monitor the training process via tensorboard (tensorboard --logdir </logs>)
   image_metadata_json: img_metadata.json

@@ -75,10 +75,12 @@ def get_fractional_sets(dets_gdf, labels_gdf, iou_threshold=0.25, area_threshold
 
     # Filter detections based on IoU value
     best_matches_gdf = candidates_tp_temp_gdf.groupby(['det_id'], group_keys=False).apply(lambda g:g[g.IOU==g.IOU.max()])
+    best_matches_gdf.drop_duplicates(subset=['det_id'], inplace=True)
 
     # Detection, resp labels, with IOU lower than threshold value are considered as FP, resp FN, and saved as such
+    col_subset = ['label_id', 'year_det'] if 'year_det' in best_matches_gdf.keys() else ['label_id']
     actual_matches_gdf = best_matches_gdf[best_matches_gdf['IOU'] >= iou_threshold].copy()
-    actual_matches_gdf = actual_matches_gdf.sort_values(by=['IOU'], ascending=False).drop_duplicates(subset=['label_id', 'year_det'])
+    actual_matches_gdf = actual_matches_gdf.sort_values(by=['IOU'], ascending=False).drop_duplicates(subset=col_subset)
     actual_matches_gdf['IOU'] = actual_matches_gdf.IOU.round(3)
 
     matched_label_ids = actual_matches_gdf['label_id'].unique().tolist()

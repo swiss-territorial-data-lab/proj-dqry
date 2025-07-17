@@ -260,8 +260,7 @@ if __name__ == "__main__":
     detections_merge_gdf = detections_merge_gdf.to_crs(2056)
     detections_merge_gdf[['geometry', 'score', 'det_class', 'det_category', 'year_det']]\
         .to_file(feature, driver='GPKG', index=False)
-    written_files.append(feature) 
-    print(written_files)      
+    written_files.append(feature)     
 
     print()
     logger.info("The following files were written. Let's check them out!")

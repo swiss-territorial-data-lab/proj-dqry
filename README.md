@@ -328,6 +328,7 @@ $ python scripts/plots.py config/config_track_swissimage.yaml
   <summary>Example 2: satellite images via Open Data Cubes</summary> 
 
    The configuration files provide use cases that have been used to train detection models with satellite images (Landsat 8 and Sentinel-2) for sites of interest in Switzerland and Brazil. The default case is the Brazilian area of interest with the Sentinel-2 image mosaic and ground truth from [Maus et al. (2020)](https://www.nature.com/articles/s41597-020-00624-w). The other cases can be selected by uncommenting/commenting the lines corresponding to the requirements and specifying the path of the output directory accordingly.
+   The hyperparameters used in the configuration files of `detectron2`, specific to the different datasets, can be found in Table 5 [here](https://tech.stdl.ch/PROJ-DQRY-TM/).
 
 
   ### Training and evaluation: 
@@ -362,7 +363,7 @@ $ python scripts/plots.py config/config_track_swissimage.yaml
   - Copy the selected trained model to the folder `models`:
   ```bash
   $ mkdir -p models/<image_name>
-  $ cp output/trne/<image_name>/logs/<selected_model_pth> models
+  $ cp output/trne/<image_name>/logs/<selected_model_pth> models/<image_name>
   ```
 
   - Process images:

@@ -14,18 +14,18 @@ generate_tilesets.py:
   debug_mode: 
     enable: False # sample of tiles
     nb_tiles_max: 5000
-  working_directory: .
+  working_directory: ./output/det/swissimage/SWISSIMAGE_YEAR/
   datasets:
-    aoi_tiles: ./output/det/swissimage/SWISSIMAGE_YEAR/tiles.geojson
+    aoi_tiles: ./tiles.geojson
     image_source:
       type: XYZ                             # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ 4. FOLDER
       year: SWISSIMAGE_YEAR                 # supported values: 1. multi-year (tiles of different year), 2. <year> (i.e. 2020)
       location: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/{year}/3857/{z}/{x}/{y}.jpeg
-  output_folder: ./output/det/swissimage/SWISSIMAGE_YEAR/
+  output_folder: .
   tile_size: 256 # per side, in pixels
   overwrite: True
   n_jobs: 10
-  # seed: 42  # optional
+  seed: 42  # default value = 1
   COCO_metadata:
     year: 2021
     version: 1.0
@@ -35,7 +35,7 @@ generate_tilesets.py:
     license:
       name: unknown
       url: unknown
-    categories_file: ./output/trne/swissimage/category_ids.json
+    categories_file: ../../trne/swissimage/category_ids.json
 
 # Object detection with the optimised trained model
 make_detections.py:

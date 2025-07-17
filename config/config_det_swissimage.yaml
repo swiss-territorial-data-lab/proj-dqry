@@ -13,18 +13,18 @@ generate_tilesets.py:
   debug_mode: 
     enable: False  # sample of tiles
     nb_tiles_max: 5000
-  working_directory: .
+  working_directory: ./output/det/swissimage/
   datasets:
-    aoi_tiles: ./output/det/swissimage/tiles.geojson
+    aoi_tiles: ./tiles.geojson
     image_source:
       type: XYZ                             # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ 4. FOLDER
       year: 2020                            # supported values: 1. multi-year (tiles of different year), 2. <year> (i.e. 2020)
       location: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/{year}/3857/{z}/{x}/{y}.jpeg
-  output_folder: ./output/det/swissimage/
+  output_folder: .
   tile_size: 256      # per side, in pixels
   overwrite: False
   n_jobs: 10
-  # seed: 42  # optional
+  seed: 42  # default value = 1
   COCO_metadata:
     year: 2021
     version: 1.0
@@ -34,7 +34,7 @@ generate_tilesets.py:
     license:
       name: unknown
       url: unknown
-    categories_file: ./output/trne/swissimage/category_ids.json
+    categories_file: ../../trne/swissimage/category_ids.json
 
 # Object detection with the optimised trained model
 make_detections.py:
@@ -79,6 +79,6 @@ filter_detections.py:
 merge_years.py:
   working_directory: ./output/det/swissimage/
   years: [[YEAR1], [YEAR2], [YEAR3]]            # choose year
-  layer: merged_detections_at_0dot3_threshold_score-0dot95_area-50_elevation-1200_slope-None-None.gpkg
+  layer: merged_detections_at_0dot3_threshold_score-0dot95_area-5000_elevation-1200_slope-None-None.gpkg
   overwrite: True
   file: layers   # supported values: 1. layers, 2. concatenate

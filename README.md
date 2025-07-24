@@ -142,7 +142,6 @@ Below is a description of the input data used for this project.
 ### Ground truth
   - The MES labels of Switzerland come from the [_swissTLM3D_](https://www.swisstopo.admin.ch/fr/geodata/landscape/tlm3d.html) product. The file _mes_swisstlm3d_swissimage2020.shp_, used for training, has been reviewed and synchronised with the 2020 _SWISSIMAGE 10 cm_ mosaic. The file _mes_swisstlm3d_swissimage2020_landsat-fp-2020-08-11.shp_ has been adapted to the footprint of the Landsat image covering Switzerland on 11-08-2020.
   - A global dataset of mining areas in the world has been compiled by [Maus et al. (2020)](https://www.nature.com/articles/s41597-020-00624-w) and can be downloaded [here](https://doi.pangaea.de/10.1594/PANGAEA.910894). The dataset has been adapted to our needs by synchronising them with image data and AoI (_mes_Maus2020_landsat-brazil-6m_2017-07_epsg4326.shp_ and _mes_Maus2020_s2-amazon-biome-3m_epsg4326.shp_).
-  **GT dataset from Tang, L., Werner, T.T. (https://doi.org/10.1038/s43247-023-00805-6), focusing on the principal MES of Brazil with few labels**
   - A dataset of artisanal gold mines detected in the Amazon, established by [Earth Genome](https://github.com/earthrise-media) since 2018, is available [here](https://github.com/earthrise-media/mining-detector). For the study we selected data from 2018 (_artisanal-mes_Earth-Genome_detections-2018.shp_) and 2022 (_artisanal-mes_Earth-Genome_detections-2022.shp_).
 
 ### AoI
@@ -180,6 +179,8 @@ Object detection is performed with tools present in the [`object-detector`](http
 The workflow can be executed by running the following list of actions and commands. A generic workflow is provided, along with two use cases: the first using SWISSIMAGE data to reproduce the results presented [here](https://tech.stdl.ch/PROJ-DQRY-TM/) ; the second using satellite images via ODC to reproduce the results presented [here](https://tech.stdl.ch/PROJ-DQRY-TM/).
 
 Adjust the paths and input values/data of the configuration files accordingly. The contents of the configuration files in squared brackets must be assigned. Uncomment/comment the lines corresponding to the requirements accordingly.
+
+Note: Requests for images to online servers may sometimes be unsuccessful. Run the`generate_tilesets.py` script again (`overwrite: False`).
 
 <details>
   <summary>Generic</summary> 

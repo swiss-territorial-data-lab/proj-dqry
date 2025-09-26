@@ -90,7 +90,6 @@ The folders/files of the project `proj-dqry` (in combination with `object-detect
 │   ├── config_det_swissimage.template.yaml         # example 1: detection workflow template with swissimage
 │   ├── config_det_swissimage.yaml                  # example 1: detection workflow with swissimage
 │   ├── config_track.yaml                           # detection tracking workflow
-│   ├── config_track_swissimage.yaml                # example 1: detection tracking workflow with swissimage
 │   ├── config_trne.yaml                            # training and evaluation workflow
 │   ├── config_trne_opendatacube.yaml               # example 2: training and evaluation workflow with ODC
 │   ├── config_trne_swissimage.yaml                 # example 1: training and evaluation workflow with swissimage
@@ -318,8 +317,8 @@ $ python scripts/plots.py config/config_track.yaml
 ### Detection tracking: 
 
 ```bash
-$ python scripts/track_detections.py config/config_track_swissimage.yaml
-$ python scripts/plots.py config/config_track_swissimage.yaml
+$ python scripts/track_detections.py config/config_track.yaml
+$ python scripts/plots.py config/config_trackyaml
 ```
 
 </details>

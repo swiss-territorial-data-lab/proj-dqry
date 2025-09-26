@@ -5,8 +5,8 @@
 # 1-Prepare the tiles geometry according to the AOI and zoom level
 prepare_data.py: 
   datasets:
-    shapefile: ./data/AoI/swissimage_footprint_SWISSIMAGE_YEAR.shp
-  output_folder: ./output/det/SWISSIMAGE_YEAR/
+    shapefile: data/AoI/swissimage_footprint_SWISSIMAGE_YEAR.shp
+  output_folder: output/det/SWISSIMAGE_YEAR
   zoom_level: 16  # z, keep between 15 and 18  
 
 # 2-Request tiles according to the provided AOI and tiles parameters
@@ -14,9 +14,9 @@ generate_tilesets.py:
   debug_mode: 
     enable: False # sample of tiles
     nb_tiles_max: 5000
-  working_directory: ./output/det/swissimage/SWISSIMAGE_YEAR/
+  working_directory: output/det/swissimage/SWISSIMAGE_YEAR
   datasets:
-    aoi_tiles: ./tiles.geojson
+    aoi_tiles: tiles.geojson
     image_source:
       type: XYZ                             # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ 4. FOLDER
       year: SWISSIMAGE_YEAR                 # supported values: 1. multi-year (tiles of different year), 2. <year> (i.e. 2020)
@@ -39,7 +39,7 @@ generate_tilesets.py:
 
 # Object detection with the optimised trained model
 make_detections.py:
-  working_directory: ./output/det/swissimage/SWISSIMAGE_YEAR/
+  working_directory: output/det/swissimage/SWISSIMAGE_YEAR
   log_subfolder: logs
   sample_tagged_img_subfolder: sample_tagged_images
   COCO_files:           # relative paths, w/ respect to the working_folder
@@ -56,7 +56,7 @@ make_detections.py:
 
 # Assess the final results
 merge_detections.py:
-  working_directory: ./output/det/swissimage/SWISSIMAGE_YEAR/
+  working_directory: output/det/swissimage/SWISSIMAGE_YEAR
   labels: labels.geojson
   detections:
     oth: oth_detections_at_0dot3_threshold.gpkg
@@ -69,10 +69,13 @@ merge_detections.py:
 
 # Filtering and merging detection polygons to improve final results
 filter_detections.py:
-  working_directory: ./data
+  working_directory: data
   detections: ../output/det/swissimage/SWISSIMAGE_YEAR/merged_detections_at_0dot3_threshold.gpkg
-  aoi: ./AoI/swissimage_footprint_SWISSIMAGE_YEAR.shp
-  dem: ./DEM/switzerland_dem_EPSG2056.tif
-  elevation_threshold: 1200 # m, altitude threshold
-  score_threshold: 0.95 # detection score (from 0 to 1) provided by detectron2
-  area_threshold: 5000 # m2, area threshold under which polygons are discarded
+  aoi: AoI/swissimage_footprint_SWISSIMAGE_YEAR.shp
+  dem: DEM/switzerland_dem_EPSG2056.tif # optional 
+  # slope: ./slope/switzerland_slope_EPSG2056.tif # optional
+  elevation_threshold: 1200 # m, altitude threshold, optional 
+  # min_slope_threshold: 1.0 # °, min slope threshold
+  # max_slope_threshold: 48.0 # °, max slope threshold
+  score_threshold: 0.95 # detection score (from 0 to 1) provided by detectron2, optional
+  area_threshold: 5000 # m2, area threshold under which polygons are discarded, optional

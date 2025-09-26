@@ -20,7 +20,7 @@ generate_tilesets.py:
     image_source:
       ## SWISSIMAGE via WMTS  
       type: XYZ                             # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ 4. FOLDER
-      year: [YEAR]                          # supported values: 1. multi-year (tiles of different year), 2. integer (i.e. 2020)
+      year: YEAR                            # supported values: 1. multi-year (tiles of different year), 2. integer (i.e. 2020)
       location: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/{year}/[EPSG]/{z}/{x}/{y}.jpeg
       ## Satelites images via WMS from ODC
       type: WMS                             # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ 4. FOLDER  
@@ -43,7 +43,7 @@ generate_tilesets.py:
     license:
       name: unknown
       url: unknown
-    categories_file: ../trne/category_ids.json
+    categories_file: ../../trne/category_ids.json
 
 # Object detection with the optimised trained model
 make_detections.py:

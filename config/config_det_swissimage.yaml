@@ -18,7 +18,7 @@ generate_tilesets.py:
     aoi_tiles: ./tiles.geojson
     image_source:
       type: XYZ                             # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ 4. FOLDER
-      year: 2020                            # supported values: 1. multi-year (tiles of different year), 2. <year> (i.e. 2020)
+      year: [YEAR]                            # supported values: 1. multi-year (tiles of different year), 2. <year> (i.e. 2020)
       location: https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/{year}/3857/{z}/{x}/{y}.jpeg
   output_folder: .
   tile_size: 256      # per side, in pixels
@@ -68,16 +68,19 @@ merge_detections.py:
 
 # Filtering and merging detection polygons to improve final results
 filter_detections.py:
-  working_directory: ./data
+  working_directory: data
   detections: ../output/det/swissimage/merged_detections_at_0dot3_threshold.gpkg
-  aoi: ./AoI/[AOI_SHPFILE] 
-  dem: ./DEM/switzerland_dem_EPSG2056.tif # optional 
+  aoi: AoI/[AOI_SHPFILE] 
+  dem: DEM/switzerland_dem_EPSG2056.tif # optional 
+  # slope: ./slope/switzerland_slope_EPSG2056.tif # optional
   elevation_threshold: 1200 # m, altitude threshold, optional 
+  # min_slope_threshold: 1.0 # °, min slope threshold
+  # max_slope_threshold: 48.0 # °, max slope threshold
   score_threshold: 0.95 # detection score (from 0 to 1) provided by detectron2, optional
   area_threshold: 5000 # m2, area threshold under which polygons are discarded, optional
 
 merge_years.py:
-  working_directory: ./output/det/swissimage/
+  working_directory: output/det/swissimage
   years: [[YEAR1], [YEAR2], [YEAR3]]            # choose year
   layer: merged_detections_at_0dot3_threshold_score-0dot95_area-5000_elevation-1200_slope-None-None.gpkg
   overwrite: True

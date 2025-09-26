@@ -4,8 +4,8 @@
 # Produce tiles geometry according to the AoI extent and zoom level
 prepare_data.py: 
   datasets:   
-    shapefile: ./data/AoI/aoi_brazil_4326.shp
-  output_folder: ./output/det/landsat-brazil-6m/
+    shapefile: data/AoI/aoi_brazil_4326.shp
+  output_folder: output/det/landsat-brazil-6m
   zoom_level: 14  # z, max 14 for LANDSAT and SENTINEL images  
 
 # Fetch of tiles (online server) and split into 3 datasets: train, test, validation
@@ -13,9 +13,9 @@ generate_tilesets.py:
   debug_mode: 
     enable: False  # sample of tiles
     nb_tiles_max: 5000
-  working_directory: ./output/det/landsat-brazil-6m/
+  working_directory: output/det/landsat-brazil-6m
   datasets:
-    aoi_tiles: ./tiles.geojson
+    aoi_tiles: tiles.geojson
     image_source:
       type: WMS   # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ 4. FOLDER
       srs: EPSG:3857
@@ -44,11 +44,11 @@ generate_tilesets.py:
     license:
       name: unknown
       url: unknown
-    categories_file: ../trne/mosaic-landsat-amazon-3m/category_ids.json
+    categories_file: ../../trne/mosaic-landsat-amazon-3m/category_ids.json
 
 # Object detection with the optimised trained model
 make_detections.py:
-  working_directory: ./output/det/mosaic-landsat-amazon-3m/
+  working_directory: output/det/mosaic-landsat-amazon-3m
   log_subfolder: logs
   sample_tagged_img_subfolder: sample_tagged_images
   COCO_files:           # relative paths, w/ respect to the working_folder
@@ -65,7 +65,7 @@ make_detections.py:
 
 # Assess the final results
 merge_detections.py:
-  working_directory: ./output/det/mosaic-landsat-amazon-3m/
+  working_directory: output/det/mosaic-landsat-amazon-3m
   labels: labels.geojson
   detections:
     oth: oth_detections_at_0dot3_threshold.gpkg
@@ -78,11 +78,11 @@ merge_detections.py:
 
 # Filtering and merging detection polygons to improve final results
 filter_detections.py:
-  working_directory: ./data
+  working_directory: data
   detections: ../output/det/mosaic-landsat-amazon-3m/merged_detections_at_0dot3_threshold.gpkg
-  aoi: ./AoI/aoi_brazil_4326.shp
-  # dem: ./DEM/switzerland_dem_EPSG2056.tif
-  # slope: ./slope/switzerland_slope_EPSG2056.tif
+  aoi: AoI/aoi_brazil_4326.shp
+  # dem: DEM/[DEM] 
+  # slope: slope/[SLOPE] 
   # elevation_threshold: 1200 # m, altitude threshold
   # min_slope_threshold: 1.0 # °, min slope threshold
   # max_slope_threshold: 48.0 # °, max slope threshold

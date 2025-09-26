@@ -4,8 +4,8 @@
 # Produce tiles geometry according to the AoI extent and zoom level
 prepare_data.py: 
   datasets:
-    shapefile: ./data/AoI/[AOI_SHPFILE] 
-  output_folder: ./output/det/swissimage/
+    shapefile: data/AoI/[AOI_SHPFILE] 
+  output_folder: output/det/swissimage
   zoom_level: 16  # z, keep between 15 and 18  
 
 # Fetch of tiles (online server) and split into 3 datasets: train, test, validation
@@ -13,9 +13,9 @@ generate_tilesets.py:
   debug_mode: 
     enable: False  # sample of tiles
     nb_tiles_max: 5000
-  working_directory: ./output/det/swissimage/
+  working_directory: output/det/swissimage
   datasets:
-    aoi_tiles: ./tiles.geojson
+    aoi_tiles: tiles.geojson
     image_source:
       type: XYZ                             # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ 4. FOLDER
       year: [YEAR]                            # supported values: 1. multi-year (tiles of different year), 2. <year> (i.e. 2020)
@@ -38,7 +38,7 @@ generate_tilesets.py:
 
 # Object detection with the optimised trained model
 make_detections.py:
-  working_directory: ./output/det/swissimage/
+  working_directory: output/det/swissimage
   log_subfolder: logs
   sample_tagged_img_subfolder: sample_tagged_images
   COCO_files:           # relative paths, w/ respect to the working_folder
@@ -55,7 +55,7 @@ make_detections.py:
 
 # Assess the final results
 merge_detections.py:
-  working_directory: ./output/det/swissimage/
+  working_directory: output/det/swissimage
   labels: labels.geojson
   detections:
     oth: oth_detections_at_0dot3_threshold.gpkg

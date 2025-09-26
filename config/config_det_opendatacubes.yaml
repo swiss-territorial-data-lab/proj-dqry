@@ -90,7 +90,7 @@ filter_detections.py:
   area_threshold: 5000 # m2, area threshold under which polygons are discarded
 
 merge_years.py:
-  working_directory: ./output/det/[IMAGE_NAME]/
+  working_directory: output/det/[IMAGE_NAME]
   years: [[YEAR1], [YEAR2], [YEAR3]]           # choose year
   layer: merged_detections_at_0dot3_threshold_score-0dot95_area-5000_elevation-1200_slope-None-None.gpkg
   overwrite: True

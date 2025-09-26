@@ -5,19 +5,19 @@
 prepare_data.py:  
   datasets:
     ## GTs for the SwissDataCube (EPSG:2056) 
-    # shapefile: ./data/ground_truth/mes_swisstlm3d_swissimage2020_landsat-fp-2020-08-11.shp # GT used for the footprint of the landsat_ot_c2_l2 layer of 2020-08-11
+    # shapefile: data/ground_truth/mes_swisstlm3d_swissimage2020_landsat-fp-2020-08-11.shp # GT used for the footprint of the landsat_ot_c2_l2 layer of 2020-08-11
     ## GTs for the BrazilianDataCube (EPSG:4326)
-    # shapefile: ./data/ground_truth/mes_Maus2020_Brazil.shp # GT (Maus et al. (2020)) used for the mosaic-landsat-brazil-6m layer in False colour
-    # shapefile: ./data/ground_truth/mes_Maus2020_Biome.shp # GT (Maus et al. (2020)) used for the mosaic-landsat-amazon-3m layer in True colour and the landsat-brazil-6m layer in False colour  
-    # shapefile: ./data/ground_truth/artisanal-mes_Earth-Genome_2018.shp # GT (Earth Genome (https://github.com/earthrise-media/mining-detector)) used for the mosaic-landsat-brazil-6m in False colour layer
-    shapefile: ./data/ground_truth/artisanal-mes_Earth-Genome_2022.shp # GT (Earth Genome (https://github.com/earthrise-media/mining-detector)) used for the mosaic-s2-amazon-3m in False colour layer 
-    # fp_shapefile: ./data/FP/[FP_SHPFILE]                # FP labels. Optional: can contain a 'year' column
+    # shapefile: data/ground_truth/mes_Maus2020_Brazil.shp # GT (Maus et al. (2020)) used for the mosaic-landsat-brazil-6m layer in False colour
+    # shapefile: data/ground_truth/mes_Maus2020_Biome.shp # GT (Maus et al. (2020)) used for the mosaic-landsat-amazon-3m layer in True colour and the landsat-brazil-6m layer in False colour  
+    # shapefile: data/ground_truth/artisanal-mes_Earth-Genome_2018.shp # GT (Earth Genome (https://github.com/earthrise-media/mining-detector)) used for the mosaic-landsat-brazil-6m in False colour layer
+    shapefile: data/ground_truth/artisanal-mes_Earth-Genome_2022.shp # GT (Earth Genome (https://github.com/earthrise-media/mining-detector)) used for the mosaic-s2-amazon-3m in False colour layer 
+    # fp_shapefile: data/FP/[FP_SHPFILE]                # FP labels. Optional: can contain a 'year' column
     # empty_tiles:
     #   type: shp                                         # supported values: 1. aoi (area in which tiles will be selected randomly) 2. shp (provided empty tiles). Adapt the following keys accordingly
-    #   shapefile: ./data/AoI/[EPT_SHPFILE]               # shapefile in which additional empty tiles can be selected. 
+    #   shapefile: data/AoI/[EPT_SHPFILE]               # shapefile in which additional empty tiles can be selected. 
     #   year: 2020                                        # if type = aoi selected, then provide a year, otherwise comment line. Supported value: (1) numeric (i.e. 2020), (2) [year1, year2] (random selection of a year within a given year range)                     
     # category: [CLASS_COL_NAME]                          # if it exists, indicate the attribute column name of the label class
-  output_folder: ./output/trne/[IMAGE_NAME]
+  output_folder: output/trne/[IMAGE_NAME]
   zoom_level: 14  # z, max 14 for LANDSAT and SENTINEL images   
 
 # Fetch of tiles (online server) and split into 3 datasets: train, test, validation
@@ -25,10 +25,10 @@ generate_tilesets.py:
   debug_mode: 
     enable: False  # sample of tiles
     nb_tiles_max: 2000
-  working_directory: ./output/trne/[IMAGE_NAME]/
+  working_directory: output/trne/[IMAGE_NAME]
   datasets:
-    aoi_tiles: ./tiles.geojson
-    ground_truth_labels: ./labels.geojson
+    aoi_tiles: tiles.geojson
+    ground_truth_labels: labels.geojson
     # fp_labels:
     #   fp_shp: ./FP.geojson 
     #   frac_trn: 0.7        # fraction of fp tiles to add to the trn dataset, then the remaining tiles will be split in 2 and added to tst and val datasets                          
@@ -66,7 +66,7 @@ generate_tilesets.py:
 
 # Train the model with the detectron2 algorithm 
 train_model.py:
-  working_directory: ./output/trne/[IMAGE_NAME]/
+  working_directory: output/trne/[IMAGE_NAME]
   log_subfolder: logs
   sample_tagged_img_subfolder: sample_tagged_images
   COCO_files: # relative paths, with respect to the working_folder
@@ -79,7 +79,7 @@ train_model.py:
 
 # Object detection with the optimised trained model
 make_detections.py:
-  working_directory: ./output/trne/[IMAGE_NAME]/
+  working_directory: output/trne/[IMAGE_NAME]
   log_subfolder: logs
   sample_tagged_img_subfolder: sample_tagged_images
   COCO_files:           # relative paths, with respect to the working_folder
@@ -88,7 +88,7 @@ make_detections.py:
     tst: COCO_tst.json
   detectron2_config_file: ../../../config/detectron2_config_opendatacubes.yaml # path relative to the working_folder
   model_weights:
-    pth_file: ./logs/model_0004799.pth # trained model minimising the validation loss curve, monitor the training process via tensorboard (tensorboard --logdir </logs>)
+    pth_file: logs/model_0004799.pth # trained model minimising the validation loss curve, monitor the training process via tensorboard (tensorboard --logdir </logs>)
   image_metadata_json: img_metadata.json
   rdp_simplification:   # rdp = Ramer-Douglas-Peucker
     enabled: True
@@ -99,7 +99,7 @@ make_detections.py:
 # Evaluate the detection quality for the different datasets by calculating metrics
 assess_detections.py:
   crs_out: EPSG:3857
-  working_directory: ./output/trne/[IMAGE_NAME]/
+  working_directory: output/trne/[IMAGE_NAME]
   datasets:
     ground_truth_labels: labels.geojson
     split_aoi_tiles: split_aoi_tiles.geojson # aoi = Area of Interest
@@ -115,7 +115,7 @@ assess_detections.py:
 
 # Assess the final results
 merge_detections.py:
-  working_directory: ./output/trne/[IMAGE_NAME]/
+  working_directory: output/trne/[IMAGE_NAME]
   labels: labels.geojson
   detections:
     trn: trn_detections_at_0dot05_threshold.gpkg

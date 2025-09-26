@@ -5,8 +5,8 @@
 # 1-Prepare the tiles geometry according to the AOI and zoom level
 prepare_data.py: 
   datasets:
-    shapefile: ./data/AoI/[AOI_SHPFILE]
-  output_folder: ./output/det/YEAR/
+    shapefile: data/AoI/[AOI_SHPFILE]
+  output_folder: output/det/YEAR
   zoom_level: [ZOOM_LEVEL]  # z  
 
 # 2-Request tiles according to the provided AOI and tiles parameters
@@ -14,9 +14,9 @@ generate_tilesets.py:
   debug_mode: 
     enable: False # sample of tiles
     nb_tiles_max: 5000
-  working_directory: ./output/det/YEAR
+  working_directory: output/det/YEAR
   datasets:
-    aoi_tiles: ./tiles.geojson
+    aoi_tiles: tiles.geojson
     image_source:
       ## SWISSIMAGE via WMTS  
       type: XYZ                             # supported values: 1. MIL = Map Image Layer 2. WMS 3. XYZ 4. FOLDER
@@ -47,7 +47,7 @@ generate_tilesets.py:
 
 # Object detection with the optimised trained model
 make_detections.py:
-  working_directory: ./output/det/YEAR/
+  working_directory: output/det/YEAR
   log_subfolder: logs
   sample_tagged_img_subfolder: sample_tagged_images
   COCO_files:           # relative paths, w/ respect to the working_folder
@@ -64,7 +64,7 @@ make_detections.py:
 
 # Assess the final results
 merge_detections.py:
-  working_directory: ./output/det/YEAR/
+  working_directory: output/det/YEAR
   labels: labels.geojson
   detections:
     oth: oth_detections_at_0dot[SCORE_THD]_threshold.gpkg
@@ -77,11 +77,11 @@ merge_detections.py:
 
 # Filtering and merging detection polygons to improve final results
 filter_detections.py:
-  working_directory: ./data
+  working_directory: data
   detections: ../output/det/merged_detections_at_0dot[SCORE_THD]_threshold.gpkg
-  aoi: ./AoI/[AOI_SHPFILE] 
-  dem: ./DEM/[DEM_EPSG2056_TIF] # optional
-  slope: ./DEM/[SLOPE_EPSG2056_TIF] # optional
+  aoi: AoI/[AOI_SHPFILE] 
+  dem: DEM/[DEM_EPSG2056_TIF] # optional
+  slope: DEM/[SLOPE_EPSG2056_TIF] # optional
   elevation_threshold: [ELEVATION_THD]  # m, altitude threshold, optional
   min_slope_threshold: [MIN_SLOPE_THD]  # °, min slope threshold, optional
   max_slope_threshold: [MAX_SLOPE_THD]  # °, max slope threshold, optional

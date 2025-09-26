@@ -52,11 +52,6 @@ def get_mean_slope_for_detection(detection_geometry, slope_raster):
     return mean_slope
 
 
-def none_if_undefined(cfg, key):
-    
-    return cfg[key] if key in cfg.keys() else None
-
-
 if __name__ == "__main__":
 
     # Chronometer
@@ -64,7 +59,7 @@ if __name__ == "__main__":
     logger.info('Starting...')
 
     # Argument and parameter specification
-    parser = argparse.ArgumentParser(description="The script post-processes the detections obtained with the object-detector")
+    parser = argparse.ArgumentParser(description="The script filters the detection of potential Mineral Extraction Sites obtained with the object-detector scripts")
     parser.add_argument('config_file', type=str, help='input geojson path')
     args = parser.parse_args()
 
@@ -95,7 +90,6 @@ if __name__ == "__main__":
     detections_gdf = detections_gdf.to_crs(2056)
     if 'tag' in detections_gdf.keys():
         detections_gdf = detections_gdf[detections_gdf['tag']!='FN']
-    detections_gdf['area'] = detections_gdf.geometry.area 
     detections_gdf['det_id'] = detections_gdf.index
     total = len(detections_gdf)
     logger.info(f"{total} detections")

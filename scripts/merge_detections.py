@@ -208,9 +208,9 @@ if __name__ == "__main__":
             for det_class in tagged_dets_gdf.det_class.to_numpy()
         ] 
 
-        tp_k, fp_k, fn_k, p_k, r_k, f1_k, accuracy, precision, recall, f1 = metrics.get_metrics(tp_gdf, fp_gdf, fn_gdf, mismatched_class_gdf, id_classes, method=METHOD)
+        tp_k, fp_k, fn_k, p_k, r_k, f1_k, jaccard, precision, recall, f1 = metrics.get_metrics(tp_gdf, fp_gdf, fn_gdf, mismatched_class_gdf, id_classes, method=METHOD)
         logger.info(f'Detection score threshold = {SCORE_THD}')
-        logger.info(f'accuracy = {accuracy:.3f}')
+        logger.info(f'Jaccard index = {jaccard:.3f}')
         logger.info(f'Method = {METHOD}: precision = {precision:.3f}, recall = {recall:.3f}, f1 = {f1:.3f}')
 
         # Save tagged processed results 

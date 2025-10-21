@@ -140,7 +140,12 @@ Below is a description of the input data used for this project.
 
 ### Ground truth
   - The MES labels of Switzerland come from the [_swissTLM3D_](https://www.swisstopo.admin.ch/fr/geodata/landscape/tlm3d.html) product. The file _mes_swisstlm3d_swissimage2020.shp_, used for training, has been reviewed and synchronised with the 2020 _SWISSIMAGE 10 cm_ mosaic. The file _mes_swisstlm3d_swissimage2020_landsat-fp-2020-08-11.shp_ has been adapted to the footprint of the Landsat image covering Switzerland on 11-08-2020.
-  - A global dataset of mining areas in the world has been compiled by [Maus et al. (2020)](https://www.nature.com/articles/s41597-020-00624-w) and can be downloaded [here](https://doi.pangaea.de/10.1594/PANGAEA.910894). The dataset has been adapted to our needs by synchronising them with image data and AoI (_mes_Maus2020_Brazil.shp_ and _mes_Maus2020_Biome.shp_).
+  - A global dataset of mining areas in the world has been compiled by [Maus et al. (2020)](https://www.nature.com/articles/s41597-020-00624-w), can be downloaded here: doi: https://doi.pangaea.de/10.1594/PANGAEA.910894. The dataset has been adapted to our needs by synchronizing them with image data and AoI (_mes_Maus2020_Brazil.shp_ and _mes_Maus2020_Biome.shp_). The modified datasets are stored [here](https://github.com/swiss-territorial-data-lab/proj-dqry-data-Mausetal2020/tree/main) and can be downloaded to the `/data/ground_truth/` folder by executing the following command:
+
+  ```bash
+  $ wget -i ./data/ground_truth/filelist.txt -P ./data/ground_truth/
+  ```
+
   - A dataset of artisanal gold mines detected in the Amazon, established by [Earth Genome](https://github.com/earthrise-media) since 2018, is available [here](https://github.com/earthrise-media/mining-detector). For the study we selected data from 2018 (_artisanal-mes_Earth-Genome_2018.shp_) and 2022 (_artisanal-mes_Earth-Genome_2022_).
 
 ### AoI
@@ -154,7 +159,6 @@ Below is a description of the input data used for this project.
   - The trained model used to produce the results with _SWISSIMAGE_ presented in the [documentation](https://github.com/swiss-territorial-data-lab/stdl-tech-website/tree/master/docs/PROJ-DQRY) and achieving a f1 score of 82% is available on request.
   - The models trained on satellite images for the Swiss and Brazilian use cases presented in the [documentation](https://github.com/swiss-territorial-data-lab/stdl-tech-website/tree/master/docs/PROJ-DQRY) are available on request.
 
-
 ## Scripts
 
 The `proj-dqry` repository contains scripts to prepare the data and post-process the results. Hereafter a short description of each script:
@@ -166,8 +170,9 @@ The `proj-dqry` repository contains scripts to prepare the data and post-process
 5. `track_detections.py`: identify and track an detection of an object over a multiple year datasets. 
 5. `plots.py`: plot some parameters of the detections to help understand the results (optional).
 7. `get_dem.sh`: download the DEM of Switzerland.
-8. `get_slope.sh`: download the slope raster of Switzerland.
-9. `batch_process.sh`: batch script to perform the inference workflow over several years.
+8. `get_mes-datasets.sh`: download the MES datasets modified from Maus et al. (2020).
+9. `get_slope.sh`: download the slope raster of Switzerland.
+10. `batch_process.sh`: batch script to perform the inference workflow over several years.
 
 
 Object detection is performed with tools present in the [`object-detector`](https://github.com/swiss-territorial-data-lab/object-detector) git repository. 
@@ -398,4 +403,4 @@ Depending on the end purpose, we strongly recommend users not take for granted t
 
 ## License
 
-This project is licensed under the terms of the GNU GPLv3. Documentation and illustrations are licensed under the terms of the CC BY 4.0.
+This project is licensed under the terms of the GNU GPL-3.0. Documentation and illustrations are licensed under the terms of the CC BY 4.0. The modified datasets of the artisanal gold mines established by [Earth Genome](https://github.com/earthrise-media) was initially released under the MIT license. All license information can be found in the [LICENSE](./LICENSE) file.

@@ -1,0 +1,8 @@
+https://github.com/swiss-territorial-data-lab/proj-dqry-data-Mausetal2020/tree/main/data/ground_truth/mes_Maus2020_Biome.dbf
+https://github.com/swiss-territorial-data-lab/proj-dqry-data-Mausetal2020/tree/main/data/ground_truth/mes_Maus2020_Biome.prj
+https://github.com/swiss-territorial-data-lab/proj-dqry-data-Mausetal2020/tree/main/data/ground_truth/mes_Maus2020_Biome.shp
+https://github.com/swiss-territorial-data-lab/proj-dqry-data-Mausetal2020/tree/main/data/ground_truth/mes_Maus2020_Biome.shx
+https://github.com/swiss-territorial-data-lab/proj-dqry-data-Mausetal2020/tree/main/data/ground_truth/mes_Maus2020_Brazil.dbf
+https://github.com/swiss-territorial-data-lab/proj-dqry-data-Mausetal2020/tree/main/data/ground_truth/mes_Maus2020_Brazil.prj
+https://github.com/swiss-territorial-data-lab/proj-dqry-data-Mausetal2020/tree/main/data/ground_truth/mes_Maus2020_Brazil.shp
+https://github.com/swiss-territorial-data-lab/proj-dqry-data-Mausetal2020/tree/main/data/ground_truth/mes_Maus2020_Brazil.shx

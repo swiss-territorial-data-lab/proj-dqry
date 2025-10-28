@@ -1,6 +1,6 @@
 # Automatic detection and observation of mineral extraction sites
 
-The aim of the project is to automatically detect mineral extraction sites (MES, also referred as quarry in this project) on georeferenced raster images over several years using a deep learning approach. The workflow was initially developed to detect MES in airborne images from [swisstopo](https://www.swisstopo.admin.ch/en) over Switzerland. The trained model, achieves a **f1 score of about 80%**, enabling accurate detection of MES over time. A detailed documentation of the project and results can be found [here](https://tech.stdl.ch/PROJ-DQRY-TM/) on the STDL tech website. The latest developments allow users to use the framework with satellite images via [Open Data Cubes](https://www.opendatacube.org/) (ODC). Two have been tested: the [Swiss Data Cube](https://www.swissdatacube.org/) (SDC) and the [Brazil Data Cube](https://data.inpe.br/bdc/web/en/home-page-2/) (BDC). The detailed documentation can be found [here](https://tech.stdl.ch/PROJ-DQRY-TM/) on the STDL tech website. Examples are provided for all use cases. <br>
+The aim of the project is to automatically detect mineral extraction sites (MES, also referred as quarry in this project) on georeferenced raster images over several years using a deep learning approach. The workflow was initially developed to detect MES in airborne images from [swisstopo](https://www.swisstopo.admin.ch/en) over Switzerland. The trained model, achieves a **f1 score of about 80%**, enabling accurate detection of MES over time. A detailed documentation of the project and results can be found [here](https://tech.stdl.ch/PROJ-DQRY-TM/) on the STDL tech website. The latest developments allow users to use the framework with satellite images via [Open Data Cubes](https://www.opendatacube.org/) (ODC). Two have been tested: the [Swiss Data Cube](https://www.swissdatacube.org/) (SDC) and the [Brazil Data Cube](https://data.inpe.br/bdc/web/en/home-page-2/) (BDC). The detailed documentation can be found [here](https://tech.stdl.ch/PROJ-SATQUARRIES/) on the STDL tech website. Examples are provided for all use cases. <br>
 
 **Table of content**
 
@@ -180,7 +180,7 @@ Object detection is performed with tools present in the [`object-detector`](http
 
  ## Workflow instructions
 
-The workflow can be executed by running the following list of actions and commands. A generic workflow is provided, along with two use cases: the first using SWISSIMAGE data to reproduce the results presented [here](https://tech.stdl.ch/PROJ-DQRY-TM/) ; the second using satellite images via ODC to reproduce the results presented [here](https://tech.stdl.ch/PROJ-DQRY-TM/).
+The workflow can be executed by running the following list of actions and commands. A generic workflow is provided, along with two use cases: the first using SWISSIMAGE data to reproduce the results presented [here](https://tech.stdl.ch/PROJ-DQRY-TM/) ; the second using satellite images via ODC to reproduce the results presented [here](https://tech.stdl.ch/PROJ-SATQUARRIES/).
 
 Adjust the paths and input values/data of the configuration files accordingly. The contents of the configuration files in squared brackets must be assigned. Uncomment/comment the lines corresponding to the requirements accordingly.
 

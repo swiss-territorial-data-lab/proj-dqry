@@ -1,6 +1,6 @@
-# Automatic detection and observation of mineral extraction sites in Switzerland
+# Automatic detection and observation of mineral extraction sites
 
-The aim of the project is to automatically detect mineral extraction sites (MES, also referred as quarry in this project) on georeferenced raster images of Switzerland over several years. A deep learning approach is used to train a model achieving a **f1 score of about 80%** (validation dataset), enabling accurate detection of MES over time. A detailed documentation of the project and results can be found on the [STDL technical website](https://tech.stdl.ch/PROJ-DQRY-TM/). <br>
+The aim of the project is to automatically detect mineral extraction sites (MES, also referred as quarry in this project) on georeferenced raster images over several years using a deep learning approach. The workflow was initially developed to detect MES in airborne images from [swisstopo](https://www.swisstopo.admin.ch/en) over Switzerland. The trained model, achieves a **f1 score of about 80%**, enabling accurate detection of MES over time. A detailed documentation of the project and results can be found [here](https://tech.stdl.ch/PROJ-DQRY-TM/) on the STDL tech website. The latest developments allow users to use the framework with satellite images via [Open Data Cubes](https://www.opendatacube.org/) (ODC). Two have been tested: the [Swiss Data Cube](https://www.swissdatacube.org/) (SDC) and the [Brazil Data Cube](https://data.inpe.br/bdc/web/en/home-page-2/) (BDC). The detailed documentation can be found [here](https://tech.stdl.ch/PROJ-SATQUARRIES/) on the STDL tech website. Examples are provided for all use cases. <br>
 
 **Table of content**
 
@@ -48,14 +48,14 @@ The main limitation is the number of tiles to be processed and the amount of det
 - PyTorch version 1.10
 - CUDA version 11.3
 - GDAL version 3.0.4
-- object-detector version [2.3.2](https://github.com/swiss-territorial-data-lab/object-detector/releases/tag/v2.3.2)
+- object-detector version [2.3.4](https://github.com/swiss-territorial-data-lab/object-detector/releases/tag/v.2.3.4)
 
 ### Installation
 
 Install GDAL:
 
 ```bash
-sudo apt-get install -y python3-gdal gdal-bin libgdal-dev gcc g++ python3.8-dev
+$ sudo apt-get install -y python3-gdal gdal-bin libgdal-dev gcc g++ python3.8-dev
 ```
 
 Python dependencies can be installed with `pip` or `conda` using the `requirements.txt` file (compiled from `requirements.in`) provided. We advise using a [Python virtual environment](https://docs.python.org/3/library/venv.html).
@@ -85,10 +85,17 @@ The folders/files of the project `proj-dqry` (in combination with `object-detect
 <pre>.
 ├── config                                          # configurations files folder
 │   ├── config_det.template.yaml                    # detection workflow template
-│   ├── config_det.yaml                             # detection workflow
+│   ├── config_det.yaml                             # generic: detection workflow
+│   ├── config_det_opendatacube.yaml                # example 2: detection workflow with ODC
+│   ├── config_det_swissimage.template.yaml         # example 1: detection workflow template with swissimage
+│   ├── config_det_swissimage.yaml                  # example 1: detection workflow with swissimage
 │   ├── config_track.yaml                           # detection tracking workflow
 │   ├── config_trne.yaml                            # training and evaluation workflow
-│   └── detectron2_config.yaml                      # detectron 2
+│   ├── config_trne_opendatacube.yaml               # example 2: training and evaluation workflow with ODC
+│   ├── config_trne_swissimage.yaml                 # example 1: training and evaluation workflow with swissimage
+│   ├── detectron2_config.yaml                      # generic: detectron 2
+│   ├── detectron2_config_opendatacube.yaml         # example 2: detectron 2 with ODC
+│   └── detectron2_config_swissimage.yaml           # example 1: detectron 2 with swissimage
 ├── data                                            # folder containing the input data
 │   ├── AoI                                         # available on request
 │   └── ground_truth                                                             
@@ -102,9 +109,11 @@ The folders/files of the project `proj-dqry` (in combination with `object-detect
 │   ├── det                            
 │   └── trne
 ├── scripts
+│   ├── batch_process_swissimage.sh                 # script to execute several commands for example 1 workflow
 │   ├── batch_process.sh                            # script to execute several commands
 │   ├── filter_detections.py                        # script to filter detections
 │   ├── get_dem.sh                                  # script downloading the swiss DEM and converting it to EPSG:2056
+│   ├── get_slope.sh                                # script downloading the swiss slope raster and converting it to EPSG:2056
 │   ├── merge_detections.py                         # script merging adjacent detections and attributing class
 │   ├── merge_years.py                              # script merging all year detections layers
 │   ├── plots.py                                    # script plotting detection tracking results
@@ -120,14 +129,35 @@ The folders/files of the project `proj-dqry` (in combination with `object-detect
 
 ## Data
 
-Below, the description of input data used for this project. 
+Below is a description of the input data used for this project.
 
-- images: [_SWISSIMAGE Journey_](https://map.geo.admin.ch/#/map?lang=fr&center=2660000,1190000&z=1&bgLayer=ch.swisstopo.pixelkarte-farbe&topic=ech&layers=ch.swisstopo.swissimage-product@year=2024;ch.swisstopo.swissimage-product.metadata@year=2024) is an annual dataset of aerial images of Switzerland from 1946 to today. Only RGB images are used, from 1999 to current. It includes [_SWISSIMAGE 10 cm_](https://www.swisstopo.admin.ch/fr/geodata/images/ortho/swissimage10.html), _SWISSIMAGE 25 cm_ and _SWISSIMAGE 50 cm_. The images are downloaded from the [geo.admin.ch](https://www.geo.admin.ch/fr) server using [XYZ](https://api3.geo.admin.ch/services/sdiservices.html#xyz) connector.
-- ground truth: MES labels come from the [swissTLM3D](https://www.swisstopo.admin.ch/fr/geodata/landscape/tlm3d.html) product. The file _tlm-hr-trn-topo.shp_, used for training, has been reviewed and synchronised with the 2020 _SWISSIMAGE 10 cm_ mosaic.
-- AoI: image acquisition footprints by year (swissimage_footprint_*.shp) can be found [here](https://map.geo.admin.ch/?lang=fr&topic=ech&bgLayer=ch.swisstopo.pixelkarte-farbe&layers=ch.swisstopo.zeitreihen,ch.bfs.gebaeude_wohnungs_register,ch.bav.haltestellen-oev,ch.swisstopo.swisstlm3d-wanderwege,ch.astra.wanderland-sperrungen_umleitungen,ch.swisstopo.swissimage-product,ch.swisstopo.swissimage-product.metadata&layers_opacity=1,1,1,0.8,0.8,1,0.7&layers_visibility=false,false,false,false,false,true,true&layers_timestamp=18641231,,,,,2021,2021&time=2021). The shapefiles of _SWISSIMAGE_ acquisition footprint from 2015 to 2020 are provided in this repository.
-- DEM: the DEM of Switzerland has been processed by Lukas Martinelli and can be downloaded [here](https://github.com/lukasmartinelli/swissdem).
-- trained model: the trained model used to produce the results presented in the [documentation](https://github.com/swiss-territorial-data-lab/stdl-tech-website/tree/master/docs/PROJ-DQRY) and achieving a f1 score of 82% is available on request.
+### Images
+  - [_SWISSIMAGE Journey_](https://map.geo.admin.ch/#/map?lang=fr&center=2660000,1190000&z=1&bgLayer=ch.swisstopo.pixelkarte-farbe&topic=ech&layers=ch.swisstopo.swissimage-product@year=2024;ch.swisstopo.swissimage-product.metadata@year=2024) is an annual dataset of aerial images of Switzerland from 1946 to today. For this project, only RGB images from 1999 to the present are used. They include [_SWISSIMAGE 10 cm_](https://www.swisstopo.admin.ch/fr/geodata/images/ortho/swissimage10.html), _SWISSIMAGE 25 cm_ and _SWISSIMAGE 50 cm_. The images are downloaded from the geo.admin.ch server using the [XYZ](https://api3.geo.admin.ch/services/sdiservices.html#xyz) connector.
+  - [_Landsat 8_](https://landsat.gsfc.nasa.gov/satellites/landsat-8/) products are used:
+    - True colour images, collection 2, level 2 and a 30 m spatial resolution are used for Switzerland via the [SDC](https://explorer.swissdatacube.org/products/landsat_ot_c2_l2).
+    - True and false colour image mosaics, with 30 m spatial resolution covering the Brazilian Amazon, are used for Brazil via the [BDC](https://data.inpe.br/bdc/web/en/home-page-2/).
+  - [_Sentinel-2_](https://www.esa.int/Applications/Observing_the_Earth/Copernicus/Sentinel-2) (s2) image mosaics in false colour and 10 m spatial resolution are used for Brazil via the [BDC](https://data.inpe.br/bdc/web/en/home-page-2/).
 
+### Ground truth
+  - The MES labels of Switzerland come from the [_swissTLM3D_](https://www.swisstopo.admin.ch/fr/geodata/landscape/tlm3d.html) product. The file _mes_swisstlm3d_swissimage2020.shp_, used for training, has been reviewed and synchronised with the 2020 _SWISSIMAGE 10 cm_ mosaic. The file _mes_swisstlm3d_swissimage2020_landsat-fp-2020-08-11.shp_ has been adapted to the footprint of the Landsat image covering Switzerland on 11-08-2020.
+  - A global dataset of mining areas in the world has been compiled by [Maus et al. (2020)](https://www.nature.com/articles/s41597-020-00624-w), can be downloaded here: doi: https://doi.pangaea.de/10.1594/PANGAEA.910894. The dataset has been adapted to our needs by synchronizing them with image data and AoI (_mes_Maus2020_Brazil.shp_ and _mes_Maus2020_Biome.shp_). The modified datasets are stored [here](https://github.com/swiss-territorial-data-lab/proj-dqry-data-Mausetal2020/tree/main) and can be downloaded to the `/data/ground_truth/` folder by executing the following command:
+
+  ```bash
+  $ wget -i ./data/ground_truth/filelist.txt -P ./data/ground_truth/
+  ```
+
+  - A dataset of artisanal gold mines detected in the Amazon, established by [Earth Genome](https://github.com/earthrise-media) since 2018, is available [here](https://github.com/earthrise-media/mining-detector). For the study we selected data from 2018 (_artisanal-mes_Earth-Genome_2018.shp_) and 2022 (_artisanal-mes_Earth-Genome_2022_).
+
+### AoI
+  - The footprints of _SWISSIMAGE_ acquisition by year (_swissimage_footprint__*_.shp_) can be found [here](https://map.geo.admin.ch/?lang=fr&topic=ech&bgLayer=ch.swisstopo.pixelkarte-farbe&layers=ch.swisstopo.zeitreihen,ch.bfs.gebaeude_wohnungs_register,ch.bav.haltestellen-oev,ch.swisstopo.swisstlm3d-wanderwege,ch.astra.wanderland-sperrungen_umleitungen,ch.swisstopo.swissimage-product,ch.swisstopo.swissimage-product.metadata&layers_opacity=1,1,1,0.8,0.8,1,0.7&layers_visibility=false,false,false,false,false,true,true&layers_timestamp=18641231,,,,,2021,2021&time=2021). The shapefiles of _SWISSIMAGE_ acquisition footprint from 2015 to 2020 are provided in this repository.
+  - The polygon for the study area in the Brazilian Amazon is provided in this repository.
+
+### DEM and slope
+  The DEM and slope of Switzerland used in this project have been processed by Lukas Martinelli and can be downloaded [here](https://github.com/lukasmartinelli/swissdem).
+
+### Trained models
+  - The trained model used to produce the results with _SWISSIMAGE_ presented in the [documentation](https://tech.stdl.ch/PROJ-DQRY-TM/) and achieving a f1 score of 82% is available on request.
+  - The models trained on satellite images for the Swiss and Brazilian use cases presented in the [documentation](https://tech.stdl.ch/PROJ-SATQUARRIES/) are available on request.
 
 ## Scripts
 
@@ -140,7 +170,9 @@ The `proj-dqry` repository contains scripts to prepare the data and post-process
 5. `track_detections.py`: identify and track an detection of an object over a multiple year datasets. 
 5. `plots.py`: plot some parameters of the detections to help understand the results (optional).
 7. `get_dem.sh`: download the DEM of Switzerland.
-8. `batch_process.sh`: batch script to perform the inference workflow over several years.
+8. `get_mes-datasets.sh`: download the MES datasets modified from Maus et al. (2020).
+9. `get_slope.sh`: download the slope raster of Switzerland.
+10. `batch_process.sh`: batch script to perform the inference workflow over several years.
 
 
 Object detection is performed with tools present in the [`object-detector`](https://github.com/swiss-territorial-data-lab/object-detector) git repository. 
@@ -148,76 +180,222 @@ Object detection is performed with tools present in the [`object-detector`](http
 
  ## Workflow instructions
 
-The workflow can be executed by running the following list of actions and commands. Adjust the paths and input values of the configuration files accordingly. The contents of the configuration files in angle brackets must be assigned. 
+The workflow can be executed by running the following list of actions and commands. A generic workflow is provided, along with two use cases: the first using SWISSIMAGE data to reproduce the results presented [here](https://tech.stdl.ch/PROJ-DQRY-TM/) ; the second using satellite images via ODC to reproduce the results presented [here](https://tech.stdl.ch/PROJ-SATQUARRIES/).
 
-**Training and evaluation**: 
+Adjust the paths and input values/data of the configuration files accordingly. The contents of the configuration files in squared brackets must be assigned. Uncomment/comment the lines corresponding to the requirements accordingly.
 
-Prepare the data:
-```bash
-$ python scripts/prepare_data.py config/config_trne.yaml
-$ stdl-objdet generate_tilesets config/config_trne.yaml
-```
+Note: Requests for images to online servers may sometimes be unsuccessful. Run the`generate_tilesets.py` script again (`overwrite: False`).
 
-Train the model:
-```bash
-$ stdl-objdet train_model config/config_trne.yaml
-$ tensorboard --logdir output/trne/logs
-```
+<details>
+  <summary>Generic</summary> 
 
-Open the following link with a web browser: `http://localhost:6006` and identify the iteration minimising the validation loss and select the model accordingly (`model_*.pth`) in `config_trne`. For the provided parameters, `model_0002999.pth` is the default one.
+  ### Training and evaluation: 
+  
+  - Prepare the data:
+  ```bash
+  $ python scripts/prepare_data.py config/config_trne.yaml
+  $ stdl-objdet generate_tilesets config/config_trne.yaml
+  ```
 
-Perform and assess detections:
-```bash
-$ stdl-objdet make_detections config/config_trne.yaml
-$ stdl-objdet assess_detections config/config_trne.yaml
-```
+  - Train the model:
+  ```bash
+  $ stdl-objdet train_model config/config_trne.yaml
+  $ tensorboard --logdir output/trne/logs
+  ```
 
-Finally, the detections obtained by tiles can be merged when adjacent and a new assessment is performed:
-```bash
-$ python scripts/merge_detections.py config/config_trne.yaml
-```
+  Open the following link with a web browser: `http://localhost:6006` and identify the iteration minimising the validation loss and select the model accordingly (`model_*.pth`) in `config_trne`. 
 
-**Inference**: 
+  - Perform and assess detections:
+  ```bash
+  $ stdl-objdet make_detections config/config_trne.yaml
+  $ stdl-objdet assess_detections config/config_trne.yaml
+  ```
 
-Copy the selected trained model to the folder `models`:
-```bash
-$ mkdir models
-$ cp output/trne/logs/<selected_model_pth> models
-```
+  - Finally, the detections obtained by tiles can be merged when adjacent and a new assessment is performed:
+  ```bash
+  $ python scripts/merge_detections.py config/config_trne.yaml
+  ```
+ 
+  ### Inference: 
 
-Process images:
-```bash
-$ python scripts/prepare_data.py config/config_det.yaml
-$ stdl-objdet generate_tilesets config/config_det.yaml
-$ stdl-objdet make_detections config/config_det.yaml
-$ python scripts/merge_detections.py config/config_det.yaml
-$ scripts/get_dem.sh
-$ python scripts/filter_detections.py config/config_det.yaml
-```
+  - Copy the selected trained model to the folder `models`:
+  ```bash
+  $ mkdir models
+  $ cp output/trne/logs/<selected_model_pth> models
+  ```
 
-The inference workflow has been automated and can be run for a batch of years (to be specified in the script) by executing these commands:
-```bash
-$ scripts/get_dem.sh
-$ scripts/batch_process.sh
-```
+  - Process images:
+  ```bash
+  $ python scripts/prepare_data.py config/config_det.yaml
+  $ stdl-objdet generate_tilesets config/config_det.yaml
+  $ stdl-objdet make_detections config/config_det.yaml
+  $ python scripts/merge_detections.py config/config_det.yaml
+  $ scripts/get_dem.sh
+  $ scripts/get_slope.sh
+  $ python scripts/filter_detections.py config/config_det.yaml
+  ```
 
-Finally, all the detection layers obtained for each year are merged into a single geopackage.
-```bash
-$ python scripts/merge_years.py config/config_det.yaml
-```
+  - The inference workflow has been automated and can be run for a batch of years (to be specified in the script) by executing these commands:
+  ```bash
+  $ scripts/get_dem.sh
+  $ scripts/get_slope.sh
+  $ scripts/batch_process.sh
+  ```
 
-**Detection tracking**: 
+  - Finally, all the detection layers obtained for each year are merged into a single geopackage.
+  ```bash
+  $ python scripts/merge_years.py config/config_det.yaml
+  ```
+
+### Detection tracking: 
 
 ```bash
 $ python scripts/track_detections.py config/config_track.yaml
 $ python scripts/plots.py config/config_track.yaml
 ```
 
+</details>
+
+
+<details>
+  <summary>Example 1: SWISSIMAGE aerial images</summary> 
+
+  ### Training and evaluation: 
+  
+  - Prepare the data:
+  ```bash
+  $ python scripts/prepare_data.py config/config_trne_swissimage.yaml
+  $ stdl-objdet generate_tilesets config/config_trne_swissimage.yaml
+  ```
+
+  - Train the model:
+  ```bash
+  $ stdl-objdet train_model config/config_trne_swissimage.yaml
+  $ tensorboard --logdir output/trne/swissimage/logs
+  ```
+
+  Open the following link with a web browser: `http://localhost:6006` and identify the iteration minimising the validation loss and select the model accordingly (`model_*.pth`) in `config_trne_swissimage`. For the provided parameters, `model_0002999.pth` is the default one.
+
+  - Perform and assess detections:
+  ```bash
+  $ stdl-objdet make_detections config/config_trne_swissimage.yaml
+  $ stdl-objdet assess_detections config/config_trne_swissimage.yaml
+  ```
+
+  - Finally, the detections obtained by tiles can be merged when adjacent and a new assessment is performed:
+  ```bash
+  $ python scripts/merge_detections.py config/config_trne_swissimage.yaml
+  ```
+ 
+  ### Inference: 
+
+  - Copy the selected trained model to the folder `models`:
+  ```bash
+  $ mkdir -p models/swissimage
+  $ cp output/trne/swissimage/logs/<selected_model_pth> models/swissimage
+  ```
+
+  - Process images:
+  ```bash
+  $ python scripts/prepare_data.py config/config_det_swissimage.yaml
+  $ stdl-objdet generate_tilesets config/config_det_swissimage.yaml
+  $ stdl-objdet make_detections config/config_det_swissimage.yaml
+  $ python scripts/merge_detections.py config/config_det_swissimage.yaml
+  $ scripts/get_dem.sh
+  $ scripts/get_slope.sh
+  $ python scripts/filter_detections.py config/config_det_swissimage.yaml
+  ```
+
+  - The inference workflow has been automated and can be run for a batch of years (to be specified in the script) by executing these commands:
+  ```bash
+  $ scripts/get_dem.sh
+  $ scripts/get_slope.sh
+  $ scripts/batch_process_swissimage.sh
+  ```
+
+  - Finally, all the detection layers obtained for each year are merged into a single geopackage.
+
+  ```bash
+  $ python scripts/merge_years.py config/config_det_swissimage.yaml
+  ```
+
+### Detection tracking: 
+
+```bash
+$ python scripts/track_detections.py config/config_track.yaml
+$ python scripts/plots.py config/config_trackyaml
+```
+
+</details>
+
+
+<details>
+  <summary>Example 2: satellite images via Open Data Cubes</summary> 
+
+   The configuration files provide use cases that have been used to train detection models with satellite images (Landsat 8 and Sentinel-2) for sites of interest in Switzerland and Brazil. The default case is the Brazilian area of interest with the Sentinel-2 image mosaic and ground truth from [Maus et al. (2020)](https://www.nature.com/articles/s41597-020-00624-w). The other cases can be selected by uncommenting/commenting the lines corresponding to the requirements and specifying the path of the output directory accordingly.
+   The hyperparameters used in the configuration files of `detectron2`, specific to the different datasets, can be found in Table 5 [here](https://tech.stdl.ch/PROJ-DQRY-TM/).
+
+
+  ### Training and evaluation: 
+  
+  - Prepare the data:
+  ```bash
+  $ python scripts/prepare_data.py config/config_trne_opendatacubes.yaml
+  $ stdl-objdet generate_tilesets config/config_trne_opendatacubes.yaml
+  ```
+
+  - Train the model:
+  ```bash
+  $ stdl-objdet train_model config/config_trne_opendatacubes.yaml
+  $ tensorboard --logdir output/trne/<image_name>/logs
+  ```
+
+  Open the following link with a web browser: `http://localhost:6006` and identify the iteration minimising the validation loss and select the model accordingly (`model_*.pth`) in `config_trne_opendatacubes`. For the provided parameters, `model_0002999.pth` is the default one.
+
+  - Perform and assess detections:
+  ```bash
+  $ stdl-objdet make_detections config/config_trne_opendatacubes.yaml
+  $ stdl-objdet assess_detections config/config_trne_opendatacubes.yaml
+  ```
+
+  - Finally, the detections obtained by tiles can be merged when adjacent and a new assessment is performed:
+  ```bash
+  $ python scripts/merge_detections.py config/config_trne_opendatacubes.yaml
+  ```
+ 
+  ### Inference: 
+
+  - Copy the selected trained model to the folder `models`:
+  ```bash
+  $ mkdir -p models/<image_name>
+  $ cp output/trne/<image_name>/logs/<selected_model_pth> models/<image_name>
+  ```
+
+  - Process images:
+  ```bash
+  $ python scripts/prepare_data.py config/config_det_opendatacubes.yaml
+  $ stdl-objdet generate_tilesets config/config_det_opendatacubes.yaml
+  $ stdl-objdet make_detections config/config_det_opendatacubes.yaml
+  $ python scripts/merge_detections.py config/config_det_opendatacubes.yaml
+  ```
+  Optional:
+  ```bash
+  $ scripts/get_dem.sh
+  $ scripts/get_slope.sh
+  ```
+
+ - Filter images:
+  ```bash
+  $ python scripts/filter_detections.py config/config_det_opendatacubes.yaml
+  ```
+
+</details>
+
 ## Contributors
 
 `proj-dqry` was made possible with the help of several contributors (alphabetical):
 
-Alessandro Cerioni, Nils Hamel, Clémence Herny, Shanci Li, Adrian Meyer, Huriel Reichel
+Alessandro Cerioni, Nils Hamel, Clémence Herny, Shanci Li, Adrian Meyer, Roxane Pott, Huriel Reichel, Gwenaëlle Salamin, Pierre Sledz.
 
 ## Disclaimer
 
@@ -225,4 +403,4 @@ Depending on the end purpose, we strongly recommend users not take for granted t
 
 ## License
 
-This project is licensed under the terms of the GNU GPLv3. Documentation and illustrations are licensed under the terms of the CC BY 4.0.
+This project is licensed under the terms of the GNU GPL-3.0. Documentation and illustrations are licensed under the terms of the CC BY 4.0. The modified datasets of the artisanal gold mines established by [Earth Genome](https://github.com/earthrise-media) was initially released under the MIT license. All license information can be found in the [LICENSE](./LICENSE) file.

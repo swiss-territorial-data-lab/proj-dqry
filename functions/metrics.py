@@ -78,8 +78,9 @@ def get_fractional_sets(dets_gdf, labels_gdf, iou_threshold=0.25, area_threshold
     best_matches_gdf.drop_duplicates(subset=['det_id'], inplace=True)
 
     # Detection, resp labels, with IOU lower than threshold value are considered as FP, resp FN, and saved as such
+    col_subset = ['label_id', 'year_det'] if 'year_det' in best_matches_gdf.keys() else ['label_id']
     actual_matches_gdf = best_matches_gdf[best_matches_gdf['IOU'] >= iou_threshold].copy()
-    actual_matches_gdf = actual_matches_gdf.sort_values(by=['IOU'], ascending=False).drop_duplicates(subset=['det_id', 'year_det'])
+    actual_matches_gdf = actual_matches_gdf.sort_values(by=['IOU'], ascending=False).drop_duplicates(subset=col_subset)
     actual_matches_gdf['IOU'] = actual_matches_gdf.IOU.round(3)
 
     matched_label_ids = actual_matches_gdf['label_id'].unique().tolist()
@@ -143,7 +144,7 @@ def get_metrics(tp_gdf, fp_gdf, fn_gdf, mismatch_gdf, id_classes=0, method='macr
             - dict: precision for each class
             - dict: recall for each 
             - dict: f1-score for each class
-            - float: accuracy
+            - float: jaccard index
             - float: precision
             - float: recall
             - float: f1 score.
@@ -181,7 +182,7 @@ def get_metrics(tp_gdf, fp_gdf, fn_gdf, mismatch_gdf, id_classes=0, method='macr
         f1_k[id_cl] = 0 if tp_count == 0 else 2 * p_k[id_cl] * r_k[id_cl] / (p_k[id_cl] + r_k[id_cl])
         count_k[id_cl] = tp_count + fn_count 
 
-    accuracy = sum(tp_k.values()) / (sum(tp_k.values()) + sum(fp_k.values()) + sum(fn_k.values()))
+    jaccard = sum(tp_k.values()) / (sum(tp_k.values()) + sum(fp_k.values()) + sum(fn_k.values()))
 
     if method == 'macro-average':   
         precision = sum(p_k.values()) / len(id_classes)
@@ -205,7 +206,7 @@ def get_metrics(tp_gdf, fp_gdf, fn_gdf, mismatch_gdf, id_classes=0, method='macr
     
     f1 = 2 * precision * recall / (precision + recall)
     
-    return tp_k, fp_k, fn_k, p_k, r_k, f1_k, accuracy, precision, recall, f1
+    return tp_k, fp_k, fn_k, p_k, r_k, f1_k, jaccard, precision, recall, f1
 
 
 def intersection_over_union(polygon1_shape, polygon2_shape):

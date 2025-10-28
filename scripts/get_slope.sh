@@ -1,4 +1,5 @@
 #!/bin/bash
+# Download slope tif file
 
 mkdir -p ./data/slope/
 wget https://github.com/lukasmartinelli/swissdem/releases/download/v1.0/switzerland_slope.tif -O ./data/slope/switzerland_slope.tif

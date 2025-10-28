@@ -86,7 +86,7 @@ filter_detections.py:
   # elevation_threshold: 1200 # m, altitude threshold
   # min_slope_threshold: 1.0 # °, min slope threshold
   # max_slope_threshold: 48.0 # °, max slope threshold
-  score_threshold: 0.5 # detection score (from 0 to 1) provided by detectron2
+  score_threshold: 0.90 # detection score (from 0 to 1) provided by detectron2
   area_threshold: 5000 # m2, area threshold under which polygons are discarded
 
 merge_years.py:

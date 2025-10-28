@@ -156,8 +156,8 @@ Below is a description of the input data used for this project.
   The DEM and slope of Switzerland used in this project have been processed by Lukas Martinelli and can be downloaded [here](https://github.com/lukasmartinelli/swissdem).
 
 ### Trained models
-  - The trained model used to produce the results with _SWISSIMAGE_ presented in the [documentation](https://github.com/swiss-territorial-data-lab/stdl-tech-website/tree/master/docs/PROJ-DQRY) and achieving a f1 score of 82% is available on request.
-  - The models trained on satellite images for the Swiss and Brazilian use cases presented in the [documentation](https://github.com/swiss-territorial-data-lab/stdl-tech-website/tree/master/docs/PROJ-DQRY) are available on request.
+  - The trained model used to produce the results with _SWISSIMAGE_ presented in the [documentation](https://tech.stdl.ch/PROJ-DQRY-TM/) and achieving a f1 score of 82% is available on request.
+  - The models trained on satellite images for the Swiss and Brazilian use cases presented in the [documentation](https://tech.stdl.ch/PROJ-SATQUARRIES/) are available on request.
 
 ## Scripts
 

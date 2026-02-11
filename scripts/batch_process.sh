@@ -1,6 +1,5 @@
-#  Proj quarry detection and time machine
 ################################################################
-#  Script used to run automatically Detections workflow for quarries detection
+#  Script used to run automatically Detections workflow for MES detection
 #  Inputs are defined in config_det.template.yaml
 
 
@@ -12,7 +11,7 @@ do
     echo '-----------'
     echo Year = $year
     sed 's/#YEAR#/$year/g' config/config_det.template.yaml > config/config_det_$year.yaml
-    sed -i "s/SWISSIMAGE_YEAR/$year/g" config/config_det_$year.yaml
+    sed -i "s/YEAR/$year/g" config/config_det_$year.yaml
     echo ' '
     echo 'prepare_data.py'
     python ./scripts/prepare_data.py config/config_det_$year.yaml

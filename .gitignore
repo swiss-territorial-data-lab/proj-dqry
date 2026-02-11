@@ -1,6 +1,7 @@
 data/*
 !data/AoI/
 !data/ground_truth/
+data/ground_truth/mes_Maus2020*
 data/AoI/swissimage_footprints_shape_per_year
 models/*
 output/*
